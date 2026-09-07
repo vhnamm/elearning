@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: elearning
+
+  profiles:
+    active: dev
