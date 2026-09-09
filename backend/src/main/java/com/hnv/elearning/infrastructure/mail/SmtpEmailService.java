@@ -1,5 +1,8 @@
 package com.hnv.elearning.infrastructure.mail;
 
+import com.hnv.elearning.common.exception.AppException;
+import com.hnv.elearning.common.exception.ErrorCode;
+import io.netty.util.concurrent.CompleteFuture;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +12,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMailMessage;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +30,7 @@ public class SmtpEmailService implements EmailService {
     }
 
     @Override
-    public void sendHtmlEmail(String to, String subject, String body) {
+    public CompletableFuture<Void> sendHtmlEmail(String to, String subject, String body) {
 
         try{
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -38,8 +43,11 @@ public class SmtpEmailService implements EmailService {
 
             javaMailSender.send(message);
 
+            log.info("Email sent successfully");
+            return CompletableFuture.completedFuture(null);
         }catch (MessagingException e){
-            log.error(e.getMessage());
+            return CompletableFuture.failedFuture(new AppException(ErrorCode.SEND_MAIL_FAIL));
+
         }
 
     }

@@ -54,6 +54,6 @@ public class AuthenticationController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-
+        return null;
     }
 }

@@ -7,9 +7,9 @@ CREATE TABLE users (
    google_id VARCHAR(50),
    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
    deleted_at TIMESTAMP    NULL,
-
+    locked      BOOLEAN,
    PRIMARY KEY (id),
-   UNIQUE KEY uk_users_email (email),
+   UNIQUE KEY uk_users_email (email)
 ) ENGINE=InnoDB;
 
 
@@ -32,12 +32,14 @@ CREATE TABLE user_roles (
 ) ENGINE=InnoDB;
 
 CREATE TABLE refresh_tokens (
+    id         BIGINT AUTO_INCREMENT,
     token_hash VARCHAR(255),
     user_id BIGINT,
     client_ip VARCHAR(255),
     user_agent VARCHAR(255),
     expired_at TIMESTAMP,
-    PRIMARY KEY (token_hash),
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_refresh_tokens_token_hash (token_hash),
     CONSTRAINT fk_refresh_token_user
         FOREIGN KEY (user_id) REFERENCES users (id)
 ) ENGINE=InnoDB;

@@ -4,7 +4,7 @@ services:
     container_name: motedu-mysql
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "3307:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
@@ -21,5 +21,5 @@ services:
       - redis_data:/data
 
 volumes:
-  database_data:
+  mysql_data:
   redis_data:

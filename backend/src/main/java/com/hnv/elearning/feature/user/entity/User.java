@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -35,6 +35,11 @@ public class User implements UserDetails {
     private String avatar;
     @Column
     private String googleId;
+
+
+    @Column
+    private Boolean locked = false;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private LocalDateTime createdAt;
