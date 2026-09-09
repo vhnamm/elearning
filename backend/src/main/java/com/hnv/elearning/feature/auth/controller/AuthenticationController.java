@@ -54,6 +54,11 @@ public class AuthenticationController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        return null;
+        authenticationService.register(registerRequest);
+        ApiResponse<Void> apiResponse = ApiResponse.<Void>builder()
+                .message("Vui lòng kiểm tra mã OTP được gửi về hòm thư của bạn")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
 }

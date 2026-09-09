@@ -6,6 +6,7 @@ import com.hnv.elearning.feature.auth.dto.LoginRequest;
 import com.hnv.elearning.feature.auth.dto.LoginResponse;
 import com.hnv.elearning.feature.auth.dto.PendingUserDto;
 import com.hnv.elearning.feature.auth.dto.RegisterRequest;
+import com.hnv.elearning.feature.auth.service.AuthMailService;
 import com.hnv.elearning.feature.user.entity.User;
 import com.hnv.elearning.feature.user.repository.UserRepository;
 import com.hnv.elearning.infrastructure.redis.RedisService;
@@ -30,6 +31,7 @@ public class AuthenticationServiceImpl implements com.hnv.elearning.feature.auth
     private final JwtProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
     private final RedisService redisService;
+    private final AuthMailService authMailService;
 
     @Value("${otp.expiration}")
     private long pending_ttl;
@@ -77,6 +79,9 @@ public class AuthenticationServiceImpl implements com.hnv.elearning.feature.auth
 
 
         redisService.set("auth:pending-user", pendingUserDto, Duration.ofMillis(pending_ttl));
+        //mail otp ve email
+        authMailService.sendAuthMail(registerRequest.getEmail(), "[Mót Edu] Mã xác thực tài khoản của bạn");
 
+        return;
     }
 }

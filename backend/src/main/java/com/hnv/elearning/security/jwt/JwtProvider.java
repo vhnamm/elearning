@@ -19,7 +19,7 @@ import java.util.UUID;
 public class JwtProvider {
     @Value("${jwt.secret}")
     private String secretKey;
-    @Value("${jwt.expiration}")
+    @Value("${jwt.access-expiration}")
     private Long accessExpiration;
 
     private SecretKey getSignerKey() {
