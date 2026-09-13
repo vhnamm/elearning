@@ -1,6 +1,9 @@
 package com.hnv.elearning.security;
 
 import com.hnv.elearning.security.jwt.JwtFilter;
+import com.hnv.elearning.security.oauth2.CustomFailureHandler;
+import com.hnv.elearning.security.oauth2.CustomOidcUserService;
+import com.hnv.elearning.security.oauth2.CustomSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +23,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig{
     private final JwtFilter jwtFilter;
+    private final CustomSuccessHandler successHandler;
+    private final CustomFailureHandler failureHandler;
+    private final CustomOidcUserService oidcUserService;
 
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
@@ -28,8 +35,17 @@ public class SecurityConfig{
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth ->
-                        auth.anyRequest().permitAll()
-                );
+                        auth.requestMatchers("/api/v1/auth/**").permitAll()
+                                .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2Login -> {
+                    oauth2Login
+                            .userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUserService))
+                            .successHandler(successHandler)
+                            .failureHandler(failureHandler);
+
+                })
+        ;
 
         return http.build();
     }

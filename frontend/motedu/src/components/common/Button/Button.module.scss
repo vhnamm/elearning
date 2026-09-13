@@ -1,0 +1,84 @@
+.btn {
+  box-sizing: border-box;
+  display: inline-block;
+  border: 1px solid #9ca3af;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.2;
+  text-decoration: none;
+  border-radius: 8px;
+
+  user-select: none;
+  &:hover {
+    cursor: pointer;
+    opacity: 0.9;
+  }
+  &:active {
+    opacity: 1;
+  }
+}
+
+.btn.disabled {
+  opacity: 0.3;
+  &:hover {
+    cursor: default;
+  }
+}
+
+.primary {
+  color: var(--primary);
+  background: var(--primary-btn);
+  border: none;
+  font-weight: bold;
+}
+
+.rounded {
+  border-radius: 999px;
+}
+
+.outlined {
+  color: var(--primary-btn);
+  background-color: transparent;
+  border: 1px solid var(--primary-btn);
+  font-weight: bold;
+}
+
+// Sizes (tuned for a standard 1920x1080 viewport — avoid oversized touch-style padding)
+.small {
+  padding: 5px 12px;
+  font-size: 12.5px;
+}
+
+.medium {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.large {
+  padding: 10px 20px;
+  font-size: 15px;
+}
+
+.loading {
+  position: relative;
+  .btn_content {
+    visibility: hidden;
+  }
+
+  .spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(0deg);
+    animation: spinning 2s linear infinite;
+  }
+}
+
+@keyframes spinning {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}

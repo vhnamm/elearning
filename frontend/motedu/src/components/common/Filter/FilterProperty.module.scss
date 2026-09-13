@@ -1,0 +1,29 @@
+.filter_property{
+    border-bottom: 1px solid #9ca3af;
+    padding-bottom: 14px;
+    margin-top: 12px;
+}       
+.property_header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    position: relative;
+    &:hover{
+        
+        cursor: pointer;
+    }
+    h4{
+        font-size: 1.6rem;
+        font-weight: 400;
+    }
+    .icon_more, .icon_less{
+        font-size: 1.6rem;
+        cursor: pointer;
+        color: #e5e7eb;
+        position: absolute;
+        left: calc(100% - 20px);
+        top: 50%;
+        transform: translateY(-50%);
+    }
+}

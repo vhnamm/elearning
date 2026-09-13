@@ -5,6 +5,7 @@ import com.hnv.elearning.common.exception.ErrorCode;
 import com.hnv.elearning.infrastructure.mail.EmailService;
 import com.hnv.elearning.infrastructure.redis.RedisService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.random.RandomGenerator;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OtpServiceImpl implements OtpService {
     private final RedisService redisService;
     private final PasswordEncoder passwordEncoder;
@@ -28,6 +30,7 @@ public class OtpServiceImpl implements OtpService {
     @Override
     public String generateOtp() {
         return String.valueOf(new SecureRandom().nextInt(900000) + 100000);
+
     }
 
     @Override

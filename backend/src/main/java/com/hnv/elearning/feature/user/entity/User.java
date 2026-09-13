@@ -38,6 +38,7 @@ public class User implements UserDetails {
 
 
     @Column
+    @Builder.Default
     private Boolean locked = false;
 
     @Column(name = "created_at")

@@ -1,6 +1,7 @@
 spring:
   application:
     name: elearning
+    frontend-url: http://localhost:5173/
 
   datasource:
     url: jdbc:mysql://${DB_HOST}:3307/motedu?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh
@@ -22,6 +23,7 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+
   mail:
     host: smtp.gmail.com
     port: 587
@@ -33,6 +35,15 @@ spring:
           auth: true
           starttls:
             enable: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${CLIENT_ID}
+            client-secret: ${CLIENT_SECRET}
+            scope: openid, email, profile
 
 
 jwt:

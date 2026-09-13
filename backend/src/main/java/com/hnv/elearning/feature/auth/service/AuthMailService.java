@@ -15,11 +15,9 @@ import org.thymeleaf.context.Context;
 @Slf4j
 public class AuthMailService {
     private final EmailService emailService;
-    private final OtpService otpService;
     private final TemplateEngine templateEngine;
 
-    public void sendAuthMail (String to, String subject) {
-        String otp = otpService.generateOtp();
+    public void sendAuthMail (String to, String subject, String otp) {
         String body = generateBody(otp);
 
         emailService.sendHtmlEmail(to, subject, body).whenComplete(
