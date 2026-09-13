@@ -22,8 +22,8 @@ public enum ErrorCode {
     INVALID_CREDENTIALS(1002, "Tài khoản hoặc mật khẩu không đúng", HttpStatus.UNAUTHORIZED),
     ACCOUNT_LOCKED(1003, "Tài khoản đã bị khóa", HttpStatus.FORBIDDEN),
     ROLE_NOT_FOUND(1004, "Không tìm thấy vai trò (Role)", HttpStatus.NOT_FOUND),
-    TOKEN_EXPIRED(1005, "Phiên đăng nhập đã hết hạn", HttpStatus.UNAUTHORIZED),
-    TOKEN_INVALID(1006, "Mã truy cập không hợp lệ", HttpStatus.UNAUTHORIZED),
+    REFRESH_TOKEN_EXPIRED(1005, "Phiên đăng nhập đã hết hạn", HttpStatus.UNAUTHORIZED),
+    REFRESH_TOKEN_INVALID(1006, "Invalid refresh token", HttpStatus.UNAUTHORIZED),
 
     // ==========================================
     // 20xx: USER MANAGEMENT

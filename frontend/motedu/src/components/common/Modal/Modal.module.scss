@@ -1,0 +1,66 @@
+.overlay {
+  width: 100vw;
+  height: calc(100vh - var(--header-height));
+  background-color: rgba(17, 24, 39, 0.16);
+  position: fixed;
+  top: var(--header-height);
+  left: 0;
+  z-index: 99;
+  backdrop-filter: blur(5px);
+}
+
+.modal {
+  width: 100%;
+  min-height: 80vh;
+  background-color: #ffffff;
+  position: absolute;
+  // z-index: 999;
+  padding: 20px 5%;
+  max-height: 80vh;
+  overflow-y: scroll;
+}
+
+.close_btn {
+  position: absolute;
+  bottom: 20px;
+  right: 44%;
+}
+
+.overlay.left {
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(17, 24, 39, 0.16);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99;
+
+  .modal {
+    width: 28%;
+    min-height: 100vh;
+    background-color: #ffffff;
+    position: absolute;
+
+    right: 0;
+    padding: 20px 2%;
+    max-height: 100vh;
+    overflow-y: scroll;
+  }
+
+  .modal.dark {
+    background-color: var(--primary);
+    width: 36%;
+  }
+}
+
+.overlay.center {
+  .modal {
+    padding: 20px 2%;
+    top: 16%;
+    left: 36%;
+    width: 30%;
+    min-height: 50vh;
+    overflow: hidden;
+    border-radius: 8px;
+  }
+}

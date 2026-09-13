@@ -1,0 +1,155 @@
+.wrapper {
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.inner {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 0 32px;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 320px;
+  height: 40px;
+  padding: 0 14px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
+
+  input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 14px;
+    font-family: var(--font-body);
+    color: var(--color-neutral-900);
+
+    &::placeholder {
+      color: #94a3b8;
+    }
+  }
+}
+
+.searchIcon {
+  color: #94a3b8;
+  font-size: 15px;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.navItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover,
+  &.active {
+    color: var(--color-primary);
+  }
+}
+
+.exploreWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+}
+
+.exploreDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  z-index: 30;
+}
+
+.exploreItem {
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #334155;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover {
+    background: #f1f5f9;
+    color: var(--color-primary);
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.cartIcon {
+  display: inline-flex;
+  font-size: 19px;
+  color: #334155;
+
+  &:hover {
+    color: var(--color-primary);
+  }
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+@media (max-width: 900px) {
+  .search,
+  .nav {
+    display: none;
+  }
+
+  .inner {
+    justify-content: space-between;
+  }
+}

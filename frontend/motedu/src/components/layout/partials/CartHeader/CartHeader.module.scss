@@ -1,0 +1,28 @@
+.cart-icon {
+  color: #111827;
+  font-size: 2rem;
+}
+
+.wrapper{
+  position: relative;
+}
+
+.quantity_wrap{
+  position: absolute;
+  top: -12px;
+  left: 80%;
+  border-radius: 50%;
+  left: 60%;
+  width: 22px;
+  height: 22px;
+  background-color: #f05d43;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  span{
+    color: #111827;
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+}

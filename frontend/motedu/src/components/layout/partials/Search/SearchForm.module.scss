@@ -1,0 +1,134 @@
+  .search_wrapper {
+    width: var(--search-container-width);
+    height: 44px;
+    
+    background-color: #f8fafc;
+    border: 1.5px solid transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    
+    position: relative;
+
+    input {
+      flex: 1;
+      height: 100%;
+      color: var(--black);
+      
+      font-size: 1.5rem;
+      line-height: 1.6rem;
+      padding: 12px 0;
+      background: transparent;
+      caret-color: var(--text);
+      color: var(--text);
+      &::placeholder {
+        color: var(--secondary-text);
+      }
+    }
+
+    .search-btn {
+      width: var(--search-btn-width);
+      height: 100%;
+      font-size: 1.6rem;
+      color: var(--secondary-text);
+      background-color: transparent;
+      border: none;
+      &:hover {
+        background-color: rgba(22, 24, 35, 0.03);
+        cursor: pointer;
+      }
+      &:active {
+        background-color: rgba(22, 24, 35, 0.06);
+      }
+    }
+
+  }
+  .item_row {
+    margin-top: 40px;
+  }
+  .txtKetqua {
+    font-size: 20px;
+  }
+  .card-item {
+    margin-bottom: 40px;
+  }
+  .item_link {
+    display: block;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  }
+
+  .item_img {
+    border-radius: 12px;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    max-height: 340px; 
+    min-height: 340px;
+  }
+  .item_img img {
+    width: 100%;
+    max-height: 340px;
+    min-height: 340px;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .item_bottom_wrap {
+    display: flex;
+    justify-content: space-between;
+  }
+  .modal_header {
+    display: flex;
+    justify-content: space-between;
+  }
+  .name_price_wrap {
+    margin: 12px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    h4 {
+      font-size: 16px;
+    }
+  }
+
+  .sold {
+    font-size: 14px;
+  }
+  .rating {
+    font-size: 14px;
+    color: orange;
+  }
+
+  .search_suggest_wrap {
+    transform: translateY(-12px);
+    opacity: 0;
+  }
+
+  .search_suggest_wrap.animate {
+    animation: slideFromTop 0.6s ease forwards;
+  }
+
+  @keyframes slideFromTop {
+    0% {
+      transform: translateY(-12px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .btn_close{
+    /* Avoid large manual offsets which can push the button outside the modal or
+       behind the overlay. Position absolute inside the modal and give it a high
+       z-index so it sits above modal content and overlay background. */
+    position: absolute;
+    bottom: -100px;
+    right: 20px;
+    z-index: 1000;
+  }

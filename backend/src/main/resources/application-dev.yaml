@@ -1,9 +1,10 @@
 spring:
   application:
     name: elearning
+    frontend-url: http://localhost:5173/
 
   datasource:
-    url: jdbc:mysql://${DB_HOST}:3307/motedu_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh
+    url: jdbc:mysql://${DB_HOST}:3307/motedu?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -22,6 +23,7 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+
   mail:
     host: smtp.gmail.com
     port: 587
@@ -34,10 +36,20 @@ spring:
           starttls:
             enable: true
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${CLIENT_ID}
+            client-secret: ${CLIENT_SECRET}
+            scope: openid, email, profile
+
 
 jwt:
   secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION}
+  access-expiration: ${JWT_ACCESS_EXPIRATION}
+  refresh-expiration: ${REFRESH_EXPIRATION}
 
 otp:
   expiration: ${OTP_EXPIRATION}

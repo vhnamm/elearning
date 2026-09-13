@@ -1,0 +1,119 @@
+import { useEffect, useRef, useState } from "react";
+import { Modal, Input, Typography } from "antd";
+import Button from "~components/common/Button/Button";
+import styles from "./OtpModal.module.scss";
+
+const RESEND_SECONDS = 60;
+
+/**
+ * Pure UI modal: 6-digit OTP input + resend countdown.
+ * All verify/resend network logic is left to the parent via onConfirm/onResend.
+ */
+const OtpModal = ({
+    open,
+    email,
+    loading = false,
+    resendLoading = false,
+    onCancel,
+    onConfirm,
+    onResend,
+}) => {
+    const [otp, setOtp] = useState("");
+    const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
+    const intervalRef = useRef(null);
+
+    const startCountdown = () => {
+        clearInterval(intervalRef.current);
+        setSecondsLeft(RESEND_SECONDS);
+        intervalRef.current = setInterval(() => {
+            setSecondsLeft((prev) => {
+                if (prev <= 1) {
+                    clearInterval(intervalRef.current);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+    };
+
+    useEffect(() => {
+        if (open) {
+            setOtp("");
+            startCountdown();
+        } else {
+            clearInterval(intervalRef.current);
+        }
+        return () => clearInterval(intervalRef.current);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open]);
+
+    const canResend = secondsLeft === 0 && !resendLoading;
+
+    const handleResend = () => {
+        if (!canResend) return;
+        onResend?.();
+        startCountdown();
+    };
+
+    const handleConfirm = () => {
+        if (otp.length !== 6) return;
+        onConfirm?.(otp);
+    };
+
+    return (
+        <Modal
+            open={open}
+            onCancel={onCancel}
+            footer={null}
+            centered
+            destroyOnHidden={true}
+            className={styles.modal}
+        >
+            <div className={styles.content}>
+                <h3 className={styles.title}>Xác thực OTP</h3>
+                <Typography.Paragraph className={styles.subtitle}>
+                    Nhập mã gồm 6 chữ số vừa được gửi đến{" "}
+                    <strong>{email}</strong>
+                </Typography.Paragraph>
+
+                <Input.OTP
+                    length={6}
+                    value={otp}
+                    onChange={setOtp}
+                    size="large"
+                    className={styles.otpInput}
+                />
+
+                <Button
+                    primary
+                    rounded
+                    size="large"
+                    className={styles.confirmBtn}
+                    disabled={otp.length !== 6}
+                    loading={loading}
+                    onClick={handleConfirm}
+                >
+                    Xác nhận
+                </Button>
+
+                <div className={styles.resendRow}>
+                    {canResend ? (
+                        <button
+                            type="button"
+                            className={styles.resendLink}
+                            onClick={handleResend}
+                        >
+                            Gửi lại mã
+                        </button>
+                    ) : (
+                        <span className={styles.countdown}>
+                            Gửi lại mã sau {secondsLeft}s
+                        </span>
+                    )}
+                </div>
+            </div>
+        </Modal>
+    );
+};
+
+export default OtpModal;
