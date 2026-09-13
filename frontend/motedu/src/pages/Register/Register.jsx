@@ -9,7 +9,9 @@ import {register} from "~services/auth.service";
 import styles from "./Register.module.scss";
 import OtpModal from "~components/OtpModal/OtpModal.jsx";
 
+
 const Register = () => {
+    const [form] = Form.useForm()
     const navigate = useNavigate();
     const [openModal, setOpenModal] = useState(false)
     const [resendLoading, setResendLoading] = useState(false)
@@ -22,14 +24,25 @@ const Register = () => {
             const res = await register({email: values.email, password: values.password, fullName: values.fullName})
             formValuesRef.current = values;
             setOpenModal(true)
+            console.log(res.message)
             message.success(res.message || "Vui lòng kiểm tra mã OTP được gửi hòm thư của bạn")
         }catch (err){
+            console.log(err.response.data.message)
+            const statusCode = err.response.status
+            if(statusCode === 409){
+                form.setFields([
+                    {
+                        name: 'email',
+                        errors: [err.response.data.message ||  "Email này đã được sử dụng!"]
 
+                    }
+                ])
+            }
         }
     }
     return (
         <>
-            <OtpModal open={openModal} email={formValuesRef.current?.email} loading={confirmLoading} resendLoading={resendLoading}></OtpModal>
+            <OtpModal open={openModal} ref={formValuesRef.current} loading={confirmLoading} resendLoading={resendLoading}></OtpModal>
             <main className={styles.main}>
                 <div className={styles.card}>
                     <h2>Đăng ký</h2>
@@ -42,6 +55,7 @@ const Register = () => {
                         requiredMark={false}
                         className={styles.form}
                         onFinish={handleSubmit}
+                        form={form}
                     >
                         <Form.Item
                             label="Email"
@@ -77,6 +91,7 @@ const Register = () => {
                             label="Mật khẩu"
                             name="password"
                             rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
+
                         >
                             <Input.Password
                                 size="large"
@@ -89,13 +104,23 @@ const Register = () => {
                         <Form.Item
                             label="Nhập lại mật khẩu"
                             name="repassword"
-                            rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
+                            dependencies={['password']}
+                            rules={[
+                                { required: true, message: "Vui lòng nhập mật khẩu" },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (!value || getFieldValue('password') === value) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(new Error('Mật khẩu nhập lại không khớp!'));
+                                    },
+                                }),
+                            ]}
                         >
                             <Input.Password
                                 size="large"
                                 prefix={<LockOutlined />}
-                                placeholder="Nhập mật khẩu"
-                                autoComplete="current-password"
+                                placeholder="Nhập lại mật khẩu"
                             />
                         </Form.Item>
 

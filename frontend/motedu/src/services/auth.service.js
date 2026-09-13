@@ -28,3 +28,13 @@ export const refresh = async () => {
   setAccessToken(data.data.accessToken);
   return data.data;
 };
+
+export const getMe = async () => {
+  const { data } = await http.get("/auth/me");
+  return data.data;
+};
+
+export const resendOtp = async ({email, password, fullName}) => {
+    const {data} = await http.post("/auth/register", {email, password, fullName})
+    return data
+}

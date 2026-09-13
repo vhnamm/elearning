@@ -21,8 +21,8 @@ import java.io.IOException;
 @Slf4j
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
-    private JwtProvider jwtProvider;
-    private CustomUserDetailService customUserDetailService;
+    private final JwtProvider jwtProvider;
+    private final CustomUserDetailService customUserDetailService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -32,30 +32,39 @@ public class JwtFilter extends OncePerRequestFilter {
 
         log.info("start jwt filter");
         String bearerToken = HeaderUtil.extractBearerToken(request);
-        if (bearerToken ==  null) {
+        if (bearerToken == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        Claims claims = jwtProvider.parseClaims(bearerToken);
-        String email = claims.getSubject();
-        String jti = claims.getId();
+        try {
+            Claims claims = jwtProvider.parseClaims(bearerToken);
+            String email = claims.getSubject();
 
-        if(email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = customUserDetailService.loadUserByUsername(email);
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = customUserDetailService.loadUserByUsername(email);
 
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            authentication.setDetails(authentication.getDetails());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                authentication.setDetails(authentication.getDetails());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+        } catch (io.jsonwebtoken.JwtException e) {
+            log.info("Invalid/expired JWT token: {}", e.getMessage());
         }
 
         filterChain.doFilter(request, response);
     }
 
+    private static final java.util.Set<String> PUBLIC_AUTH_PATHS = java.util.Set.of(
+            "/api/v1/auth/login",
+            "/api/v1/auth/register",
+            "/api/v1/auth/confirm-otp",
+            "/api/v1/auth/refresh-token",
+            "/api/v1/auth/logout"
+    );
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        return path.startsWith("/api/v1/auth");
-
+        return PUBLIC_AUTH_PATHS.contains(request.getRequestURI());
     }
 }

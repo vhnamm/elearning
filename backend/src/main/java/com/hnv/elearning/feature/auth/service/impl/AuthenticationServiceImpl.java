@@ -188,6 +188,25 @@ public class AuthenticationServiceImpl implements com.hnv.elearning.feature.auth
     }
 
     @Override
+    public UserResponse getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof User user)) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        List<String> roles = user.getUserRoles() == null
+                ? List.of()
+                : user.getUserRoles().stream().map(userRole -> userRole.getRole().getName()).toList();
+
+        return UserResponse.builder()
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .avatar(user.getAvatar())
+                .roles(roles)
+                .build();
+    }
+
+    @Override
     @Transactional
     public User processGoogleLogin(String email, String fullName, String avatarUrl, String providerId) {
         Optional<User> existingOpt = userRepository.findWithAuthortiesByEmail(email);
