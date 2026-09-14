@@ -67,7 +67,7 @@ const OtpModal = ({
             message.success(res?.message)
             navigate('/login')
         }catch (err){
-            const errMsg = err.response?.message
+            const errMsg = err.response?.data?.message
             message.error(errMsg)
             setOtp("")
         }

@@ -42,7 +42,13 @@ const Register = () => {
     }
     return (
         <>
-            <OtpModal open={openModal} ref={formValuesRef.current} loading={confirmLoading} resendLoading={resendLoading}></OtpModal>
+            <OtpModal
+                open={openModal}
+                ref={formValuesRef.current}
+                loading={confirmLoading} r
+                esendLoading={resendLoading}
+                onCancel={() => setOpenModal(false)}
+            ></OtpModal>
             <main className={styles.main}>
                 <div className={styles.card}>
                     <h2>Đăng ký</h2>

@@ -13,8 +13,8 @@ INSERT IGNORE INTO users (id, email, password, full_name, avatar, locked) VALUES
 INSERT IGNORE INTO user_roles (user_id, role_id)
 SELECT u.id, r.id
 FROM users u, roles r
-WHERE u.email = 'admin@example.com' AND r.name = 'ADMIN'
+WHERE u.email = 'admin@gmail.com' AND r.name = 'ADMIN'
 UNION ALL
 SELECT u.id, r.id
 FROM users u, roles r
-WHERE u.email = 'user.hybrid@example.com' AND r.name IN ('INSTRUCTOR', 'STUDENT');
+WHERE u.email = 'usertest1@gmail.com' AND r.name IN ('INSTRUCTOR', 'STUDENT');

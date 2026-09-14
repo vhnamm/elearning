@@ -15,7 +15,7 @@ export const register = async ({ email, password, fullName }) => {
 
 export const confirmOtp = async ({ email, otp }) => {
   const { data } = await http.post("/auth/confirm-otp", { email, otp });
-  return data.data;
+  return data;
 };
 
 export const logout = async () => {
