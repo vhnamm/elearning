@@ -10,7 +10,7 @@ const PLACEHOLDER_CATEGORIES = ["Lập trình", "Thiết kế", "Kinh doanh", "N
 // Mỗi mục có hành vi riêng (dropdown, điều hướng theo trạng thái đăng nhập...)
 // nên viết tường minh từng mục, không gom chung thành 1 mảng {label, to}.
 const HeaderNav = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [exploreOpen, setExploreOpen] = useState(false);
 
   return (
@@ -43,7 +43,7 @@ const HeaderNav = () => {
       )}
 
       <NavLink
-        to={isAuthenticated ? "/instructor/dashboard" : "/login"}
+        to={user?.roles?.includes('INSTRUCTOR') ? "/instructor/courses" : "/teaching"}
         className={clsx(styles.navItem)}
       >
         Giảng viên

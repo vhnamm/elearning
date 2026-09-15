@@ -14,12 +14,12 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || "/";
-
+  const from = sessionStorage.getItem("redirectTo") || "/";
   const handleFinish = async (values) => {
     setSubmitting(true);
     try {
       await login({ email: values.email, password: values.password });
+      sessionStorage.removeItem("redirectTo");
       message.success("Đăng nhập thành công");
       navigate(from, { replace: true });
     } catch (error) {

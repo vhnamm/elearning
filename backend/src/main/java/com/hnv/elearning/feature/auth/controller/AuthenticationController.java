@@ -7,6 +7,7 @@ import com.hnv.elearning.feature.auth.dto.ConfirmOtpRequest;
 import com.hnv.elearning.feature.auth.dto.LoginRequest;
 import com.hnv.elearning.feature.auth.dto.LoginResponse;
 import com.hnv.elearning.feature.auth.dto.RegisterRequest;
+import com.hnv.elearning.feature.auth.dto.UserResponse;
 import com.hnv.elearning.feature.auth.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -108,5 +109,14 @@ public class AuthenticationController {
         return ResponseEntity.ok(apiResponse);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserResponse>> me() {
+        UserResponse userResponse = authenticationService.getCurrentUser();
+        ApiResponse<UserResponse> apiResponse = ApiResponse.<UserResponse>builder()
+                .data(userResponse)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
 
 }

@@ -5,13 +5,17 @@ export const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8
 // Root gốc của backend (bỏ /api/v1), dùng cho các URL nằm ngoài REST API như OAuth2 authorization endpoint
 export const API_ORIGIN = BASE_URL.replace(/\/api\/v1\/?$/, "");
 
-let accessToken = null;
+const ACCESS_TOKEN_KEY = "accessToken";
 
 export const setAccessToken = (token) => {
-  accessToken = token;
+  if (token) {
+    localStorage.setItem(ACCESS_TOKEN_KEY, token);
+  } else {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+  }
 };
 
-export const getAccessToken = () => accessToken;
+export const getAccessToken = () => localStorage.getItem(ACCESS_TOKEN_KEY);
 
 const http = axios.create({
   baseURL: BASE_URL,
@@ -20,6 +24,7 @@ const http = axios.create({
 
 //interceptor cho mỗi rq dc gửi đi, tự gắn accessToken vào header(nếu có)
 http.interceptors.request.use((config) => {
+  const accessToken = getAccessToken();
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
@@ -50,7 +55,7 @@ http.interceptors.response.use(
 
     try {
       if (!refreshPromise) {
-        refreshPromise = http.post("/auth/refresh").finally(() => {
+        refreshPromise = http.post("/auth/refresh-token").finally(() => {
           refreshPromise = null;
         });
       }

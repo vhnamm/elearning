@@ -1,5 +1,6 @@
 package com.hnv.elearning.security;
 
+import com.hnv.elearning.security.jwt.CustomAuthenticationEntryPoint;
 import com.hnv.elearning.security.jwt.JwtFilter;
 import com.hnv.elearning.security.oauth2.CustomFailureHandler;
 import com.hnv.elearning.security.oauth2.CustomOidcUserService;
@@ -26,7 +27,7 @@ public class SecurityConfig{
     private final CustomSuccessHandler successHandler;
     private final CustomFailureHandler failureHandler;
     private final CustomOidcUserService oidcUserService;
-
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -44,6 +45,9 @@ public class SecurityConfig{
                             .successHandler(successHandler)
                             .failureHandler(failureHandler);
 
+                })
+                .exceptionHandling(exception -> {
+                    exception.authenticationEntryPoint(customAuthenticationEntryPoint);
                 })
         ;
 

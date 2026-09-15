@@ -58,7 +58,7 @@ public class RefreshTokenService {
             throw new AppException(ErrorCode.REFRESH_TOKEN_INVALID);
         }
         RefreshToken refreshToken = optional.get();
-        if(Instant.now().isAfter(Instant.from(refreshToken.getExpiredAt()))){
+        if(refreshToken.getExpiredAt().isBefore(LocalDateTime.now())){
             log.info("Refresh token expired");
 
             refreshTokenRepository.deleteByTokenHash(tokenHash);

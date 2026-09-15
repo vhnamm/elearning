@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Modal, Input, Typography } from "antd";
+import { Modal, Input, Typography, message} from "antd";
 import Button from "~components/common/Button/Button";
 import styles from "./OtpModal.module.scss";
+import {confirmOtp, resendOtp} from "~services/auth.service.js";
+import {useNavigate} from "react-router-dom";
 
 const RESEND_SECONDS = 60;
 
@@ -11,7 +13,7 @@ const RESEND_SECONDS = 60;
  */
 const OtpModal = ({
     open,
-    email,
+    ref,
     loading = false,
     resendLoading = false,
     onCancel,
@@ -21,6 +23,7 @@ const OtpModal = ({
     const [otp, setOtp] = useState("");
     const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
     const intervalRef = useRef(null);
+    const navigate = useNavigate()
 
     const startCountdown = () => {
         clearInterval(intervalRef.current);
@@ -49,15 +52,27 @@ const OtpModal = ({
 
     const canResend = secondsLeft === 0 && !resendLoading;
 
-    const handleResend = () => {
+    const handleResend = async () => {
         if (!canResend) return;
-        onResend?.();
+        const res = await resendOtp({email: ref?.email, password: ref?.password, fullName: ref?.fullName})
+        console.log(res.message)
+        message.success(res?.message)
         startCountdown();
     };
 
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
         if (otp.length !== 6) return;
-        onConfirm?.(otp);
+        try {
+            const res = await confirmOtp({email: ref?.email, otp: otp})
+            message.success(res?.message)
+            navigate('/login')
+        }catch (err){
+            const errMsg = err.response?.data?.message
+            message.error(errMsg)
+            setOtp("")
+        }
+
+
     };
 
     return (
@@ -73,7 +88,7 @@ const OtpModal = ({
                 <h3 className={styles.title}>Xác thực OTP</h3>
                 <Typography.Paragraph className={styles.subtitle}>
                     Nhập mã gồm 6 chữ số vừa được gửi đến{" "}
-                    <strong>{email}</strong>
+                    <strong>{ref?.email}</strong>
                 </Typography.Paragraph>
 
                 <Input.OTP
