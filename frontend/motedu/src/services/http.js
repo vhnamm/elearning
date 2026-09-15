@@ -55,7 +55,7 @@ http.interceptors.response.use(
 
     try {
       if (!refreshPromise) {
-        refreshPromise = http.post("/auth/refresh").finally(() => {
+        refreshPromise = http.post("/auth/refresh-token").finally(() => {
           refreshPromise = null;
         });
       }

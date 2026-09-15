@@ -43,7 +43,7 @@ const HeaderNav = () => {
       )}
 
       <NavLink
-        to={user?.roles.includes('INSTRUCTOR') ? "/instructor/courses" : "/teaching"}
+        to={user?.roles?.includes('INSTRUCTOR') ? "/instructor/courses" : "/teaching"}
         className={clsx(styles.navItem)}
       >
         Giảng viên

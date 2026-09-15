@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "~hooks/useAuth.js";
+import LoadingScreen from "~components/common/Loading/LoadingScreen.jsx";
 
 const Oauth2CallbackHandler = () => {
     const { loginWithAccessToken } = useAuth();
@@ -26,14 +27,14 @@ const Oauth2CallbackHandler = () => {
                 await loginWithAccessToken(accessToken);
 
                 // 3. Lấy redirect destination đúng cú pháp: getItem() || fallback
-                const from = sessionStorage.getItem("redirectFrom") || "/";
-                sessionStorage.removeItem("redirectFrom");
+                const from = sessionStorage.getItem("redirectTo") || "/";
+                sessionStorage.removeItem("redirectTo");
 
                 navigate(from, { replace: true });
             } catch (err) {
                 console.error("OAuth2 authentication error:", err);
                 // 4. Nếu có lỗi (401, mất mạng, token sai) -> Điều hướng thoát khỏi Loading
-                sessionStorage.removeItem("redirectFrom");
+                sessionStorage.removeItem("redirectTo");
                 navigate("/login", {
                     replace: true,
                     state: { error: "Đăng nhập bằng Google thất bại. Vui lòng thử lại!" }
@@ -42,12 +43,10 @@ const Oauth2CallbackHandler = () => {
         };
 
         handleOAuth2();
-    }, [loginWithAccessToken, navigate]);
+    }, []);
 
     return (
-        <div className="flex items-center justify-center min-h-screen">
-            <p>Đang xác thực và chuyển hướng...</p>
-        </div>
+        <LoadingScreen></LoadingScreen>
     );
 };
 

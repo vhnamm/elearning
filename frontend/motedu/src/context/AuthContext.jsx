@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
 import * as authService from "~services/auth.service";
 import { setAccessToken } from "~services/http";
 
@@ -8,7 +8,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isInitializing, setIsInitializing] = useState(true);
 
-    console.log(user)
+  //khi user f5 thì ko mất trnagj thái đăng nhập
   useEffect(() => {
     authService
       .getMe()

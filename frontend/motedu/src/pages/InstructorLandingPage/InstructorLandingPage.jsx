@@ -3,13 +3,18 @@ import { Row, Col } from "antd";
 import styles from "./InstrcutorLandingPage.module.scss";
 import Button from "~components/common/Button/Button.jsx";
 import {CheckOutlined, CreditCardFilled, TeamOutlined} from "@ant-design/icons";
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
+import useAuth from "~hooks/useAuth.js";
 
 export default function InstructorLandingPage() {
     const navigate = useNavigate();
+    const {user} = useAuth();
+
+
     const handleCta = () => {
         navigate("/instructor/onboarding")
     }
+
     return (
         <div className={styles.pageWrapper}>
             {/* 1. Hero Section */}
