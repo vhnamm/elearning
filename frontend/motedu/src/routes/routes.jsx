@@ -8,6 +8,8 @@ import Onboarding from "~pages/Onboarding/Onboarding.jsx";
 import HeaderOnly from "~layouts/HeaderOnly/HeaderOnly.jsx";
 import Forbidden from "~pages/Forbidden/Forbidden.jsx";
 import RouteGuard from "./RouteGuard.jsx";
+import InstructorLayout from "~layouts/InstructorLayout/InstructorLayout.jsx";
+import InstructorCourses from "~pages/InstructorCourses/InstructorCourses.jsx";
 
 const AppRoutes = () => (
   <Routes>
@@ -45,6 +47,12 @@ const AppRoutes = () => (
       <Route element={<RouteGuard requireAuth allowedRoles={["ADMIN"]} redirectTo="/403" />}>
         <Route path="/admin" element={<AdminPage/>} />
       </Route> */}
+
+      <Route element={<RouteGuard requireAuth allowedRoles={["INSTRUCTOR"]} redirectTo="/403"/>}>
+          <Route path="/instructor" element={<InstructorLayout/>}>
+              <Route path="courses" element={<InstructorCourses/>}></Route>
+          </Route>
+      </Route>
   </Routes>
 );
 

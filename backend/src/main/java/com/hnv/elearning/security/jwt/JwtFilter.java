@@ -1,6 +1,7 @@
 package com.hnv.elearning.security.jwt;
 
 import com.hnv.elearning.common.utils.HeaderUtil;
+import com.hnv.elearning.infrastructure.redis.RedisService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -23,6 +24,7 @@ import java.io.IOException;
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;
     private final CustomUserDetailService customUserDetailService;
+    private final RedisService redisService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -37,8 +39,14 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
+
         try {
             Claims claims = jwtProvider.parseClaims(bearerToken);
+            if(redisService.exists("auth:blacklist:" + claims.getId())){
+                log.info("access token in blacklist");
+                filterChain.doFilter(request, response);
+                return;
+            }
             String email = claims.getSubject();
 
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {

@@ -1,0 +1,33 @@
+.layout {
+  min-height: 100svh;
+  background: #f5f6f8;
+}
+
+.sider {
+  min-height: 100svh;
+  background: #fff;
+  border-right: 1px solid #edeef1;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+
+.content {
+  flex: 1;
+  padding: 24px clamp(16px, 3vw, 32px);
+}
+
+@media (max-width: 900px) {
+  .sider {
+    position: static;
+    min-height: auto;
+    border-right: none;
+    border-bottom: 1px solid #edeef1;
+  }
+}
