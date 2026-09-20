@@ -54,6 +54,7 @@ public class Course {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "instructor_id")
     private User instructor;

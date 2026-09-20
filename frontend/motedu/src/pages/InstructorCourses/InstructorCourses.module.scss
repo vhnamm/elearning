@@ -22,6 +22,26 @@
   }
 }
 
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0 4px;
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 220px;
+  max-width: 360px;
+  border-radius: 8px;
+}
+
+.sortSelect {
+  width: 200px;
+  flex-shrink: 0;
+}
+
 .tabs {
   margin-bottom: 8px;
 

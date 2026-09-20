@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Row, Col, Tabs } from "antd";
+import { Row, Col, Tabs, Input, Select } from "antd";
 import {
   StarFilled,
   TeamOutlined,
@@ -8,10 +8,12 @@ import {
   DeleteOutlined,
   MoreOutlined,
   PlusOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import styles from "./InstructorCourses.module.scss";
 
 // TODO: thay bằng dữ liệu thật từ API (GET /instructor/courses)
+// priceValue/createdAt là dữ liệu thô để sort, price là chuỗi đã format để hiển thị
 const DUMMY_COURSES = [
   {
     id: 1,
@@ -21,6 +23,8 @@ const DUMMY_COURSES = [
     students: 850,
     rating: 4.8,
     price: "1.200.000đ",
+    priceValue: 1200000,
+    createdAt: "2026-06-10",
   },
   {
     id: 2,
@@ -30,6 +34,8 @@ const DUMMY_COURSES = [
     students: null,
     rating: null,
     price: "0đ",
+    priceValue: 0,
+    createdAt: "2026-08-02",
   },
   {
     id: 3,
@@ -39,6 +45,8 @@ const DUMMY_COURSES = [
     students: null,
     rating: null,
     price: "890.000đ",
+    priceValue: 890000,
+    createdAt: "2026-07-18",
   },
   {
     id: 4,
@@ -48,6 +56,8 @@ const DUMMY_COURSES = [
     students: 412,
     rating: 4.6,
     price: "1.500.000đ",
+    priceValue: 1500000,
+    createdAt: "2026-05-01",
   },
   {
     id: 5,
@@ -57,6 +67,8 @@ const DUMMY_COURSES = [
     students: null,
     rating: null,
     price: "0đ",
+    priceValue: 0,
+    createdAt: "2026-09-05",
   },
   {
     id: 6,
@@ -66,8 +78,24 @@ const DUMMY_COURSES = [
     students: null,
     rating: null,
     price: "990.000đ",
+    priceValue: 990000,
+    createdAt: "2026-04-20",
   },
 ];
+
+const SORT_OPTIONS = [
+  { value: "newest", label: "Ngày tạo: Mới nhất" },
+  { value: "oldest", label: "Ngày tạo: Cũ nhất" },
+  { value: "price_asc", label: "Giá: Thấp đến cao" },
+  { value: "price_desc", label: "Giá: Cao đến thấp" },
+];
+
+const SORTERS = {
+  newest: (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+  oldest: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+  price_asc: (a, b) => a.priceValue - b.priceValue,
+  price_desc: (a, b) => b.priceValue - a.priceValue,
+};
 
 const STATUS_META = {
   published: { label: "Đã xuất bản", className: "statusPublished" },
@@ -141,16 +169,47 @@ const CreateCourseCard = () => (
 
 const InstructorCourses = () => {
   const [activeTab, setActiveTab] = useState("all");
+  const [searchText, setSearchText] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
 
   const filteredCourses = useMemo(() => {
-    if (activeTab === "all") return DUMMY_COURSES;
-    return DUMMY_COURSES.filter((course) => course.status === activeTab);
-  }, [activeTab]);
+    let result = DUMMY_COURSES;
+
+    if (activeTab !== "all") {
+      result = result.filter((course) => course.status === activeTab);
+    }
+
+    const keyword = searchText.trim().toLowerCase();
+    if (keyword) {
+      result = result.filter((course) =>
+        course.title.toLowerCase().includes(keyword)
+      );
+    }
+
+    return [...result].sort(SORTERS[sortBy]);
+  }, [activeTab, searchText, sortBy]);
 
   return (
     <div className={styles.wrapper}>
       <div className={styles.header}>
         <h1>Khoá học của tôi</h1>
+      </div>
+
+      <div className={styles.toolbar}>
+        <Input
+          className={styles.searchInput}
+          placeholder="Tìm kiếm khoá học theo tên..."
+          prefix={<SearchOutlined />}
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          allowClear
+        />
+        <Select
+          className={styles.sortSelect}
+          value={sortBy}
+          onChange={setSortBy}
+          options={SORT_OPTIONS}
+        />
       </div>
 
       <Tabs
