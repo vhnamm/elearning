@@ -55,10 +55,11 @@ public class AuthenticationServiceImpl implements com.hnv.elearning.feature.auth
         log.info("Login Request: {}", loginRequest);
 
         User user = userRepository.findWithAuthortiesByEmail(loginRequest.getEmail()).orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS));
-
+        log.info(String.valueOf(passwordEncoder.matches("123456", user.getPassword())));
         if(user.getPassword() == null || !passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())){
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);
         }
+
 
         Authentication authentication = UsernamePasswordAuthenticationToken.authenticated(
             user, null,user.getAuthorities()
