@@ -32,7 +32,7 @@ INSERT INTO courses (
       - Chương 5: Tạo tương tác mượt mà với Advanced Prototyping và bàn giao dự án cho Developer.
 
       Dành cho: Người mới bắt đầu chuyển ngành hoặc lập trình viên muốn nâng cao mắt thẩm mỹ.',
-       'https://placehold.co/600x400?text=Figma+UIUX', 10000.00, 'PUBLISHED', 'BEGINNER'),
+       'https://pub-5ab381ad35034ad6b27959e4a6136657.r2.dev/courses/2/thumbnail/khoa2.webp', 10000.00, 'PUBLISHED', 'BEGINNER'),
 
       (3, 'thi-giac-may-tinh-voi-opencv-va-yolo', 2, 'Thị giác máy tính với OpenCV và YOLO',
        'Nhận diện đối tượng, phân tích luồng camera thời gian thực bằng Python.',
