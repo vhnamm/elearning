@@ -4,4 +4,5 @@ CREATE TABLE categories (
     slug VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uq_categories_slug UNIQUE (slug)
+
 ) ENGINE = InnoDB;
