@@ -1,14 +1,23 @@
+-- ==============================================================================
 -- Seed data cho trang "Tất cả khoá học của instructor"
 -- instructor_id = 2 (usertest1@gmail.com, có cả role INSTRUCTOR + STUDENT, từ V2)
 -- student_id    = 3, 4 (student1@gmail.com, student2@gmail.com, học viên thuần, từ V2)
+-- ==============================================================================
 
 -- 1. Courses với đủ các trạng thái để test filter tabs (DRAFT / PENDING_REVIEW / PUBLISHED / REJECTED)
+-- Bổ sung cột subcategory_id:
+--   - Course 1 (Spring Boot)   -> subcategory_id = 1  (Phát triển Web)
+--   - Course 2 (Figma UI/UX)   -> subcategory_id = 7  (Thiết kế Giao diện UI/UX)
+--   - Course 3 (OpenCV YOLO)   -> subcategory_id = 10 (Thị giác Máy tính (CV))
+--   - Course 4 (HeyGen AI)     -> subcategory_id = 12 (Công cụ AI Sáng tạo)
+--   - Course 5 (IELTS Writing) -> subcategory_id = 19 (Luyện thi Tiếng Anh (IELTS/TOEIC))
+
 INSERT INTO courses (
-    id, slug, instructor_id, title,
+    id, slug, instructor_id, subcategory_id, title,
     short_description, description,
     thumbnail_url, price, status, level
 ) VALUES
-      (1, 'spring-boot-tu-co-ban-den-nang-cao', 2, 'Spring Boot từ cơ bản đến nâng cao',
+      (1, 'spring-boot-tu-co-ban-den-nang-cao', 2, 1, 'Spring Boot từ cơ bản đến nâng cao',
        'Xây dựng REST API chuẩn doanh nghiệp với Spring Boot 3 và MySQL.',
        'Khóa học trang bị toàn diện kỹ năng Backend thực chiến từ số 0:
 
@@ -21,7 +30,7 @@ INSERT INTO courses (
       Yêu cầu đầu vào: Nắm chắc lập trình hướng đối tượng (OOP) với Java căn bản.',
        'https://pub-5ab381ad35034ad6b27959e4a6136657.r2.dev/courses/1/thumbnail/khoa_1_thumb_1.jpg', 1000.00, 'PUBLISHED', 'INTERMEDIATE'),
 
-      (2, 'thiet-ke-ui-ux-chuyen-nghiep-voi-figma', 2, 'Thiết kế UI/UX chuyên nghiệp với Figma',
+      (2, 'thiet-ke-ui-ux-chuyen-nghiep-voi-figma', 2, 7, 'Thiết kế UI/UX chuyên nghiệp với Figma',
        'Làm chủ tư duy trải nghiệm người dùng, Design System và Prototype.',
        'Khóa học dẫn dắt bạn qua quy trình thiết kế sản phẩm số thực tế:
 
@@ -34,7 +43,7 @@ INSERT INTO courses (
       Dành cho: Người mới bắt đầu chuyển ngành hoặc lập trình viên muốn nâng cao mắt thẩm mỹ.',
        'https://pub-5ab381ad35034ad6b27959e4a6136657.r2.dev/courses/2/thumbnail/khoa2.webp', 10000.00, 'PUBLISHED', 'BEGINNER'),
 
-      (3, 'thi-giac-may-tinh-voi-opencv-va-yolo', 2, 'Thị giác máy tính với OpenCV và YOLO',
+      (3, 'thi-giac-may-tinh-voi-opencv-va-yolo', 2, 10, 'Thị giác máy tính với OpenCV và YOLO',
        'Nhận diện đối tượng, phân tích luồng camera thời gian thực bằng Python.',
        'Nội dung khóa học đang trong quá trình biên soạn và hoàn thiện tài liệu lab:
 
@@ -46,7 +55,7 @@ INSERT INTO courses (
       Dự kiến phát hành vào quý tới với đầy đủ source code và dataset mẫu.',
        'https://pub-5ab381ad35034ad6b27959e4a6136657.r2.dev/courses/3/thumbnail/khoa3.webp', 2000.00, 'DRAFT', 'ADVANCED'),
 
-      (4, 'san-xuat-video-ai-chuyen-nghiep-voi-heygen', 2, 'Sản xuất Video AI chuyên nghiệp với HeyGen',
+      (4, 'san-xuat-video-ai-chuyen-nghiep-voi-heygen', 2, 12, 'Sản xuất Video AI chuyên nghiệp với HeyGen',
        'Ứng dụng MC ảo, nhân bản giọng nói và tự động hóa sản xuất video bán hàng.',
        'Khóa học hướng dẫn quy trình tạo video marketing và bài giảng không cần quay mặt:
 
@@ -56,7 +65,7 @@ INSERT INTO courses (
       - Module 4: Tự động hóa sản xuất video hàng loạt phục vụ chạy quảng cáo TikTok và Reels.',
        'https://pub-5ab381ad35034ad6b27959e4a6136657.r2.dev/courses/4/thumbnail/khoa4.webp', 1000.00, 'PENDING_REVIEW', 'INTERMEDIATE'),
 
-      (5, 'chinh-phuc-ielts-writing-task-2-band-7', 2, 'Chinh phục IELTS Writing Task 2 Band 7.0+',
+      (5, 'chinh-phuc-ielts-writing-task-2-band-7', 2, 19, 'Chinh phục IELTS Writing Task 2 Band 7.0+',
        'Nâng cấp tư duy phát triển luận điểm, từ vựng học thuật và liên kết câu.',
        'Khóa học tập trung giải quyết dứt điểm các lỗi mất điểm trong bài thi viết Task 2:
 
@@ -66,17 +75,20 @@ INSERT INTO courses (
       - Kỹ thuật đa dạng hóa cấu trúc ngữ pháp (Grammatical Range) và cách sửa các lỗi sai kinh điển.
 
       Mục tiêu đầu ra: Tự tin viết bài đạt band điểm từ 6.5 đến 7.5+ trong phòng thi.',
-       'https://pub-5ab381ad35034ad6b27959e4a6136657.r2.dev/courses/5/thumbnail/khoa5.webp', 0.00, 'PUBLISHED', 'BEGINNER');;
+       'https://pub-5ab381ad35034ad6b27959e4a6136657.r2.dev/courses/5/thumbnail/khoa5.webp', 0.00, 'PUBLISHED', 'BEGINNER');
 
--- 2. Enrollments (chỉ enroll vào course đã PUBLISHED) để tính studentsCount
+
+-- 3. Enrollments (chỉ enroll vào course đã PUBLISHED) để tính studentsCount
+-- Chuẩn hóa tên cột user_id và enum status ('in_progress', 'completed') theo DBML
 INSERT IGNORE INTO enrollments
-    (id, student_id, course_id, order_item_id, status, enrolled_at, completed_at)
+    (id, user_id, course_id, order_item_id, status, enrolled_at, completed_at)
 VALUES
-    (1, 3, 1, NULL, 'ACTIVE', '2026-08-01 09:00:00', NULL),
-    (2, 4, 1, NULL, 'COMPLETED', '2026-08-03 09:00:00', '2026-09-01 14:00:00'),
-    (3, 3, 2, NULL, 'COMPLETED', '2026-07-15 10:30:00', '2026-08-10 14:00:00');
+    (1, 3, 1, NULL, 'in_progress', '2026-08-01 09:00:00', NULL),
+    (2, 4, 1, NULL, 'completed',   '2026-08-03 09:00:00', '2026-09-01 14:00:00'),
+    (3, 3, 2, NULL, 'completed',   '2026-07-15 10:30:00', '2026-08-10 14:00:00');
 
--- 3. Course reviews (chỉ review course đã PUBLISHED) để tính avgRating
+
+-- 4. Course reviews (chỉ review course đã PUBLISHED) để tính avgRating
 INSERT IGNORE INTO course_reviews
     (id, course_id, student_id, rating, comment, created_at, updated_at)
 VALUES
