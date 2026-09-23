@@ -5,11 +5,12 @@ import Register from "~pages/Register/Register.jsx";
 import Oauth2CallbackHandler from "~pages/Login/Oauth2CallbackHandler.jsx";
 import InstructorLandingPage from "~pages/InstructorLandingPage/InstructorLandingPage.jsx";
 import Onboarding from "~pages/Onboarding/Onboarding.jsx";
-import HeaderOnly from "~layouts/HeaderOnly/HeaderOnly.jsx";
+import HeaderBlankLayout from "~layouts/HeaderBlankLayout/HeaderBlankLayout.jsx";
 import Forbidden from "~pages/Forbidden/Forbidden.jsx";
 import RouteGuard from "./RouteGuard.jsx";
 import InstructorLayout from "~layouts/InstructorLayout/InstructorLayout.jsx";
 import InstructorCourses from "~pages/InstructorCourses/InstructorCourses.jsx";
+import CreateCourseInitial from "~pages/CreateCourse/CreateCourseInitial.jsx";
 
 const AppRoutes = () => (
   <Routes>
@@ -32,21 +33,21 @@ const AppRoutes = () => (
           <Route path="/403" element={<Forbidden/>}></Route>
       </Route>
 
+      <Route element={<RouteGuard requireAuth allowedRoles={["INSTRUCTOR"]} redirectTo="/403" />}>
+          <Route element={<HeaderBlankLayout/>}>
+              <Route path={"/instructor/course/create"} element={<CreateCourseInitial/>}></Route>
+          </Route>
+      </Route>
+
+
       {/* Nhóm 4: Onboarding/Upgrade -> bắt buộc login; đã là Instructor/Admin thì đá sang trang của họ */}
       {/* TODO: đổi redirectTo="/instructor/courses" khi trang đó đã có route thật, hiện chưa tồn tại */}
       <Route element={<RouteGuard requireAuth forbiddenRoles={["INSTRUCTOR", "ADMIN"]} redirectTo="/instructor/courses" />}>
-        <Route path="/instructor/onboarding" element={<HeaderOnly/>}>
+        <Route path="/instructor/onboarding" element={<HeaderBlankLayout/>}>
           <Route index={true} element={<Onboarding/>}></Route>
         </Route>
       </Route>
 
-      {/* Nhóm 5: Protected/Role-specific -> chưa login -> /login; login rồi mà sai role -> /403 */}
-      {/* <Route element={<RouteGuard requireAuth allowedRoles={["INSTRUCTOR"]} redirectTo="/403" />}>
-        <Route path="/instructor/dashboard" element={<InstructorDashboard/>} />
-      </Route>
-      <Route element={<RouteGuard requireAuth allowedRoles={["ADMIN"]} redirectTo="/403" />}>
-        <Route path="/admin" element={<AdminPage/>} />
-      </Route> */}
 
       <Route element={<RouteGuard requireAuth allowedRoles={["INSTRUCTOR"]} redirectTo="/403"/>}>
           <Route path="/instructor" element={<InstructorLayout/>}>

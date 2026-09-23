@@ -3,7 +3,7 @@ import {PlusOutlined} from "@ant-design/icons";
 import styles from "./InstructorCourses.module.scss"
 
 const CreateCourseCard = () => (
-    <Link to="/instructor/courses/new" className={styles.createCard}>
+    <Link to="/instructor/course/create" className={styles.createCard}>
     <span className={styles.createIcon}>
       <PlusOutlined />
     </span>

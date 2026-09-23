@@ -1,0 +1,31 @@
+.wrapper {
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.inner {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 6%;
+}
+
+.divider {
+  width: 1px;
+  height: 24px;
+  background-color: #cbd5e1;
+  flex-shrink: 0;
+}
+
+.pageTitle {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--color-neutral-900, #0f172a);
+  white-space: nowrap;
+}
