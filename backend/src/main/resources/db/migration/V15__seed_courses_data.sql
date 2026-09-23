@@ -81,7 +81,7 @@ INSERT INTO courses (
 -- 3. Enrollments (chỉ enroll vào course đã PUBLISHED) để tính studentsCount
 -- Chuẩn hóa tên cột user_id và enum status ('in_progress', 'completed') theo DBML
 INSERT IGNORE INTO enrollments
-    (id, user_id, course_id, order_item_id, status, enrolled_at, completed_at)
+    (id, student_id, course_id, order_item_id, status, enrolled_at, completed_at)
 VALUES
     (1, 3, 1, NULL, 'in_progress', '2026-08-01 09:00:00', NULL),
     (2, 4, 1, NULL, 'completed',   '2026-08-03 09:00:00', '2026-09-01 14:00:00'),
