@@ -2,6 +2,7 @@ CREATE TABLE courses (
      id         BIGINT AUTO_INCREMENT,
      slug       VARCHAR(255) NOT NULL UNIQUE,
      instructor_id BIGINT NOT NULL,
+     subcategory_id BIGINT NOT NULL,
      title      VARCHAR(255) NOT NULL,
      short_description  VARCHAR(500) NULL,
      description   TEXT  NULL,
@@ -13,5 +14,7 @@ CREATE TABLE courses (
      updated_at TIMESTAMP   NULL,
      PRIMARY KEY (id),
      CONSTRAINT fk_course_instructor
-         FOREIGN KEY (instructor_id) REFERENCES users (id)
+         FOREIGN KEY (instructor_id) REFERENCES users (id),
+     CONSTRAINT fk_course_subcategory
+        FOREIGN KEY (subcategory_id) REFERENCES subcategories (id)
 ) ENGINE=InnoDB;
