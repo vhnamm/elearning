@@ -2,7 +2,7 @@ import React from "react";
 import styles from "./HeaderBlank.module.scss";
 import LogoNoLink from "~components/common/Logo/LogoNoLink.jsx";
 
-const HeaderBlank = ({ title = "Tạo khóa học mới" }) => (
+const HeaderBlank = ({ title = "Tạo khóa học mới", extra = null }) => (
     <header className={styles.wrapper}>
         <div className={styles.inner}>
             <LogoNoLink />
@@ -12,6 +12,7 @@ const HeaderBlank = ({ title = "Tạo khóa học mới" }) => (
                     <h1 className={styles.pageTitle}>{title}</h1>
                 </>
             )}
+            {extra && <div className={styles.extra}>{extra}</div>}
         </div>
     </header>
 );

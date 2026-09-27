@@ -45,7 +45,13 @@ public enum ErrorCode {
     // ==========================================
     CATEGORY_NOT_FOUND(4001, "Không tìm thấy danh mục", HttpStatus.NOT_FOUND),
     CATEGORY_INVALID_PARENT(4002, "Không thể chọn chính danh mục hoặc danh mục con của nó làm danh mục cha", HttpStatus.BAD_REQUEST),
-    CATEGORY_NAME_DUPLICATED(4003, "Tên danh mục đã tồn tại", HttpStatus.CONFLICT);
+    CATEGORY_NAME_DUPLICATED(4003, "Tên danh mục đã tồn tại", HttpStatus.CONFLICT),
+
+
+    // ==========================================
+    // 50xx: COURSE MANAGEMENT
+    // ==========================================
+    COURSE_NOT_FOUND(5001, "Không tìm thấy khoá học", HttpStatus.NOT_FOUND);
 
     private final int code;
     private final String message;

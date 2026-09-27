@@ -1,0 +1,13 @@
+package com.hnv.elearning.feature.course.service;
+
+import com.hnv.elearning.feature.course.dto.*;
+import com.hnv.elearning.feature.user.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+public interface CourseManagementService {
+    Page<InstructorCourseItemDto> getMyCourses(CourseFilterRequest request, Long instructorId, Pageable pageable);
+    CourseDraftDto createDraft(CourseDraftRequest courseDraftRequest, User user);
+
+    CourseBasicInfoResponse getCourseBasicInfo(Long courseId, Long instructorId);
+}

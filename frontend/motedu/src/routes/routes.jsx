@@ -11,6 +11,8 @@ import RouteGuard from "./RouteGuard.jsx";
 import InstructorLayout from "~layouts/InstructorLayout/InstructorLayout.jsx";
 import InstructorCourses from "~pages/InstructorCourses/InstructorCourses.jsx";
 import CreateCourseInitial from "~pages/CreateCourse/CreateCourseInitial.jsx";
+import CreateCourseLayout from "~layouts/CreateCourseLayout/CreateCourseLayout.jsx";
+import CreateCourseOverview from "~pages/CreateCourse/CreateCourseOverview.jsx";
 
 const AppRoutes = () => (
   <Routes>
@@ -36,6 +38,10 @@ const AppRoutes = () => (
       <Route element={<RouteGuard requireAuth allowedRoles={["INSTRUCTOR"]} redirectTo="/403" />}>
           <Route element={<HeaderBlankLayout/>}>
               <Route path={"/instructor/course/create"} element={<CreateCourseInitial/>}></Route>
+          </Route>
+
+          <Route path="/instructor/course/:courseId/manage" element={<CreateCourseLayout/>}>
+              <Route path="overview" element={<CreateCourseOverview/>}></Route>
           </Route>
       </Route>
 

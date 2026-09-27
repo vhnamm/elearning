@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {useOutletContext} from "react-router-dom";
+import {useNavigate, useOutletContext} from "react-router-dom";
 import {
     Form,
     Input,
@@ -15,6 +15,8 @@ import {
     InfoCircleOutlined
 } from '@ant-design/icons';
 import styles from './CreateCourseInitial.module.scss';
+import {getAllCategories} from "~services/category.service.js";
+import {saveDraftCourse} from "~services/course.service.js";
 
 const { Title, Paragraph } = Typography;
 
@@ -25,26 +27,40 @@ export default function CreateCourseInitial() {
         setPageTitle("Tạo khóa học mới");
 
         // (Tùy chọn) Reset khi rời khỏi trang
-        return () => setHeaderTitle("");
+        return () => setPageTitle("");
     }, [setPageTitle]);
+
 
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
+    const [categories, setCategories] = useState([])
+    const navigate = useNavigate()
 
-    const categories = [
-        { value: 'it-dev', label: 'Lập trình & Công nghệ thông tin' },
-        { value: 'design', label: 'Thiết kế đồ họa & Multimedia' },
-        { value: 'business', label: 'Kinh doanh & Khởi nghiệp' },
-        { value: 'marketing', label: 'Marketing số & Truyền thông' },
-        { value: 'language', label: 'Ngoại ngữ' },
-    ];
 
-    const onFinish = (values) => {
-        setLoading(true);
-        console.log('Khởi tạo khóa học nháp:', values);
-        setTimeout(() => {
-            setLoading(false);
-        }, 800);
+    useEffect( () => {
+        const fetchCates = async () => {
+            const result = await getAllCategories();
+            console.log(result)
+            setCategories(result?.map(category => ({
+                value: category.id,
+                label: category.name
+            })))
+        }
+
+        fetchCates()
+    }, [])
+
+
+
+
+    const onFinish = async (values) => {
+        const result = await saveDraftCourse({title: values.title, categoryId: values.category})
+        navigate(`/instructor/course${result.id}/manage/overview`,
+                {state: {
+                    courseId: result.id,
+                    title: values.title
+                }}
+            )
     };
 
     return (
