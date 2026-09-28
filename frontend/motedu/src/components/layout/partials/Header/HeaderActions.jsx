@@ -25,7 +25,7 @@ const HeaderActions = () => {
 
                 <div className={styles.popupAvatar} >
 
-                    {user?.avatar === null ?  <UserOutlined /> : <img src={user?.avatar} alt="anh ava"/>}
+                    {user?.avatar ? <img src={user.avatar} alt={user?.fullName}/> : <UserOutlined />}
                 </div>
 
                 <div className={styles.popupInfo}>
@@ -65,7 +65,7 @@ const HeaderActions = () => {
                 trigger={"hover"}
             >
                 <Link to="/profile" className={styles.avatar}>
-                    {user?.avatar === null ?  <UserOutlined /> : <img src={user.avatar} alt="anh ava"/>}
+                    {user?.avatar ? <img src={user.avatar} alt={user?.fullName}/> : <UserOutlined />}
 
                 </Link>
             </Popover>

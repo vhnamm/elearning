@@ -74,7 +74,7 @@ const CourseCard = ({ course }) => {
                 </div>
 
                 <div className={styles.actions}>
-                    <Link to={`/instructor/courses/${course.id}/edit`} className={styles.editBtn}>
+                    <Link to={`/instructor/course/${course.id}/manage/overview`} className={styles.editBtn}>
                         Sửa
                     </Link>
                     <button type="button" className={styles.iconBtn} aria-label="Xoá khoá học">

@@ -19,7 +19,7 @@ public class CategoryServiceImpl implements CategoryService {
         List<Category> result = categoryRepository.findAll();
 
         return result.stream().map(
-                category -> new CategoryDto(category.getId(), category.getSlug(), category.getName())
+                category -> new CategoryDto(category.getId(),  category.getName(), category.getSlug())
         ).toList();
 
     }
