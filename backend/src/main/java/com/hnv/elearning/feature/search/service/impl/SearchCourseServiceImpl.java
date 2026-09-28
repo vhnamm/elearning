@@ -2,6 +2,8 @@ package com.hnv.elearning.feature.search.service.impl;
 
 import com.hnv.elearning.feature.category.entity.Category;
 import com.hnv.elearning.feature.category.entity.Subcategory;
+import com.hnv.elearning.feature.category.entity.Topic;
+import com.hnv.elearning.feature.category.enums.TopicStatus;
 import com.hnv.elearning.feature.category.repository.CategoryRepository;
 import com.hnv.elearning.feature.course.entity.Course;
 import com.hnv.elearning.feature.course.enums.CourseLevel;
@@ -38,6 +40,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -67,6 +70,8 @@ public class SearchCourseServiceImpl implements SearchCourseService {
     public CourseSearchResponse search(SearchCourseRequest request) {
         String keyword = normalizeKeyword(request.getKeyword());
         List<Long> categoryIds = request.getCategoryIds() == null ? List.of() : request.getCategoryIds();
+        List<Long> subcategoryIds = request.getSubcategoryIds() == null ? List.of() : request.getSubcategoryIds();
+        List<Long> topicIds = request.getTopicIds() == null ? List.of() : request.getTopicIds();
         List<CourseLevel> levels = request.getLevels() == null ? List.of() : request.getLevels();
         Double minRating = normalizeRating(request.getMinRating());
         String priceType = normalizePriceType(request.getPriceType());
@@ -81,9 +86,10 @@ public class SearchCourseServiceImpl implements SearchCourseService {
         int page = request.getPage() == null ? 0 : Math.max(request.getPage(), 0);
         int size = request.getSize() == null ? 5 : Math.min(Math.max(request.getSize(), 1), 20);
 
-        Specification<Course> spec = CourseSpecification.forSearch(
-                keyword, categoryIds, levels, minRating, priceType, min, max
+        Filters filters = new Filters(
+                keyword, categoryIds, subcategoryIds, topicIds, levels, minRating, priceType, min, max
         );
+        Specification<Course> spec = filters.toSpec();
         List<Course> courses = findPage(spec, sort, page, size);
         long total = count(spec);
 
@@ -96,8 +102,10 @@ public class SearchCourseServiceImpl implements SearchCourseService {
                 .totalPages(totalPages)
                 .page(page)
                 .size(size)
-                .categories(categoryFacets(keyword, levels, minRating, priceType, min, max))
-                .levels(levelFacets(keyword, categoryIds, minRating, priceType, min, max))
+                .categories(categoryFacets(filters))
+                .subcategories(subcategoryFacets(filters))
+                .topics(topicFacets(filters))
+                .levels(levelFacets(filters))
                 .relatedQueries(relatedQueries(keyword))
                 .build();
     }
@@ -163,18 +171,12 @@ public class SearchCourseServiceImpl implements SearchCourseService {
         return null;
     }
 
-    // Đếm khóa đã xuất bản theo từng danh mục cha, không áp bộ lọc danh mục đang chọn.
-    private List<SearchFacet> categoryFacets(
-            String keyword,
-            List<CourseLevel> levels,
-            Double minRating,
-            String priceType,
-            BigDecimal min,
-            BigDecimal max
-    ) {
-        Specification<Course> spec = CourseSpecification.forSearch(
-                keyword, List.of(), levels, minRating, priceType, min, max
-        );
+    // Đếm khóa đã xuất bản theo từng danh mục cha, bỏ bộ lọc danh mục, danh mục con và topic đang chọn.
+    private List<SearchFacet> categoryFacets(Filters filters) {
+        Specification<Course> spec = filters.withCategoryIds(List.of())
+                .withSubcategoryIds(List.of())
+                .withTopicIds(List.of())
+                .toSpec();
         Map<Long, Long> counts = countByCategory(spec);
         return categoryRepository.findAll().stream()
                 .sorted((left, right) -> left.getName().compareToIgnoreCase(right.getName()))
@@ -187,18 +189,27 @@ public class SearchCourseServiceImpl implements SearchCourseService {
                 .toList();
     }
 
+    // Đếm khóa theo danh mục con trong phạm vi danh mục cha đang chọn, bỏ bộ lọc danh mục con và topic.
+    private List<SearchFacet> subcategoryFacets(Filters filters) {
+        Specification<Course> spec = filters.withSubcategoryIds(List.of())
+                .withTopicIds(List.of())
+                .toSpec();
+        List<SearchFacet> facets = new ArrayList<>(countByGroup(spec, "subcategory"));
+        addMissingSelected(facets, filters.subcategoryIds(), Subcategory.class);
+        return facets;
+    }
+
+    // Đếm khóa theo topic đã duyệt trong phạm vi danh mục đang chọn, bỏ bộ lọc topic.
+    private List<SearchFacet> topicFacets(Filters filters) {
+        Specification<Course> spec = filters.withTopicIds(List.of()).toSpec();
+        List<SearchFacet> facets = new ArrayList<>(countByGroup(spec, "topics"));
+        addMissingSelected(facets, filters.topicIds(), Topic.class);
+        return facets;
+    }
+
     // Đếm khóa đã xuất bản theo từng cấp độ, không áp bộ lọc cấp độ đang chọn.
-    private List<SearchFacet> levelFacets(
-            String keyword,
-            List<Long> categoryIds,
-            Double minRating,
-            String priceType,
-            BigDecimal min,
-            BigDecimal max
-    ) {
-        Specification<Course> spec = CourseSpecification.forSearch(
-                keyword, categoryIds, List.of(), minRating, priceType, min, max
-        );
+    private List<SearchFacet> levelFacets(Filters filters) {
+        Specification<Course> spec = filters.withLevels(List.of()).toSpec();
         Map<String, Long> counts = countByLevel(spec);
         return LEVEL_ORDER.stream()
                 .map(level -> SearchFacet.builder()
@@ -228,6 +239,57 @@ public class SearchCourseServiceImpl implements SearchCourseService {
             counts.put(tuple.get(0, Long.class), tuple.get(1, Long.class));
         }
         return counts;
+    }
+
+    // Nhóm số khóa học theo danh mục con hoặc topic, trả về id, tên và số lượng.
+    private List<SearchFacet> countByGroup(Specification<Course> spec, String attribute) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tuple> query = cb.createTupleQuery();
+        Root<Course> root = query.from(Course.class);
+        Join<Course, ?> group = root.join(attribute, JoinType.INNER);
+        List<Predicate> predicates = new ArrayList<>();
+        Predicate predicate = spec.toPredicate(root, query, cb);
+        if (predicate != null) {
+            predicates.add(predicate);
+        }
+        if ("topics".equals(attribute)) {
+            predicates.add(cb.equal(group.get("status"), TopicStatus.APPROVED));
+        }
+        query.multiselect(group.get("id"), group.get("name"), cb.countDistinct(root.get("id")));
+        query.where(predicates.toArray(Predicate[]::new));
+        query.groupBy(group.get("id"), group.get("name"));
+        query.orderBy(cb.desc(cb.countDistinct(root.get("id"))), cb.asc(group.get("name")));
+
+        List<SearchFacet> facets = new ArrayList<>();
+        for (Tuple tuple : entityManager.createQuery(query).getResultList()) {
+            Long id = tuple.get(0, Long.class);
+            facets.add(SearchFacet.builder()
+                    .id(id)
+                    .key(String.valueOf(id))
+                    .name(tuple.get(1, String.class))
+                    .count(tuple.get(2, Long.class))
+                    .build());
+        }
+        return facets;
+    }
+
+    // Giữ lại lựa chọn đang tick dù hiện có 0 khóa, để người dùng bỏ tick được.
+    private void addMissingSelected(List<SearchFacet> facets, List<Long> selectedIds, Class<?> type) {
+        Set<Long> present = new HashSet<>();
+        facets.forEach(facet -> present.add(facet.getId()));
+        for (Long id : selectedIds) {
+            if (id == null || present.contains(id)) {
+                continue;
+            }
+            Object entity = entityManager.find(type, id);
+            String name = entity instanceof Subcategory subcategory ? subcategory.getName()
+                    : entity instanceof Topic topic ? topic.getName()
+                    : null;
+            if (name == null) {
+                continue;
+            }
+            facets.add(SearchFacet.builder().id(id).key(String.valueOf(id)).name(name).count(0).build());
+        }
     }
 
     // Nhóm số khóa học theo cấp độ BEGINNER, INTERMEDIATE, ADVANCED.
@@ -388,5 +450,40 @@ public class SearchCourseServiceImpl implements SearchCourseService {
         }
         String normalized = sort.trim().toLowerCase(Locale.ROOT);
         return SORTS.contains(normalized) ? normalized : "popular";
+    }
+
+    // Bộ lọc đã chuẩn hóa; các hàm withX tạo bản sao bỏ một nhóm lọc để đếm số lượng.
+    private record Filters(
+            String keyword,
+            List<Long> categoryIds,
+            List<Long> subcategoryIds,
+            List<Long> topicIds,
+            List<CourseLevel> levels,
+            Double minRating,
+            String priceType,
+            BigDecimal min,
+            BigDecimal max
+    ) {
+        Specification<Course> toSpec() {
+            return CourseSpecification.forSearch(
+                    keyword, categoryIds, subcategoryIds, topicIds, levels, minRating, priceType, min, max
+            );
+        }
+
+        Filters withCategoryIds(List<Long> value) {
+            return new Filters(keyword, value, subcategoryIds, topicIds, levels, minRating, priceType, min, max);
+        }
+
+        Filters withSubcategoryIds(List<Long> value) {
+            return new Filters(keyword, categoryIds, value, topicIds, levels, minRating, priceType, min, max);
+        }
+
+        Filters withTopicIds(List<Long> value) {
+            return new Filters(keyword, categoryIds, subcategoryIds, value, levels, minRating, priceType, min, max);
+        }
+
+        Filters withLevels(List<CourseLevel> value) {
+            return new Filters(keyword, categoryIds, subcategoryIds, topicIds, value, minRating, priceType, min, max);
+        }
     }
 }

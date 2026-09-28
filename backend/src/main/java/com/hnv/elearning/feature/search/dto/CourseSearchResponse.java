@@ -20,6 +20,8 @@ public class CourseSearchResponse {
     private int page;
     private int size;
     private List<SearchFacet> categories;
+    private List<SearchFacet> subcategories;
+    private List<SearchFacet> topics;
     private List<SearchFacet> levels;
     private List<String> relatedQueries;
 }

@@ -12,6 +12,8 @@ import java.util.List;
 public class SearchCourseRequest {
     private String keyword;
     private List<Long> categoryIds;
+    private List<Long> subcategoryIds;
+    private List<Long> topicIds;
     private List<CourseLevel> levels;
     private Double minRating;
     private String priceType;

@@ -1,6 +1,7 @@
 package com.hnv.elearning.feature.course.entity;
 
 import com.hnv.elearning.feature.category.entity.Subcategory;
+import com.hnv.elearning.feature.category.entity.Topic;
 import com.hnv.elearning.feature.course.enums.CourseLevel;
 import com.hnv.elearning.feature.course.enums.CourseStatus;
 import com.hnv.elearning.feature.user.entity.User;
@@ -10,6 +11,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "courses")
@@ -63,6 +66,15 @@ public class Course {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subcategory_id", nullable = false)
     private Subcategory subcategory;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "course_topics",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "topic_id")
+    )
+    @Builder.Default
+    private Set<Topic> topics = new HashSet<>();
 
     @PreUpdate
     protected void onUpdate() {

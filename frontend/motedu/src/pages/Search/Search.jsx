@@ -81,6 +81,8 @@ const Search = () => {
   const priceType = searchParams.get("priceType") || "all";
   const minRating = searchParams.get("minRating") || "";
   const categoryIds = searchParams.getAll("categoryIds");
+  const subcategoryIds = searchParams.getAll("subcategoryIds");
+  const topicIds = searchParams.getAll("topicIds");
   const levels = searchParams.getAll("levels");
   const min = searchParams.get("min") || "";
   const max = searchParams.get("max") || "";
@@ -91,13 +93,17 @@ const Search = () => {
   const [error, setError] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [priceDraft, setPriceDraft] = useState({ min, max });
+  const [priceSource, setPriceSource] = useState(`${min}|${max}`);
+  const queryString = searchParams.toString();
 
-  useEffect(() => {
+  if (priceSource !== `${min}|${max}`) {
+    setPriceSource(`${min}|${max}`);
     setPriceDraft({ min, max });
-  }, [min, max]);
+  }
 
   useEffect(() => {
     let cancelled = false;
+    const params = new URLSearchParams(queryString);
 
     // Gọi API tìm kiếm mỗi khi từ khóa, bộ lọc, sắp xếp hoặc trang đổi.
     const load = async () => {
@@ -105,15 +111,17 @@ const Search = () => {
       setError(null);
       try {
         const data = await searchCourses({
-          keyword,
-          categoryIds,
-          levels,
-          minRating,
-          priceType,
-          min,
-          max,
-          sort,
-          page: page - 1,
+          keyword: params.get("keyword") || "",
+          categoryIds: params.getAll("categoryIds"),
+          subcategoryIds: params.getAll("subcategoryIds"),
+          topicIds: params.getAll("topicIds"),
+          levels: params.getAll("levels"),
+          minRating: params.get("minRating") || "",
+          priceType: params.get("priceType") || "all",
+          min: params.get("min") || "",
+          max: params.get("max") || "",
+          sort: params.get("sort") || "popular",
+          page: Math.max(Number(params.get("page") || "1"), 1) - 1,
           size: 5,
         });
         if (!cancelled) setResult(data);
@@ -131,7 +139,7 @@ const Search = () => {
     return () => {
       cancelled = true;
     };
-  }, [keyword, sort, priceType, minRating, min, max, page, categoryIds.join(","), levels.join(",")]);
+  }, [queryString]);
 
   // Cập nhật query trên URL. Đổi bộ lọc thì quay về trang 1.
   const updateParams = (patch, resetPage = true) => {
@@ -151,17 +159,20 @@ const Search = () => {
   };
 
   // Bật hoặc tắt một giá trị trong bộ lọc nhiều lựa chọn, như danh mục và cấp độ.
-  const toggleListValue = (key, value, current) => {
+  const toggleListValue = (key, value, current, resetKeys = []) => {
     const next = current.includes(value)
       ? current.filter((item) => item !== value)
       : [...current, value];
-    updateParams({ [key]: next });
+    const reset = Object.fromEntries(resetKeys.map((resetKey) => [resetKey, []]));
+    updateParams({ [key]: next, ...reset });
   };
 
   // Xóa bộ lọc, giữ lại từ khóa và cách sắp xếp.
   const clearFilters = () => {
     updateParams({
       categoryIds: [],
+      subcategoryIds: [],
+      topicIds: [],
       levels: [],
       minRating: "",
       priceType: "",
@@ -195,10 +206,14 @@ const Search = () => {
   const total = result?.totalElements || 0;
   const totalPages = result?.totalPages || 0;
   const categories = result?.categories || [];
+  const subcategoryFacets = result?.subcategories || [];
+  const topicFacets = result?.topics || [];
   const levelFacets = result?.levels || [];
   const relatedQueries = result?.relatedQueries || [];
   const hasFilters =
     categoryIds.length > 0 ||
+    subcategoryIds.length > 0 ||
+    topicIds.length > 0 ||
     levels.length > 0 ||
     Boolean(minRating) ||
     priceType !== "all" ||
@@ -206,6 +221,8 @@ const Search = () => {
     Boolean(max);
   const activeFilterCount =
     categoryIds.length +
+    subcategoryIds.length +
+    topicIds.length +
     levels.length +
     (minRating ? 1 : 0) +
     (priceType !== "all" ? 1 : 0) +
@@ -256,6 +273,8 @@ const Search = () => {
                     updateParams({
                       keyword: query,
                       categoryIds: [],
+                      subcategoryIds: [],
+                      topicIds: [],
                       levels: [],
                       minRating: "",
                       priceType: "",
@@ -324,7 +343,12 @@ const Search = () => {
                           <input
                             type="checkbox"
                             checked={categoryIds.includes(id)}
-                            onChange={() => toggleListValue("categoryIds", id, categoryIds)}
+                            onChange={() =>
+                              toggleListValue("categoryIds", id, categoryIds, [
+                                "subcategoryIds",
+                                "topicIds",
+                              ])
+                            }
                           />
                           {category.name}
                         </span>
@@ -334,6 +358,62 @@ const Search = () => {
                   })}
                 </div>
               </section>
+
+              {subcategoryFacets.length > 0 && (
+                <section className={styles.filterBlock}>
+                  <h3>
+                    Danh mục con
+                    <FontAwesomeIcon icon={faChevronDown} />
+                  </h3>
+                  <div className={styles.options}>
+                    {subcategoryFacets.map((subcategory) => {
+                      const id = String(subcategory.id);
+                      return (
+                        <label key={id} className={styles.checkRow}>
+                          <span>
+                            <input
+                              type="checkbox"
+                              checked={subcategoryIds.includes(id)}
+                              onChange={() =>
+                                toggleListValue("subcategoryIds", id, subcategoryIds, ["topicIds"])
+                              }
+                            />
+                            {subcategory.name}
+                          </span>
+                          <em>{formatCount(subcategory.count)}</em>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
+
+              {topicFacets.length > 0 && (
+                <section className={styles.filterBlock}>
+                  <h3>
+                    Topic
+                    <FontAwesomeIcon icon={faChevronDown} />
+                  </h3>
+                  <div className={styles.options}>
+                    {topicFacets.map((topic) => {
+                      const id = String(topic.id);
+                      return (
+                        <label key={id} className={styles.checkRow}>
+                          <span>
+                            <input
+                              type="checkbox"
+                              checked={topicIds.includes(id)}
+                              onChange={() => toggleListValue("topicIds", id, topicIds)}
+                            />
+                            {topic.name}
+                          </span>
+                          <em>{formatCount(topic.count)}</em>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
 
               <section className={styles.filterBlock}>
                 <h3>

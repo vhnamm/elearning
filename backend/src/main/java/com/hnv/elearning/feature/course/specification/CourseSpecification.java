@@ -1,11 +1,13 @@
 package com.hnv.elearning.feature.course.specification;
 
+import com.hnv.elearning.feature.category.entity.Topic;
 import com.hnv.elearning.feature.course.entity.Course;
 import com.hnv.elearning.feature.course.enums.CourseLevel;
 import com.hnv.elearning.feature.course.enums.CourseStatus;
 import com.hnv.elearning.feature.review.entity.CourseReview;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
@@ -86,6 +88,28 @@ public class CourseSpecification {
                         : root.get("subcategory").get("category").get("id").in(categoryIds);
     }
 
+    // Giữ khóa học thuộc các danh mục con được chọn.
+    public static Specification<Course> hasSubcategoryIds(Collection<Long> subcategoryIds) {
+        return (root, query, cb) ->
+                (subcategoryIds == null || subcategoryIds.isEmpty())
+                        ? null
+                        : root.get("subcategory").get("id").in(subcategoryIds);
+    }
+
+    // Giữ khóa học được gắn ít nhất một topic được chọn, dùng EXISTS để không nhân bản dòng.
+    public static Specification<Course> hasTopicIds(Collection<Long> topicIds) {
+        return (root, query, cb) -> {
+            if (topicIds == null || topicIds.isEmpty()) {
+                return null;
+            }
+            Subquery<Long> subquery = query.subquery(Long.class);
+            Root<Course> correlated = subquery.correlate(root);
+            Join<Course, Topic> topic = correlated.join("topics");
+            subquery.select(topic.get("id")).where(topic.get("id").in(topicIds));
+            return cb.exists(subquery);
+        };
+    }
+
     // Giữ khóa học có cấp độ nằm trong danh sách được chọn.
     public static Specification<Course> hasLevels(Collection<CourseLevel> levels) {
         return (root, query, cb) ->
@@ -115,6 +139,8 @@ public class CourseSpecification {
     public static Specification<Course> forSearch(
             String keyword,
             Collection<Long> categoryIds,
+            Collection<Long> subcategoryIds,
+            Collection<Long> topicIds,
             Collection<CourseLevel> levels,
             Double minRating,
             String priceType,
@@ -124,6 +150,8 @@ public class CourseSpecification {
         return Specification.where(hasCourseStatus(CourseStatus.PUBLISHED))
                 .and(matchesKeyword(keyword))
                 .and(hasCategoryIds(categoryIds))
+                .and(hasSubcategoryIds(subcategoryIds))
+                .and(hasTopicIds(topicIds))
                 .and(hasLevels(levels))
                 .and(hasMinRating(minRating))
                 .and(hasPriceFilter(priceType, min, max));

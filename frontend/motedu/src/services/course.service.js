@@ -26,6 +26,8 @@ export const getPopularCourses = async (size = 4) => {
 export const searchCourses = async ({
   keyword,
   categoryIds = [],
+  subcategoryIds = [],
+  topicIds = [],
   levels = [],
   minRating,
   priceType,
@@ -38,6 +40,8 @@ export const searchCourses = async ({
   const params = new URLSearchParams();
   if (keyword) params.set("keyword", keyword);
   categoryIds.forEach((id) => params.append("categoryIds", id));
+  subcategoryIds.forEach((id) => params.append("subcategoryIds", id));
+  topicIds.forEach((id) => params.append("topicIds", id));
   levels.forEach((level) => params.append("levels", level));
   if (minRating) params.set("minRating", minRating);
   if (priceType && priceType !== "all") params.set("priceType", priceType);
