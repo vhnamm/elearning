@@ -56,6 +56,7 @@ public class CourseSpecification {
                 .and(priceBetween(min, max));
     }
 
+    // Khớp từ khóa với tên khóa, mô tả ngắn, giảng viên, danh mục con và danh mục cha.
     public static Specification<Course> matchesKeyword(String keyword) {
         return (root, query, cb) -> {
             if (keyword == null || keyword.isBlank()) {
@@ -77,6 +78,7 @@ public class CourseSpecification {
         };
     }
 
+    // Giữ khóa học thuộc các danh mục cha được chọn.
     public static Specification<Course> hasCategoryIds(Collection<Long> categoryIds) {
         return (root, query, cb) ->
                 (categoryIds == null || categoryIds.isEmpty())
@@ -84,11 +86,13 @@ public class CourseSpecification {
                         : root.get("subcategory").get("category").get("id").in(categoryIds);
     }
 
+    // Giữ khóa học có cấp độ nằm trong danh sách được chọn.
     public static Specification<Course> hasLevels(Collection<CourseLevel> levels) {
         return (root, query, cb) ->
                 (levels == null || levels.isEmpty()) ? null : root.get("level").in(levels);
     }
 
+    // Giữ khóa học có điểm trung bình đánh giá từ mức tối thiểu trở lên.
     public static Specification<Course> hasMinRating(Double minRating) {
         return (root, query, cb) -> {
             if (minRating == null) {
@@ -102,10 +106,12 @@ public class CourseSpecification {
         };
     }
 
+    // Lọc miễn phí, trả phí, hoặc nằm trong khoảng giá.
     public static Specification<Course> hasPriceFilter(String priceType, BigDecimal min, BigDecimal max) {
         return (root, query, cb) -> pricePredicate(root, cb, priceType, min, max);
     }
 
+    // Gộp toàn bộ điều kiện của trang tìm kiếm, chỉ lấy khóa đã xuất bản.
     public static Specification<Course> forSearch(
             String keyword,
             Collection<Long> categoryIds,
@@ -123,6 +129,7 @@ public class CourseSpecification {
                 .and(hasPriceFilter(priceType, min, max));
     }
 
+    // Biến từ khóa thành mẫu LIKE, coi % và _ trong từ khóa là ký tự thường.
     public static String likePattern(String keyword) {
         String escaped = keyword.trim()
                 .toLowerCase(Locale.ROOT)
@@ -132,6 +139,7 @@ public class CourseSpecification {
         return "%" + escaped + "%";
     }
 
+    // Dựng điều kiện giá: FREE thì giá bằng 0, PAID thì giá lớn hơn 0, rồi áp min/max.
     private static Predicate pricePredicate(
             Root<Course> root,
             CriteriaBuilder cb,

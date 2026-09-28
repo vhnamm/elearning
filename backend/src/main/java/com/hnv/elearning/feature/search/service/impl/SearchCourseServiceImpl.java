@@ -62,6 +62,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
     private final EnrollmentService enrollmentService;
     private final CourseReviewService courseReviewService;
 
+    // Chuẩn hóa tham số rồi trả danh sách khóa, số lượng lọc và gợi ý liên quan.
     @Override
     public CourseSearchResponse search(SearchCourseRequest request) {
         String keyword = normalizeKeyword(request.getKeyword());
@@ -101,6 +102,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
                 .build();
     }
 
+    // Gắn điểm đánh giá, số review và số học viên vào từng khóa trong trang hiện tại.
     private List<SearchCourse> toCards(List<Course> courses) {
         if (courses.isEmpty()) {
             return List.of();
@@ -120,6 +122,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
                 .toList();
     }
 
+    // Đổi một Course entity thành dữ liệu thẻ hiển thị trên trang tìm kiếm.
     private SearchCourse toCard(Course course, Integer totalEnrollments, Double rating, Long reviewCount) {
         String instructorName = course.getInstructor() != null ? course.getInstructor().getFullName() : null;
         String subcategoryName = course.getSubcategory() != null ? course.getSubcategory().getName() : null;
@@ -146,6 +149,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
                 .build();
     }
 
+    // Chọn nhãn trên ảnh: miễn phí, đánh giá cao, hoặc mới trong 60 ngày.
     private String resolveBadge(Course course, Double rating, Long reviewCount) {
         if (course.getPrice() != null && course.getPrice().compareTo(BigDecimal.ZERO) == 0) {
             return "FREE";
@@ -159,6 +163,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
         return null;
     }
 
+    // Đếm khóa đã xuất bản theo từng danh mục cha, không áp bộ lọc danh mục đang chọn.
     private List<SearchFacet> categoryFacets(
             String keyword,
             List<CourseLevel> levels,
@@ -182,6 +187,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
                 .toList();
     }
 
+    // Đếm khóa đã xuất bản theo từng cấp độ, không áp bộ lọc cấp độ đang chọn.
     private List<SearchFacet> levelFacets(
             String keyword,
             List<Long> categoryIds,
@@ -203,6 +209,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
                 .toList();
     }
 
+    // Nhóm số khóa học theo id danh mục cha.
     private Map<Long, Long> countByCategory(Specification<Course> spec) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Tuple> query = cb.createTupleQuery();
@@ -223,6 +230,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
         return counts;
     }
 
+    // Nhóm số khóa học theo cấp độ BEGINNER, INTERMEDIATE, ADVANCED.
     private Map<String, Long> countByLevel(Specification<Course> spec) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Tuple> query = cb.createTupleQuery();
@@ -245,6 +253,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
         return counts;
     }
 
+    // Lấy tối đa 6 gợi ý: danh mục khớp từ khóa, hoặc danh mục nhiều khóa nhất nếu chưa nhập từ khóa.
     private List<String> relatedQueries(String keyword) {
         if (keyword == null) {
             return courseRepository.findPopularCategoryNames(PageRequest.of(0, 6));
@@ -259,6 +268,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
         return related.values().stream().limit(6).toList();
     }
 
+    // Thêm tên gợi ý, bỏ trùng và bỏ đúng từ khóa đang tìm.
     private void addRelated(Map<String, String> target, Collection<String> names, String keyword) {
         for (String name : names) {
             if (name == null || name.isBlank() || name.equalsIgnoreCase(keyword)) {
@@ -268,6 +278,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
         }
     }
 
+    // Lấy một trang khóa học đã lọc và sắp xếp.
     private List<Course> findPage(Specification<Course> spec, String sort, int page, int size) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Course> query = cb.createQuery(Course.class);
@@ -283,6 +294,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
                 .getResultList();
     }
 
+    // Đếm tổng khóa học khớp bộ lọc, dùng cho phân trang.
     private long count(Specification<Course> spec) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> query = cb.createQuery(Long.class);
@@ -295,6 +307,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
         return entityManager.createQuery(query).getSingleResult();
     }
 
+    // Dựng thứ tự sắp xếp: phổ biến, đánh giá, mới nhất, hoặc giá.
     private List<Order> buildOrders(String sort, Root<Course> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
         List<Order> orders = new ArrayList<>();
         switch (sort) {
@@ -314,6 +327,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
         return orders;
     }
 
+    // Điểm trung bình review của khóa, khóa chưa có review được tính là 0.
     private Expression<Double> averageRating(Root<Course> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
         Subquery<Double> subquery = query.subquery(Double.class);
         Root<CourseReview> review = subquery.from(CourseReview.class);
@@ -322,6 +336,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
         return cb.coalesce(subquery, 0.0);
     }
 
+    // Số lượt ghi danh còn hiệu lực, không tính bản ghi đã thu hồi.
     private Expression<Long> enrollmentCount(Root<Course> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
         Subquery<Long> subquery = query.subquery(Long.class);
         Root<Enrollment> enrollment = subquery.from(Enrollment.class);
@@ -333,6 +348,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
         return cb.coalesce(subquery, 0L);
     }
 
+    // Bỏ khoảng trắng; từ khóa rỗng thì tìm toàn bộ khóa đã xuất bản.
     private String normalizeKeyword(String keyword) {
         if (keyword == null || keyword.isBlank()) {
             return null;
@@ -340,6 +356,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
         return keyword.trim();
     }
 
+    // Chỉ nhận điểm lọc trong khoảng lớn hơn 0 và không quá 5.
     private Double normalizeRating(Double minRating) {
         if (minRating == null || minRating <= 0 || minRating > 5) {
             return null;
@@ -347,6 +364,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
         return minRating;
     }
 
+    // Chuẩn hóa loại giá về ALL, PAID hoặc FREE.
     private String normalizePriceType(String priceType) {
         if (priceType == null) {
             return "ALL";
@@ -355,6 +373,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
         return PRICE_TYPES.contains(normalized) ? normalized : "ALL";
     }
 
+    // Bỏ giá âm; giá null nghĩa là không giới hạn đầu đó.
     private BigDecimal normalizeMoney(BigDecimal value) {
         if (value == null || value.signum() < 0) {
             return null;
@@ -362,6 +381,7 @@ public class SearchCourseServiceImpl implements SearchCourseService {
         return value;
     }
 
+    // Chỉ nhận các kiểu sắp xếp đã hỗ trợ, còn lại dùng phổ biến nhất.
     private String normalizeSort(String sort) {
         if (sort == null) {
             return "popular";

@@ -13,12 +13,14 @@ const HeaderSearch = () => {
     setKeyword(urlKeyword);
   }, [urlKeyword]);
 
+  // Enter hoặc submit thì mở trang /search với từ khóa hiện tại.
   const handleSubmit = (e) => {
     e.preventDefault();
     const value = keyword.trim();
     navigate(value ? `/search?keyword=${encodeURIComponent(value)}` : "/search");
   };
 
+  // Xóa ô tìm kiếm. Nếu URL đang có từ khóa thì về trang tìm tất cả khóa học.
   const clearKeyword = () => {
     setKeyword("");
     if (urlKeyword) {

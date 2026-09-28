@@ -38,22 +38,27 @@ const BADGES = {
   NEW: { label: "Mới ra mắt", tone: "new" },
 };
 
+// Hiển thị giá VND, giá 0 thì ghi Miễn phí.
 const formatPrice = (price) => {
   const value = Number(price);
   if (!value) return "Miễn phí";
   return `${new Intl.NumberFormat("vi-VN").format(value)} đ`;
 };
 
+// Định dạng số lượng theo kiểu Việt Nam, ví dụ 1.240.
 const formatCount = (count) =>
   new Intl.NumberFormat("vi-VN").format(Number(count) || 0);
 
+// Hiện số đã nhập trong ô giá kèm hậu tố "đ".
 const formatMoneyInput = (value) => {
   if (!value) return "";
   return `${new Intl.NumberFormat("vi-VN").format(Number(value))} đ`;
 };
 
+// Chỉ giữ chữ số khi người dùng gõ vào ô giá.
 const digitsOnly = (value) => String(value).replace(/[^\d]/g, "");
 
+// Tạo dãy số trang, rút gọn bằng dấu ... khi có nhiều trang.
 const buildPages = (current, total) => {
   if (total <= 1) return [1];
   if (total <= 7) {
@@ -94,6 +99,7 @@ const Search = () => {
   useEffect(() => {
     let cancelled = false;
 
+    // Gọi API tìm kiếm mỗi khi từ khóa, bộ lọc, sắp xếp hoặc trang đổi.
     const load = async () => {
       setLoading(true);
       setError(null);
@@ -127,6 +133,7 @@ const Search = () => {
     };
   }, [keyword, sort, priceType, minRating, min, max, page, categoryIds.join(","), levels.join(",")]);
 
+  // Cập nhật query trên URL. Đổi bộ lọc thì quay về trang 1.
   const updateParams = (patch, resetPage = true) => {
     const next = new URLSearchParams(searchParams);
     Object.entries(patch).forEach(([key, value]) => {
@@ -143,6 +150,7 @@ const Search = () => {
     setSearchParams(next);
   };
 
+  // Bật hoặc tắt một giá trị trong bộ lọc nhiều lựa chọn, như danh mục và cấp độ.
   const toggleListValue = (key, value, current) => {
     const next = current.includes(value)
       ? current.filter((item) => item !== value)
@@ -150,6 +158,7 @@ const Search = () => {
     updateParams({ [key]: next });
   };
 
+  // Xóa bộ lọc, giữ lại từ khóa và cách sắp xếp.
   const clearFilters = () => {
     updateParams({
       categoryIds: [],
@@ -162,6 +171,7 @@ const Search = () => {
     setFiltersOpen(false);
   };
 
+  // Ghi khoảng giá lên URL. Nếu giá từ lớn hơn giá đến thì đổi chỗ hai đầu.
   const applyPrice = () => {
     let nextMin = priceDraft.min;
     let nextMax = priceDraft.max;
@@ -175,6 +185,7 @@ const Search = () => {
     });
   };
 
+  // Chuyển trang và cuộn lên đầu danh sách.
   const goToPage = (nextPage) => {
     updateParams({ page: nextPage <= 1 ? "" : String(nextPage) }, false);
     window.scrollTo({ top: 0, behavior: "smooth" });

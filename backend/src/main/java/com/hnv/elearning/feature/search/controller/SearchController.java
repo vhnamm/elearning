@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SearchController {
     private final SearchCourseService searchCourseService;
 
+    // API công khai cho trang tìm kiếm: GET /api/v1/search/courses.
     @GetMapping("/courses")
     public ResponseEntity<ApiResponse<CourseSearchResponse>> search(SearchCourseRequest request) {
         CourseSearchResponse data = searchCourseService.search(request);

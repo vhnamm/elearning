@@ -16,6 +16,7 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
     @Override
     Page<Course> findAll(Specification<Course> spec, Pageable pageable);
 
+    // Danh mục cha có nhiều khóa đã xuất bản nhất, dùng khi chưa nhập từ khóa.
     @Query("""
             SELECT cat.name
             FROM Course c
@@ -27,6 +28,7 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
             """)
     List<String> findPopularCategoryNames(Pageable pageable);
 
+    // Tên danh mục cha của các khóa đã xuất bản khớp từ khóa.
     @Query("""
             SELECT DISTINCT cat.name
             FROM Course c
@@ -43,6 +45,7 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
             """)
     List<String> findRelatedCategoryNames(@Param("pattern") String pattern, Pageable pageable);
 
+    // Tên danh mục con của các khóa đã xuất bản khớp từ khóa.
     @Query("""
             SELECT DISTINCT s.name
             FROM Course c

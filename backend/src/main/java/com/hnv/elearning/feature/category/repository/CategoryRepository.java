@@ -13,6 +13,7 @@ public interface CategoryRepository extends JpaRepository<Category,Long> {
     @Query("SELECT c FROM Category c")
     List<Category> findAll();
 
+    // Tên danh mục cha có chứa từ khóa, dùng khi không có khóa học khớp.
     @Query("""
             SELECT c.name
             FROM Category c

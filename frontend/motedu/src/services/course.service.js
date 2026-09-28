@@ -22,6 +22,7 @@ export const getPopularCourses = async (size = 4) => {
   return data.data;
 };
 
+// Gọi GET /search/courses với từ khóa, bộ lọc, sắp xếp và phân trang.
 export const searchCourses = async ({
   keyword,
   categoryIds = [],
