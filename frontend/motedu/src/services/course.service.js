@@ -1,5 +1,6 @@
 import http from "~services/http.js";
 
+// Danh sách khóa học của giảng viên đang đăng nhập.
 export const getInstructorCourses = async ({
   keyword,
   status,
@@ -9,9 +10,19 @@ export const getInstructorCourses = async ({
   size = 10,
   sort = "createdAt,desc",
 } = {}) => {
-  const { data } = await http.get("/instructor/courses", {
+  const { data } = await http.get("/users/me/instructed-courses", {
     params: { keyword, status, min, max, page, size, sort },
   });
+  return data.data;
+};
+
+export const saveDraftCourse = async ({ title, categoryId }) => {
+  const { data } = await http.post("/courses", { title, categoryId });
+  return data.data;
+};
+
+export const getCourseBasicInfo = async (courseId) => {
+  const { data } = await http.get(`/courses/${courseId}/basic-info`);
   return data.data;
 };
 
@@ -22,12 +33,11 @@ export const getPopularCourses = async (size = 4) => {
   return data.data;
 };
 
-// Gọi GET /search/courses với từ khóa, bộ lọc, sắp xếp và phân trang.
+// Gọi GET /courses với từ khóa, bộ lọc, sắp xếp và phân trang.
 export const searchCourses = async ({
   keyword,
   categoryIds = [],
   subcategoryIds = [],
-  topicIds = [],
   levels = [],
   minRating,
   priceType,
@@ -41,7 +51,6 @@ export const searchCourses = async ({
   if (keyword) params.set("keyword", keyword);
   categoryIds.forEach((id) => params.append("categoryIds", id));
   subcategoryIds.forEach((id) => params.append("subcategoryIds", id));
-  topicIds.forEach((id) => params.append("topicIds", id));
   levels.forEach((level) => params.append("levels", level));
   if (minRating) params.set("minRating", minRating);
   if (priceType && priceType !== "all") params.set("priceType", priceType);
@@ -51,7 +60,7 @@ export const searchCourses = async ({
   params.set("page", String(page));
   params.set("size", String(size));
 
-  const { data } = await http.get("/search/courses", { params });
+  const { data } = await http.get("/courses", { params });
   return data.data;
 };
 
@@ -61,7 +70,7 @@ export const getPublishedCourses = async ({
   max,
   page = 0,
   size = 8,
-  sort = "createdAt,desc",
+  sort = "newest",
 } = {}) => {
   const { data } = await http.get("/courses", {
     params: { keyword, min, max, page, size, sort },

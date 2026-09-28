@@ -26,10 +26,10 @@ const HeaderActions = ({ hideAuthOnMobile = false, onNavigate }) => {
         onClick={onNavigate}
       >
         <div className={styles.popupAvatar}>
-          {user?.avatar === null ? (
-            <UserOutlined />
+          {user?.avatar ? (
+            <img src={user.avatar} alt={user?.fullName} />
           ) : (
-            <img src={user?.avatar} alt="anh ava" />
+            <UserOutlined />
           )}
         </div>
 
@@ -75,10 +75,10 @@ const HeaderActions = ({ hideAuthOnMobile = false, onNavigate }) => {
       {isAuthenticated ? (
         <Popover content={content} trigger="click">
           <button type="button" className={styles.avatar} aria-label="Tài khoản">
-            {user?.avatar === null ? (
-              <UserOutlined />
+            {user?.avatar ? (
+              <img src={user.avatar} alt={user?.fullName} />
             ) : (
-              <img src={user.avatar} alt="anh ava" />
+              <UserOutlined />
             )}
           </button>
         </Popover>

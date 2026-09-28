@@ -1,0 +1,50 @@
+.layout {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Tránh thanh cuộn toàn trang */
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  min-height: 0;   /* BẮT BUỘC: cho phép flex item co lại để kích hoạt overflow con */
+  overflow: hidden;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  background: #f8fafc;
+  overflow-y: auto; /* CHỈ CUỘN RIÊNG PHẦN CONTENT NÀY */
+  height: 100%;
+}
+
+.dashboardLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+  }
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2563eb;
+  flex-shrink: 0;
+}
