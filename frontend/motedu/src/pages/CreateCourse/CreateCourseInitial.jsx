@@ -55,7 +55,7 @@ export default function CreateCourseInitial() {
 
     const onFinish = async (values) => {
         const result = await saveDraftCourse({title: values.title, categoryId: values.category})
-        navigate(`/instructor/course${result.id}/manage/overview`,
+        navigate(`/instructor/course/${result.id}/manage/overview`,
                 {state: {
                     courseId: result.id,
                     title: values.title

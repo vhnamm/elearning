@@ -9,7 +9,7 @@ export const getInstructorCourses = async ({keyword, status, min, max, page = 0,
 }
 
 export const saveDraftCourse = async ({title, categoryId}) => {
-    const {data} = await http.post("/instructor/courses/new-draft", {title: title, categoryId: categoryId})
+    const {data} = await http.post("/courses", {title: title, categoryId: categoryId})
     return data.data
 }
 
