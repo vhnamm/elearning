@@ -1,5 +1,6 @@
 package com.hnv.elearning.feature.course.entity;
 
+import com.hnv.elearning.feature.category.entity.Subcategory;
 import com.hnv.elearning.feature.course.enums.CourseLevel;
 import com.hnv.elearning.feature.course.enums.CourseStatus;
 import com.hnv.elearning.feature.user.entity.User;
@@ -58,6 +59,10 @@ public class Course {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "instructor_id")
     private User instructor;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subcategory_id", nullable = false)
+    private Subcategory subcategory;
 
     @PreUpdate
     protected void onUpdate() {

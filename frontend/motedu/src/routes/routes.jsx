@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Login from "~pages/Login/Login";
 import MainLayout from "~layouts/MainLayout/MainLayout.jsx";
 import Register from "~pages/Register/Register.jsx";
@@ -10,12 +10,17 @@ import Forbidden from "~pages/Forbidden/Forbidden.jsx";
 import RouteGuard from "./RouteGuard.jsx";
 import InstructorLayout from "~layouts/InstructorLayout/InstructorLayout.jsx";
 import InstructorCourses from "~pages/InstructorCourses/InstructorCourses.jsx";
+import Home from "~pages/Home/Home.jsx";
+import Search from "~pages/Search/Search.jsx";
 
 const AppRoutes = () => (
   <Routes>
       <Route path="/oauth2/callback" element={<Oauth2CallbackHandler/>}></Route>
 
       <Route path="/" element={<MainLayout/>}>
+          <Route index element={<Home />} />
+          <Route path="/search" element={<Search />} />
+
           {/* Nhóm 2: Auth/Guest-only -> đã login thì đá về "/" */}
           <Route element={<RouteGuard guestOnly redirectTo="/" />}>
               <Route path="/login" element={<Login />} />
