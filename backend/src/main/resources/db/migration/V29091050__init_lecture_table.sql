@@ -8,7 +8,7 @@ CREATE TABLE lectures (
       video_duration_seconds INT           NULL,
       thumbnail_url          VARCHAR(1024)  NULL,
       PRIMARY KEY (id),
-      UNIQUE KEY uq_lectures_content_item (content_item_id),
+      UNIQUE KEY uq_lectures_content_item (curriculum_item_id),
       CONSTRAINT fk_lectures_item
           FOREIGN KEY (curriculum_item_id) REFERENCES curriculum_items (id) ON DELETE CASCADE
 ) ENGINE=InnoDB;

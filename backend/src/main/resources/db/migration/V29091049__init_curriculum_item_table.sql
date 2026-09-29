@@ -8,5 +8,5 @@ CREATE TABLE curriculum_items (
       created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY (id),
       CONSTRAINT fk_items_section
-          FOREIGN KEY (section_id) REFERENCES sections (id) ON DELETE CASCADE,
+          FOREIGN KEY (section_id) REFERENCES sections (id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
