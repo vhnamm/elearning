@@ -17,6 +17,9 @@ public class CourseReviewImpl implements CourseReviewService {
 
     @Override
     public Map<Long, Double> getAverageRatingsByCourseIds(Collection<Long> courseIds){
+        if (courseIds == null || courseIds.isEmpty()) {
+            return Map.of();
+        }
         List<Object[]> list =  courseReviewRepository.getAverageRatingsByCourseIds(courseIds);
 
         return list.stream().collect(Collectors.toMap(
@@ -24,5 +27,18 @@ public class CourseReviewImpl implements CourseReviewService {
                 item -> ((Number) item[1]).doubleValue()
         ));
 
+    }
+
+    @Override
+    public Map<Long, Long> getReviewCountsByCourseIds(Collection<Long> courseIds) {
+        if (courseIds == null || courseIds.isEmpty()) {
+            return Map.of();
+        }
+        List<Object[]> list = courseReviewRepository.getReviewCountsByCourseIds(courseIds);
+
+        return list.stream().collect(Collectors.toMap(
+                item -> (Long) item[0],
+                item -> ((Number) item[1]).longValue()
+        ));
     }
 }

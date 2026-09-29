@@ -22,11 +22,11 @@ public class CourseManagementController {
     @GetMapping("/api/v1/users/me/instructed-courses")
     public ResponseEntity<?> getInstructorCourses(
             @AuthenticationPrincipal(expression = "id") Long instructorId,
-            CourseFilterRequest courseFilterRequest,
+            CourseSearchRequest request,
             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     )
     {
-        var data = courseManagementService.getMyCourses(courseFilterRequest, instructorId, pageable);
+        var data = courseManagementService.getMyCourses(request, instructorId, pageable);
         ApiResponse<Page<InstructorCourseItemDto>> response = ApiResponse.<Page<InstructorCourseItemDto>>builder()
                 .code(HttpStatus.OK.value())
                 .data(data)
