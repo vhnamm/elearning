@@ -80,7 +80,7 @@ const Search = () => {
   const sort = searchParams.get("sort") || "popular";
   const priceType = searchParams.get("priceType") || "all";
   const minRating = searchParams.get("minRating") || "";
-  const categoryId = searchParams.get("categoryId") || "";
+  const categoryIds = searchParams.getAll("categoryIds");
   const levels = searchParams.getAll("levels");
   const min = searchParams.get("min") || "";
   const max = searchParams.get("max") || "";
@@ -126,7 +126,7 @@ const Search = () => {
       try {
         const data = await searchCourses({
           keyword: params.get("keyword") || "",
-          categoryId: params.get("categoryId") || "",
+          categoryIds: params.getAll("categoryIds"),
           levels: params.getAll("levels"),
           minRating: params.get("minRating") || "",
           priceType: params.get("priceType") || "all",
@@ -181,7 +181,7 @@ const Search = () => {
   // Xóa bộ lọc, giữ lại từ khóa và cách sắp xếp.
   const clearFilters = () => {
     updateParams({
-      categoryId: "",
+      categoryIds: [],
       levels: [],
       minRating: "",
       priceType: "",
@@ -216,14 +216,14 @@ const Search = () => {
   const totalPages = result?.totalPages || 0;
   const relatedQueries = result?.relatedQueries || [];
   const hasFilters =
-    Boolean(categoryId) ||
+    categoryIds.length > 0 ||
     levels.length > 0 ||
     Boolean(minRating) ||
     priceType !== "all" ||
     Boolean(min) ||
     Boolean(max);
   const activeFilterCount =
-    (categoryId ? 1 : 0) +
+    categoryIds.length +
     levels.length +
     (minRating ? 1 : 0) +
     (priceType !== "all" ? 1 : 0) +
@@ -273,7 +273,7 @@ const Search = () => {
                   onClick={() =>
                     updateParams({
                       keyword: query,
-                      categoryId: "",
+                      categoryIds: [],
                       levels: [],
                       minRating: "",
                       priceType: "",
@@ -340,15 +340,9 @@ const Search = () => {
                       <label key={id} className={styles.checkRow}>
                         <span>
                           <input
-                            type="radio"
-                            name="category-filter"
-                            checked={categoryId === id}
-                            onChange={() => updateParams({ categoryId: id })}
-                            onClick={() => {
-                              if (categoryId === id) {
-                                updateParams({ categoryId: "" });
-                              }
-                            }}
+                            type="checkbox"
+                            checked={categoryIds.includes(id)}
+                            onChange={() => toggleListValue("categoryIds", id, categoryIds)}
                           />
                           {category.name}
                         </span>

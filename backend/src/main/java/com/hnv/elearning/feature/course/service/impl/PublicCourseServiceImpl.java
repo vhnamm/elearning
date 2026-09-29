@@ -146,6 +146,7 @@ public class PublicCourseServiceImpl implements PublicCourseService {
     // Chuẩn hóa từ khóa, bộ lọc, sắp xếp và phân trang ngay trên request trước khi build specification.
     private void normalize(CourseSearchRequest request) {
         request.setKeyword(normalizeKeyword(request.getKeyword()));
+        request.setCategoryIds(request.getCategoryIds() == null ? List.of() : request.getCategoryIds());
         request.setSubcategoryIds(request.getSubcategoryIds() == null ? List.of() : request.getSubcategoryIds());
         request.setLevels(request.getLevels() == null ? List.of() : request.getLevels());
         request.setMinRating(normalizeRating(request.getMinRating()));
