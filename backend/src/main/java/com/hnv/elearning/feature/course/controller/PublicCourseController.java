@@ -1,14 +1,11 @@
 package com.hnv.elearning.feature.course.controller;
 
 import com.hnv.elearning.common.response.ApiResponse;
-import com.hnv.elearning.feature.course.dto.CourseFilterRequest;
+import com.hnv.elearning.feature.course.dto.CourseSearchRequest;
+import com.hnv.elearning.feature.course.dto.CourseSearchResponse;
 import com.hnv.elearning.feature.course.dto.PublicCourseCardDto;
 import com.hnv.elearning.feature.course.service.PublicCourseService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,14 +34,12 @@ public class PublicCourseController {
         );
     }
 
+    // API công khai cho trang tìm kiếm / khám phá khóa học: GET /api/v1/courses.
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<PublicCourseCardDto>>> getPublishedCourses(
-            CourseFilterRequest request,
-            @PageableDefault(page = 0, size = 8, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
-    ) {
-        Page<PublicCourseCardDto> data = publicCourseService.getPublishedCourses(request, pageable);
+    public ResponseEntity<ApiResponse<CourseSearchResponse>> search(CourseSearchRequest request) {
+        CourseSearchResponse data = publicCourseService.search(request);
         return ResponseEntity.ok(
-                ApiResponse.<Page<PublicCourseCardDto>>builder()
+                ApiResponse.<CourseSearchResponse>builder()
                         .code(HttpStatus.OK.value())
                         .data(data)
                         .build()

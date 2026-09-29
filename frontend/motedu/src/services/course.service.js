@@ -36,7 +36,7 @@ export const getPopularCourses = async (size = 4) => {
 // Gọi GET /courses với từ khóa, bộ lọc, sắp xếp và phân trang.
 export const searchCourses = async ({
   keyword,
-  categoryIds = [],
+  categoryId,
   subcategoryIds = [],
   levels = [],
   minRating,
@@ -49,7 +49,7 @@ export const searchCourses = async ({
 } = {}) => {
   const params = new URLSearchParams();
   if (keyword) params.set("keyword", keyword);
-  categoryIds.forEach((id) => params.append("categoryIds", id));
+  if (categoryId) params.set("categoryId", categoryId);
   subcategoryIds.forEach((id) => params.append("subcategoryIds", id));
   levels.forEach((level) => params.append("levels", level));
   if (minRating) params.set("minRating", minRating);
