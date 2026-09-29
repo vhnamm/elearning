@@ -1,16 +1,32 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { SearchOutlined } from "@ant-design/icons";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { CloseOutlined, SearchOutlined } from "@ant-design/icons";
 import styles from "./Header.module.scss";
 
 const HeaderSearch = () => {
-  const [keyword, setKeyword] = useState("");
+  const [searchParams] = useSearchParams();
+  const urlKeyword = searchParams.get("keyword") ?? "";
+  const [keyword, setKeyword] = useState(urlKeyword);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    setKeyword(urlKeyword);
+  }, [urlKeyword]);
+
+  // Enter hoặc submit thì mở trang /search với từ khóa hiện tại. Từ khóa rỗng thì không điều hướng.
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!keyword.trim()) return;
-    navigate(`/search?keyword=${encodeURIComponent(keyword.trim())}`);
+    const value = keyword.trim();
+    if (!value) return;
+    navigate(`/search?keyword=${encodeURIComponent(value)}`);
+  };
+
+  // Xóa ô tìm kiếm. Nếu URL đang có từ khóa thì về trang tìm tất cả khóa học.
+  const clearKeyword = () => {
+    setKeyword("");
+    if (urlKeyword) {
+      navigate("/search");
+    }
   };
 
   return (
@@ -19,8 +35,19 @@ const HeaderSearch = () => {
       <input
         value={keyword}
         onChange={(e) => setKeyword(e.target.value)}
-        placeholder="Tìm kiếm khóa học..."
+        placeholder="Tìm kiếm khóa học, giảng viên, kỹ năng..."
+        aria-label="Tìm kiếm khóa học"
       />
+      {keyword && (
+        <button
+          type="button"
+          className={styles.searchClear}
+          aria-label="Xóa từ khóa"
+          onClick={clearKeyword}
+        >
+          <CloseOutlined />
+        </button>
+      )}
     </form>
   );
 };

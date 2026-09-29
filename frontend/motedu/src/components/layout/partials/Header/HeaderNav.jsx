@@ -1,4 +1,3 @@
-import { useState } from "react";
 import clsx from "clsx";
 import { NavLink } from "react-router-dom";
 import useAuth from "~hooks/useAuth";
@@ -11,26 +10,21 @@ const PLACEHOLDER_CATEGORIES = ["Lập trình", "Thiết kế", "Kinh doanh", "N
 // nên viết tường minh từng mục, không gom chung thành 1 mảng {label, to}.
 const HeaderNav = () => {
   const { isAuthenticated, user } = useAuth();
-  const [exploreOpen, setExploreOpen] = useState(false);
 
   return (
     <nav className={styles.nav}>
-      <div
-        className={styles.exploreWrap}
-        onMouseEnter={() => setExploreOpen(true)}
-        onMouseLeave={() => setExploreOpen(false)}
-      >
-        <span className={styles.navItem}>Khám phá</span>
+      <div className={styles.exploreWrap}>
+        <span className={styles.navItem} tabIndex={0} aria-haspopup="true">
+          Khám phá
+        </span>
 
-        {exploreOpen && (
-          <div className={styles.exploreDropdown}>
-            {PLACEHOLDER_CATEGORIES.map((category) => (
-              <a key={category} href="#" className={styles.exploreItem}>
-                {category}
-              </a>
-            ))}
-          </div>
-        )}
+        <div className={styles.exploreDropdown}>
+          {PLACEHOLDER_CATEGORIES.map((category) => (
+            <a key={category} href="#" className={styles.exploreItem}>
+              {category}
+            </a>
+          ))}
+        </div>
       </div>
 
       {isAuthenticated && (

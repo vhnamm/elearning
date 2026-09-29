@@ -41,7 +41,7 @@ public class CourseManagementManagementServiceImpl implements CourseManagementSe
 
     @PreAuthorize("hasRole('INSTRUCTOR')")
     @Override
-    public Page<InstructorCourseItemDto> getMyCourses(CourseFilterRequest request, Long instructorId, Pageable pageable) {
+    public Page<InstructorCourseItemDto> getMyCourses(CourseSearchRequest request, Long instructorId, Pageable pageable) {
         Specification spec = CourseSpecification.forInstructor(instructorId, request.getStatus(), request.getKeyword());
         Page<Course> courses = courseRepository.findAll(spec, pageable);
 
