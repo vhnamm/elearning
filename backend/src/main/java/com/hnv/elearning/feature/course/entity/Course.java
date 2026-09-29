@@ -1,5 +1,7 @@
 package com.hnv.elearning.feature.course.entity;
 
+import com.hnv.elearning.feature.category.entity.Category;
+import com.hnv.elearning.feature.category.entity.Subcategory;
 import com.hnv.elearning.feature.category.entity.Subcategory;
 import com.hnv.elearning.feature.category.entity.Topic;
 import com.hnv.elearning.feature.course.enums.CourseLevel;
@@ -11,6 +13,9 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,22 +31,19 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, length = 255, nullable = false)
+    @Column(unique = true, length = 255)
     private String slug;
-    @Column(length = 255, nullable = false)
+    @Column(length = 255)
     private String title;
 
-    @Column(name = "short_description", length = 500)
-    private String shortDescription;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
+    @Column(columnDefinition 
 
-    @Column(name = "thumbnail_url", length = 1024, nullable = false)
+    @Column(name = "thumbnail_url", length = 1024)
     private String thumbnailUrl;
 
 
-    @Column(nullable = false)
+
     private BigDecimal price;
 
 
@@ -49,7 +51,6 @@ public class Course {
     private CourseStatus status;
 
     @Enumerated(EnumType.STRING)
-    private CourseLevel level;
 
     @Column(name = "created_at")
     @CreationTimestamp
@@ -75,6 +76,22 @@ public class Course {
     )
     @Builder.Default
     private Set<Topic> topics = new HashSet<>();
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subcategory_id")
+    private Subcategory  subcategory;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<CourseLearningOutcome> learningOutcomes =  new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<CourseRequiredSkill> requiredSkills = new LinkedHashSet<>();
 
     @PreUpdate
     protected void onUpdate() {

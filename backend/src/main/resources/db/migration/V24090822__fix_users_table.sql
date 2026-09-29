@@ -1,0 +1,3 @@
+ALTER TABLE users
+    MODIFY COLUMN avatar VARCHAR(1024) NULL
+

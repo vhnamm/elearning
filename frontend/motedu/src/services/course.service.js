@@ -68,3 +68,15 @@ export const getPublishedCourses = async ({
   });
   return data.data;
 };
+export const saveDraftCourse = async ({ title, categoryId }) => {
+  const { data } = await http.post("/courses", {
+    title: title,
+    categoryId: categoryId,
+  });
+  return data.data;
+};
+
+export const getCourseBasicInfo = async (courseId) => {
+  const { data } = await http.get(`/courses/${courseId}/basic-info`);
+  return data.data;
+};
