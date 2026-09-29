@@ -1,23 +1,17 @@
-$primary: #2b6c00;
-$primary-container: #58cc02;
-$primary-active: #46a302;
+// Đồng bộ theo màu chủ đạo của app (xem :root trong src/index.css).
+$primary: var(--color-primary);
+$primary-hover: var(--color-primary-dark);
+$accent: var(--color-accent);
 $on-primary: #ffffff;
-$on-primary-container: #1e5000;
-$secondary: #755b00;
-$secondary-fixed: #ffdf92;
-$on-secondary: #ffffff;
-$tertiary: #006590;
-$tertiary-fixed: #c8e6ff;
-$on-tertiary: #ffffff;
-$on-surface: #1b1c1c;
-$on-surface-variant: #3f4a36;
+$on-surface: #0f172a;
+$on-surface-variant: #52525b;
 $surface: #fbf9f8;
-$surface-variant: #e4e2e1;
+$surface-variant: #e2e8f0;
 $surface-container-low: #f5f3f2;
-$surface-container-high: #eae8e7;
+$surface-container-high: #eff6ff;
 $surface-lowest: #ffffff;
-$outline-variant: #becbb1;
-$warning: #ff9600;
+$outline-variant: #bfdbfe;
+$warning: #f59e0b;
 
 .page {
   width: 100%;
@@ -73,24 +67,6 @@ $warning: #ff9600;
   }
 }
 
-.heroBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border-radius: 9999px;
-  border: 1px solid $secondary-fixed;
-  background: $surface-container-high;
-  color: $primary;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.2;
-
-  svg {
-    font-size: 14px;
-  }
-}
-
 .heroTitle {
   margin: 0;
   font-family: var(--font-heading), system-ui, sans-serif;
@@ -135,14 +111,17 @@ $warning: #ff9600;
   }
 }
 
-.btnPrimary,
-.btnGhost {
+.btnPrimary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   padding: 14px 20px;
   border-radius: 12px;
+  border: none;
+  background: $primary;
+  color: $on-primary;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -152,37 +131,13 @@ $warning: #ff9600;
   transition: all 0.15s ease;
   width: 100%;
 
+  &:hover {
+    background: $primary-hover;
+  }
+
   @media (min-width: 640px) {
     width: auto;
     padding: 16px 24px;
-  }
-}
-
-.btnPrimary {
-  border: none;
-  background: $primary;
-  color: $on-primary;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-
-  &:hover {
-    background: $primary-container;
-    color: $on-primary-container;
-  }
-}
-
-.btnGhost {
-  background: $surface-lowest;
-  color: $on-surface;
-  border: 2px solid $surface-variant;
-  border-bottom-width: 4px;
-
-  &:hover {
-    background: $surface-variant;
-  }
-
-  &:active {
-    border-bottom-width: 2px;
-    transform: translateY(2px);
   }
 }
 
@@ -203,7 +158,7 @@ $warning: #ff9600;
 .heroDecor {
   position: absolute;
   inset: 0;
-  background: $secondary-fixed;
+  background: $outline-variant;
   border-radius: 24px;
   transform: rotate(-3deg) scale(0.95);
   opacity: 0.5;
@@ -321,18 +276,16 @@ $warning: #ff9600;
   z-index: 2;
   padding: 4px 8px;
   border-radius: 4px;
-  border: 1px solid $secondary-fixed;
-  background: $secondary;
-  color: $on-secondary;
+  background: $accent;
+  color: $on-primary;
   font-size: 12px;
   font-weight: 700;
   line-height: 1.2;
 }
 
 .badgeTertiary {
-  background: $tertiary;
-  color: $on-tertiary;
-  border-color: $tertiary-fixed;
+  background: $primary;
+  color: $on-primary;
 }
 
 .courseThumb {

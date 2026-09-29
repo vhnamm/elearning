@@ -5,7 +5,6 @@ import {
   faArrowRight,
   faChevronLeft,
   faChevronRight,
-  faRocket,
   faStar,
 } from "@fortawesome/free-solid-svg-icons";
 import clsx from "clsx";
@@ -25,15 +24,25 @@ const SKILL_TABS = [
 ];
 
 const HERO_IMAGE =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuCC2GrKowWrjof4iATC92m-Iu5xvUwTml7YchwsvfQwnbbai5Sb6fVIa-cxbI7tPCHn7yd_b5hbrB7sO2y2ZxILBTTNTYCsd2GAOCSpVcnvKjwM1aupfrw12HDTmdANEuiarbtQTCW1VndUh4Gf_agp_vNxVKjcVUnLfSouFtNIp5cnXHL54YVvlk9coEp9GFAP4uc3rAdZ1wMs-gs-Nu0NWrh5oTaleD0a2rC5JNZFUT2MQGmjNfcN";
+  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80";
 
+// Giá 0 hiển thị "Miễn phí", giống thẻ khóa học ở trang quản lý khóa học của giảng viên.
 const formatPrice = (price) => {
-  if (price == null) return "";
+  if (price === null || price === undefined || price === "") return "";
+  const numPrice = Number(price);
+  if (numPrice === 0) return "Miễn phí";
   return new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency: "VND",
     maximumFractionDigits: 0,
-  }).format(Number(price));
+  }).format(numPrice);
+};
+
+// Chuẩn hóa số sao về 1 chữ số thập phân; chưa có đánh giá thì hiển thị "--".
+const formatRating = (rating) => {
+  const numRating = Number(rating) || 0;
+  if (numRating === 0) return "--";
+  return numRating.toFixed(1);
 };
 
 const formatReviewCount = (count) => {
@@ -48,7 +57,7 @@ const mapCourseCard = (course) => ({
   id: course.id,
   title: course.title,
   instructor: course.instructorName || "Giảng viên MótEdu",
-  rating: course.rating ?? 0,
+  rating: formatRating(course.rating),
   reviews: formatReviewCount(course.reviewCount),
   price: formatPrice(course.price),
   image: course.thumbnailUrl,
@@ -132,10 +141,6 @@ const Home = () => {
     <main className={styles.page}>
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
-          <div className={styles.heroBadge}>
-            <FontAwesomeIcon icon={faRocket} />
-            Khám phá tiềm năng của bạn
-          </div>
           <h1 className={styles.heroTitle}>
             Nâng cao sự nghiệp của bạn với{" "}
             <span>kỹ năng mới</span>
@@ -150,9 +155,6 @@ const Home = () => {
               Bắt đầu ngay
               <FontAwesomeIcon icon={faArrowRight} />
             </Link>
-            <button type="button" className={styles.btnGhost}>
-              Làm bài test năng lực
-            </button>
           </div>
         </div>
         <div className={styles.heroMedia}>

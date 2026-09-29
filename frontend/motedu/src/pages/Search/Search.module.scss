@@ -582,15 +582,15 @@
 }
 
 .freePrice {
-  color: #059669 !important;
+  color: var(--color-primary) !important;
 }
 
 .freeAction {
-  background: #ecfdf5 !important;
-  color: #047857 !important;
+  background: #eff6ff !important;
+  color: var(--color-primary) !important;
 
   &:hover {
-    background: #059669 !important;
+    background: var(--color-primary) !important;
     color: #fff !important;
   }
 }
