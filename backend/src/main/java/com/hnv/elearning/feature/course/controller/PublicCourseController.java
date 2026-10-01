@@ -1,6 +1,7 @@
 package com.hnv.elearning.feature.course.controller;
 
 import com.hnv.elearning.common.response.ApiResponse;
+import com.hnv.elearning.feature.course.dto.CourseDetailDto;
 import com.hnv.elearning.feature.course.dto.CourseSearchRequest;
 import com.hnv.elearning.feature.course.dto.CourseSearchResponse;
 import com.hnv.elearning.feature.course.dto.PublicCourseCardDto;
@@ -8,10 +9,7 @@ import com.hnv.elearning.feature.course.service.PublicCourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -42,6 +40,18 @@ public class PublicCourseController {
                 ApiResponse.<CourseSearchResponse>builder()
                         .code(HttpStatus.OK.value())
                         .data(data)
+                        .build()
+        );
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<CourseDetailDto>> getCourseDetail(@PathVariable("id") Long id) {
+        CourseDetailDto result = publicCourseService.getCourseDetail(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.<CourseDetailDto>builder()
+                        .code(HttpStatus.OK.value())
+                        .data(result)
                         .build()
         );
     }

@@ -26,9 +26,9 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, length = 255)
+    @Column(unique = true)
     private String slug;
-    @Column(length = 255)
+
     private String title;
 
     @Column(name = "short_description", length = 500)
@@ -78,6 +78,13 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<CourseRequiredSkill> requiredSkills = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("position ASC")
+    @Builder.Default
+    private Set<Section> sections = new LinkedHashSet<>();
+
+    @OneToMany
 
     @PreUpdate
     protected void onUpdate() {

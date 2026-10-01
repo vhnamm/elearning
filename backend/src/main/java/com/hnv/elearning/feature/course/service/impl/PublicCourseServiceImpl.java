@@ -1,10 +1,12 @@
 package com.hnv.elearning.feature.course.service.impl;
 
 import com.hnv.elearning.feature.category.repository.CategoryRepository;
+import com.hnv.elearning.feature.course.dto.CourseDetailDto;
 import com.hnv.elearning.feature.course.dto.CourseSearchRequest;
 import com.hnv.elearning.feature.course.dto.CourseSearchResponse;
 import com.hnv.elearning.feature.course.dto.PublicCourseCardDto;
 import com.hnv.elearning.feature.course.entity.Course;
+import com.hnv.elearning.feature.course.mapper.CourseMapper;
 import com.hnv.elearning.feature.course.repository.CourseRepository;
 import com.hnv.elearning.feature.course.service.PublicCourseService;
 import com.hnv.elearning.feature.course.specification.CourseSpecification;
@@ -37,6 +39,7 @@ public class PublicCourseServiceImpl implements PublicCourseService {
     private final CategoryRepository categoryRepository;
     private final EnrollmentService enrollmentService;
     private final CourseReviewService courseReviewService;
+    private final CourseMapper courseMapper;
 
     @Override
     public List<PublicCourseCardDto> getPopularCourses(int size) {
@@ -207,4 +210,44 @@ public class PublicCourseServiceImpl implements PublicCourseService {
         String normalized = sort.trim().toLowerCase(Locale.ROOT);
         return SORTS.contains(normalized) ? normalized : "popular";
     }
+
+    @Override
+    public CourseDetailDto getCourseDetail(Long courseId) {
+        Course course = courseRepository.findCourseDetailById(courseId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khóa học với ID: " + courseId));
+
+        CourseDetailDto dto = courseMapper.toCourseDetailDto(course);
+
+        int totalDuration = 0;
+        int totalQuizzes = 0;
+
+        if (dto.getSections() != null) {
+            for (CourseDetailDto.SectionDto section : dto.getSections()) {
+                if (section.getCurriculumItems() != null) {
+                    for (CourseDetailDto.CurriculumItemDto item : section.getCurriculumItems()) {
+                        if ("LECTURE".equals(item.getType()) && item.getVideoDurationSeconds() != null) {
+                            totalDuration += item.getVideoDurationSeconds();
+                        } else if ("QUIZ".equals(item.getType())) {
+                            totalQuizzes++;
+                        }
+                    }
+                }
+            }
+        }
+        dto.setTotalDurationSeconds(totalDuration);
+        dto.setTotalQuizzes(totalQuizzes);
+
+        List<Long> singleIdList = List.of(courseId);
+
+        Map<Long, Integer> enrollmentMap = enrollmentService.getEnrolledCountByCourseIds(singleIdList);
+        Map<Long, Double> ratingMap = courseReviewService.getAverageRatingsByCourseIds(singleIdList);
+        Map<Long, Long> reviewCountMap = courseReviewService.getReviewCountsByCourseIds(singleIdList);
+
+        dto.setStudentCount(enrollmentMap.getOrDefault(courseId, 0));
+        dto.setAverageStar(ratingMap.getOrDefault(courseId, 0.0));
+        dto.setReviewCount(reviewCountMap.getOrDefault(courseId, 0L).intValue());
+
+        return dto;
+    }
+
 }

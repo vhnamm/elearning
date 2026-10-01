@@ -66,4 +66,7 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
             ORDER BY s.name
             """)
     List<String> findRelatedSubcategoryNames(@Param("pattern") String pattern, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"sections", "learningOutcomes", "instructor", "requiredSkills"})
+    Optional<Course> findCourseDetailById(Long id);
 }

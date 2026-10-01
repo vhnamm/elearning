@@ -15,6 +15,7 @@ import Search from "~pages/Search/Search.jsx";
 import CreateCourseInitial from "~pages/CreateCourse/CreateCourseInitial.jsx";
 import CreateCourseLayout from "~layouts/CreateCourseLayout/CreateCourseLayout.jsx";
 import CreateCourseOverview from "~pages/CreateCourse/CreateCourseOverview.jsx";
+import CourseDetail from "~pages/CourseDetail/CourseDetail.jsx";
 
 const AppRoutes = () => (
   <Routes>
@@ -23,6 +24,8 @@ const AppRoutes = () => (
       <Route path="/" element={<MainLayout/>}>
           <Route index element={<Home />} />
           <Route path="/search" element={<Search />} />
+
+          <Route path="/course/:courseId" element={<CourseDetail />} />
 
           {/* Nhóm 2: Auth/Guest-only -> đã login thì đá về "/" */}
           <Route element={<RouteGuard guestOnly redirectTo="/" />}>

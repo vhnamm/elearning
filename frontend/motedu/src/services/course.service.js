@@ -1,4 +1,5 @@
 import http from "~services/http.js";
+import axios from 'axios';
 
 // Danh sách khóa học của giảng viên đang đăng nhập.
 export const getInstructorCourses = async ({
@@ -76,4 +77,35 @@ export const getPublishedCourses = async ({
     params: { keyword, min, max, page, size, sort },
   });
   return data.data;
+};
+
+export const getCourseDetailPublic = async (courseId) => {
+  const { data } = await http.get(`/courses/${courseId}`);
+  return data.data;
+};
+
+export const checkUserEnrollmentApi = async (courseId) => {
+  try {
+    const response = await axios.get(`/api/v1/enrollments/check/${courseId}`);
+    if (typeof response.data === 'object' && response.data !== null) {
+      return response.data.data === true;
+    }
+
+    // Nếu Backend trả về boolean nguyên thủy
+    return response.data === true;
+
+  } catch (error) {
+    // Cứ có lỗi (kể cả 401 do chưa đăng nhập) thì mặc định là chưa mua!
+    return false;
+  }
+};
+
+export const enrollFreeCourseApi = async (courseId) => {
+  try {
+    const response = await axios.post(`/api/v1/enrollments/free/${courseId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Lỗi đăng ký khóa học:", error);
+    throw error;
+  }
 };
