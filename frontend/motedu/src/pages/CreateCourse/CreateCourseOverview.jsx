@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import { useOutletContext, useParams } from "react-router-dom";
 import { Form, Input, Select, Button, Upload, message, Spin } from "antd";
 import { getCourseBasicInfo } from "~services/course.service.js";
+import {getCategoryTree, searchTopics} from "~services/category.service.js";
+import useDebounce from "~hooks/useDebounce.js";
+
 import {
     HolderOutlined,
     DeleteOutlined,
@@ -23,32 +26,12 @@ import styles from "./CreateCourseOverview.module.scss";
 
 const { TextArea } = Input;
 
-const MAIN_CATEGORY_OPTIONS = [
-    { value: "programming", label: "Lập trình & CNTT" },
-    { value: "design", label: "Thiết kế" },
-    { value: "business", label: "Kinh doanh" },
-    { value: "marketing", label: "Marketing" },
-];
 
-const SUB_CATEGORY_OPTIONS = [
-    { value: "web", label: "Lập trình Web" },
-    { value: "mobile", label: "Lập trình Mobile" },
-    { value: "data", label: "Khoa học dữ liệu" },
-    { value: "devops", label: "DevOps" },
-];
-
-const TOPIC_OPTIONS = [
-    { value: "react", label: "React" },
-    { value: "typescript", label: "TypeScript" },
-    { value: "nodejs", label: "Node.js" },
-    { value: "spring", label: "Spring Boot" },
-    { value: "redux", label: "Redux" },
-];
 
 const LEVEL_OPTIONS = [
-    { value: "beginner", label: "Cơ bản / Người mới bắt đầu" },
-    { value: "intermediate", label: "Trung cấp" },
-    { value: "advanced", label: "Nâng cao" },
+    { value: "BEGINNER", label: "Người mới bắt đầu" },
+    { value: "INTERMEDIATE", label: "Trung cấp" },
+    { value: "ADVANCED", label: "Nâng cao" },
 ];
 
 const TITLE_MAX = 100;
@@ -80,10 +63,19 @@ export default function CreateCourseOverview() {
     const [form] = Form.useForm();
     const titleValue = Form.useWatch("title", form) || "";
     const shortDescValue = Form.useWatch("shortDescription", form) || "";
+    const selectedMainCategoryId = Form.useWatch("mainCategory", form)
+    const selectedSubcategoryId = Form.useWatch("subCategory", form)
 
     const [thumbnailPreview, setThumbnailPreview] = useState(null);
     const [isThumbnailBlobUrl, setIsThumbnailBlobUrl] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    const [categoryTree, setCategoryTree] = useState([])
+    const [topicOptions, setTopicOptions] = useState([])
+    const [topicSearchLoading, setTopicSearchLoading] = useState(false)
+    const [topicKeyword, setTopicKeyword] = useState("")
+    const debouncedTopicKeyword = useDebounce(topicKeyword, 400)
+
 
     useEffect(() => {
         return () => {
@@ -91,34 +83,52 @@ export default function CreateCourseOverview() {
         };
     }, [thumbnailPreview, isThumbnailBlobUrl]);
 
+
     useEffect(() => {
         if (!courseId) return;
 
-        const fetchBasicInfo = async () => {
+        const fetchFormData = async () => {
             setLoading(true);
-            try {
-                const data = await getCourseBasicInfo(courseId);
 
-                const outcomes = data?.learningOutcomes?.length
-                    ? data.learningOutcomes.map((item) => item.content)
+            try {
+
+                const [courseData, categoryTreeData] = await Promise.all([
+                    getCourseBasicInfo(courseId),
+                    getCategoryTree()
+                ]);
+
+                setCategoryTree(categoryTreeData)
+                // Seed options bằng đúng các topic course đang chọn (có sẵn label),
+                // các lựa chọn khác sẽ được nạp qua ô search khi user gõ.
+                setTopicOptions(
+                    (courseData?.topics ?? []).map(topic => ({value: topic.id, label: topic.name}))
+                )
+
+                const outcomes = courseData?.learningOutcomes?.length
+                    ? courseData.learningOutcomes.map((item) => item.content)
                     : ["", "", "", ""];
-                const prerequisites = data?.requiredSkills?.length
-                    ? data.requiredSkills.map((item) => item.content)
+                const prerequisites = courseData?.requiredSkills?.length
+                    ? courseData.requiredSkills.map((item) => item.content)
                     : ["", ""];
 
                 form.setFieldsValue({
-                    title: data?.title,
-                    shortDescription: data?.shortDescription,
-                    longDescription: data?.description,
+                    title: courseData?.title,
+                    shortDescription: courseData?.shortDescription,
+                    longDescription: courseData?.description,
+                    mainCategory: courseData?.categoryId,
+                    subCategory: courseData?.subcategoryId,
                     outcomes,
                     prerequisites,
-                    thumbnail: data?.thumbnailUrl ? [{ uid: "-1", name: "thumbnail", url: data.thumbnailUrl }] : [],
+                    topics: (courseData?.topics ?? []).map((t) => t.id),
+                    thumbnail: courseData?.thumbnailUrl ? [{ uid: "-1", name: "thumbnail", url: courseData.thumbnailUrl }] : [],
+                    courseLevel: courseData?.level
                 });
 
-                if (data?.thumbnailUrl) {
+                if (courseData?.thumbnailUrl) {
                     setIsThumbnailBlobUrl(false);
-                    setThumbnailPreview(data.thumbnailUrl);
+                    setThumbnailPreview(courseData.thumbnailUrl);
                 }
+
             } catch (error) {
                 message.error("Không thể tải thông tin khóa học!");
             } finally {
@@ -126,8 +136,64 @@ export default function CreateCourseOverview() {
             }
         };
 
-        fetchBasicInfo();
+        fetchFormData();
     }, [courseId, form]);
+
+
+    const mainCategoryOptions = useMemo(() => {
+        return categoryTree.map(category => {
+            return ({value: category.id, label: category.name})
+        })
+    }, [categoryTree])
+
+    const subcategoryOptions = useMemo(() => {
+        if(!selectedMainCategoryId || categoryTree.length === 0) return []
+
+        //tim danh muc cha
+        const currentCategory = categoryTree.find(cate => {
+            return cate.id === selectedMainCategoryId
+        })
+
+        return currentCategory?.subcategories.map(sub => {
+            return ({value: sub.id, label: sub.name})
+        })
+    }, [selectedMainCategoryId, categoryTree])
+
+
+    // Topic là tag tự do, không phụ thuộc subcategory -> chỉ cần reset chính subcategory
+    const handleMainCategoryChange = () => {
+        form.setFieldValue("subCategory", undefined);
+    };
+
+    // Search-server cho Topic: gõ tới đâu set state tới đó, debounce lo phần gọi API
+    useEffect(() => {
+        let cancelled = false;
+
+        const runSearch = async () => {
+            setTopicSearchLoading(true);
+            try {
+                const results = await searchTopics(debouncedTopicKeyword);
+                if (cancelled) return;
+
+                const selectedIds = new Set(form.getFieldValue("topics") || []);
+                setTopicOptions((prev) => {
+                    const selectedOptions = prev.filter((opt) => selectedIds.has(opt.value));
+                    const newOptions = results
+                        .filter((t) => !selectedIds.has(t.id))
+                        .map((t) => ({ value: t.id, label: t.name }));
+                    return [...selectedOptions, ...newOptions];
+                });
+            } catch (error) {
+                if (!cancelled) message.error("Không thể tìm kiếm chủ đề!");
+            } finally {
+                if (!cancelled) setTopicSearchLoading(false);
+            }
+        };
+
+        runSearch();
+        return () => { cancelled = true; };
+    }, [debouncedTopicKeyword, form]);
+
 
     const MAX_THUMBNAIL_SIZE_MB = 5;
 
@@ -476,7 +542,8 @@ export default function CreateCourseOverview() {
                         >
                             <Select
                                 size="large"
-                                options={MAIN_CATEGORY_OPTIONS}
+                                options={mainCategoryOptions}
+                                onChange={handleMainCategoryChange}
                                 placeholder="Lập trình & CNTT"
                                 suffixIcon={<AppstoreOutlined />}
                             />
@@ -490,7 +557,7 @@ export default function CreateCourseOverview() {
                         >
                             <Select
                                 size="large"
-                                options={SUB_CATEGORY_OPTIONS}
+                                options={subcategoryOptions}
                                 placeholder="Lập trình Web"
                             />
                         </Form.Item>
@@ -503,8 +570,12 @@ export default function CreateCourseOverview() {
                             <Select
                                 size="large"
                                 mode="multiple"
-                                options={TOPIC_OPTIONS}
-                                placeholder="Thêm chủ đề..."
+                                options={topicOptions}
+                                onSearch={setTopicKeyword}
+                                filterOption={false}
+                                loading={topicSearchLoading}
+                                notFoundContent={topicSearchLoading ? "Đang tìm..." : "Gõ để tìm chủ đề"}
+                                placeholder="Tìm và thêm chủ đề..."
                             />
                         </Form.Item>
                     </div>

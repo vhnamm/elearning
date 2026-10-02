@@ -2,12 +2,16 @@ package com.hnv.elearning.feature.category.controller;
 
 import com.hnv.elearning.common.response.ApiResponse;
 import com.hnv.elearning.feature.category.dto.CategoryDto;
+import com.hnv.elearning.feature.category.dto.CategoryTreeDto;
+import com.hnv.elearning.feature.category.dto.TopicDto;
 import com.hnv.elearning.feature.category.repository.CategoryRepository;
 import com.hnv.elearning.feature.category.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -28,5 +32,15 @@ public class CategoryController {
         return ResponseEntity.ok(response);
 
     }
+
+    @GetMapping("/api/v1/categories/tree")
+    public ResponseEntity<ApiResponse<List<CategoryTreeDto>>> getAllCategoryTree() {
+        List<CategoryTreeDto> result = categoryService.getCategoryTree();
+        ApiResponse response = ApiResponse.builder()
+                .data(result)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
 
 }

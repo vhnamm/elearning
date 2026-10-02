@@ -19,7 +19,7 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
     @Override
     Page<Course> findAll(Specification<Course> spec, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"learningOutcomes", "requiredSkills"})
+    @EntityGraph(attributePaths = {"learningOutcomes", "requiredSkills", "category", "subcategory", "topics"})
     Optional<Course> findWithDetailById(Long id);
 
     boolean existsByIdAndInstructorId(Long id, Long instructorId);
