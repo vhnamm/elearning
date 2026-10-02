@@ -78,6 +78,21 @@ INSERT INTO courses (
        'https://pub-5ab381ad35034ad6b27959e4a6136657.r2.dev/courses/5/thumbnail/khoa5.webp', 0.00, 'PUBLISHED', 'BEGINNER');
 
 
+-- 2. Gắn tags chủ đề (Topics) vào từng khoá học qua bảng course_topics
+-- (chuyển từ V14 sang đây vì courses phải tồn tại trước khi chèn FK)
+INSERT IGNORE INTO course_topics (course_id, topic_id) VALUES
+    -- Khóa 1 (Spring Boot): Spring Boot (1), Java (6)
+    (1, 1), (1, 6),
+    -- Khóa 2 (Figma UI/UX): Figma (12), Design System (13)
+    (2, 12), (2, 13),
+    -- Khóa 3 (OpenCV YOLO): OpenCV (17), YOLO (18), Python (7)
+    (3, 17), (3, 18), (3, 7),
+    -- Khóa 4 (HeyGen): HeyGen Video AI (22), ChatGPT & Prompt Eng (23)
+    (4, 22), (4, 23),
+    -- Khóa 5 (IELTS): IELTS Writing Task 2 (31), IELTS Overall (32)
+    (5, 31), (5, 32);
+
+
 -- 3. Enrollments (chỉ enroll vào course đã PUBLISHED) để tính studentsCount
 -- Chuẩn hóa tên cột user_id và enum status ('in_progress', 'completed') theo DBML
 INSERT IGNORE INTO enrollments

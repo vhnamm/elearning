@@ -2,6 +2,7 @@ package com.hnv.elearning.feature.course.entity;
 
 import com.hnv.elearning.feature.category.entity.Category;
 import com.hnv.elearning.feature.category.entity.Subcategory;
+import com.hnv.elearning.feature.category.entity.Topic;
 import com.hnv.elearning.feature.course.enums.CourseLevel;
 import com.hnv.elearning.feature.course.enums.CourseStatus;
 import com.hnv.elearning.feature.user.entity.User;
@@ -12,6 +13,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Set;
 
 @Entity
@@ -78,6 +80,14 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<CourseRequiredSkill> requiredSkills = new LinkedHashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "course_topics",
+           joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "topic_id")
+    )
+    private Set<Topic> topics;
 
     @PreUpdate
     protected void onUpdate() {
