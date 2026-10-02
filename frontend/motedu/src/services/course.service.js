@@ -1,5 +1,4 @@
 import http from "~services/http.js";
-import axios from 'axios';
 
 // Danh sách khóa học của giảng viên đang đăng nhập.
 export const getInstructorCourses = async ({
@@ -37,7 +36,7 @@ export const getPopularCourses = async (size = 4) => {
 // Gọi GET /courses với từ khóa, bộ lọc, sắp xếp và phân trang.
 export const searchCourses = async ({
   keyword,
-  categoryId,
+  categoryIds = [],
   subcategoryIds = [],
   levels = [],
   minRating,
@@ -50,7 +49,7 @@ export const searchCourses = async ({
 } = {}) => {
   const params = new URLSearchParams();
   if (keyword) params.set("keyword", keyword);
-  if (categoryId) params.set("categoryId", categoryId);
+  categoryIds.forEach((id) => params.append("categoryIds", id));
   subcategoryIds.forEach((id) => params.append("subcategoryIds", id));
   levels.forEach((level) => params.append("levels", level));
   if (minRating) params.set("minRating", minRating);
@@ -86,26 +85,15 @@ export const getCourseDetailPublic = async (courseId) => {
 
 export const checkUserEnrollmentApi = async (courseId) => {
   try {
-    const response = await axios.get(`/api/v1/enrollments/check/${courseId}`);
-    if (typeof response.data === 'object' && response.data !== null) {
-      return response.data.data === true;
-    }
-
-    // Nếu Backend trả về boolean nguyên thủy
-    return response.data === true;
-
-  } catch (error) {
-    // Cứ có lỗi (kể cả 401 do chưa đăng nhập) thì mặc định là chưa mua!
+    const { data } = await http.get(`/enrollments/check/${courseId}`);
+    return data?.data === true;
+  } catch {
+    // Chưa đăng nhập (401) hoặc lỗi khác thì coi như chưa mua.
     return false;
   }
 };
 
 export const enrollFreeCourseApi = async (courseId) => {
-  try {
-    const response = await axios.post(`/api/v1/enrollments/free/${courseId}`);
-    return response.data;
-  } catch (error) {
-    console.error("Lỗi đăng ký khóa học:", error);
-    throw error;
-  }
+  const { data } = await http.post(`/enrollments/free/${courseId}`);
+  return data;
 };

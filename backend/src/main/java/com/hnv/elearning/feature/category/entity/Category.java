@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "categories")
@@ -26,5 +27,6 @@ public class Category {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "category")
+    private List<Subcategory> subcategories;
 }

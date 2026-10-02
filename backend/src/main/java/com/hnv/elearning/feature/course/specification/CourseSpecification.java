@@ -79,10 +79,12 @@ public class CourseSpecification {
         };
     }
 
-    // Giữ khóa học thuộc danh mục cha được chọn. Mỗi khóa chỉ thuộc 1 danh mục nên chỉ lọc theo 1 id.
-    public static Specification<Course> hasCategoryId(Long categoryId) {
+    // Giữ khóa học thuộc một trong các danh mục cha được chọn.
+    public static Specification<Course> hasCategoryIds(Collection<Long> categoryIds) {
         return (root, query, cb) ->
-                categoryId == null ? null : cb.equal(root.get("category").get("id"), categoryId);
+                (categoryIds == null || categoryIds.isEmpty())
+                        ? null
+                        : root.get("category").get("id").in(categoryIds);
     }
 
     // Giữ khóa học thuộc các danh mục con được chọn.
@@ -123,7 +125,7 @@ public class CourseSpecification {
     public static Specification<Course> buildSearchSpec(CourseSearchRequest req) {
         Specification<Course> filters = Specification.where(hasCourseStatus(CourseStatus.PUBLISHED))
                 .and(matchesKeyword(req.getKeyword()))
-                .and(hasCategoryId(req.getCategoryId()))
+                .and(hasCategoryIds(req.getCategoryIds()))
                 .and(hasSubcategoryIds(req.getSubcategoryIds()))
                 .and(hasLevels(req.getLevels()))
                 .and(hasMinRating(req.getMinRating()))

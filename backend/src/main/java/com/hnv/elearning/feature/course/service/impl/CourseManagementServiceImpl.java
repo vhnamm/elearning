@@ -31,7 +31,7 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CourseManagementManagementServiceImpl implements CourseManagementService {
+public class CourseManagementServiceImpl implements CourseManagementService {
     private final CourseRepository courseRepository;
     private final EnrollmentService enrollmentService;
     private final CourseReviewService  courseReviewService;

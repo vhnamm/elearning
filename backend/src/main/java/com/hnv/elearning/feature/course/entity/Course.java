@@ -2,6 +2,7 @@ package com.hnv.elearning.feature.course.entity;
 
 import com.hnv.elearning.feature.category.entity.Category;
 import com.hnv.elearning.feature.category.entity.Subcategory;
+import com.hnv.elearning.feature.category.entity.Topic;
 import com.hnv.elearning.feature.course.enums.CourseLevel;
 import com.hnv.elearning.feature.course.enums.CourseStatus;
 import com.hnv.elearning.feature.user.entity.User;
@@ -12,6 +13,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -26,9 +28,9 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, length = 255)
     private String slug;
-
+    @Column(length = 255)
     private String title;
 
     @Column(name = "short_description", length = 500)
@@ -63,6 +65,7 @@ public class Course {
     @JoinColumn(name = "instructor_id")
     private User instructor;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
@@ -79,12 +82,20 @@ public class Course {
     @Builder.Default
     private Set<CourseRequiredSkill> requiredSkills = new LinkedHashSet<>();
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "course_topics",
+           joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "topic_id")
+    )
+    private Set<Topic> topics;
+
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("position ASC")
     @Builder.Default
     private Set<Section> sections = new LinkedHashSet<>();
 
-    @OneToMany
+
 
     @PreUpdate
     protected void onUpdate() {

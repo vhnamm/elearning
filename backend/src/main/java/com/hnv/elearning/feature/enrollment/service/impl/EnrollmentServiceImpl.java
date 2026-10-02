@@ -16,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +30,12 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public Map<Long, Integer> getEnrolledCountByCourseIds(Collection<Long> courseIds) {
-        return Map.of();
+        List<Object[]> list = enrollmentRepository.countEnrolledByCourseIds(courseIds);
+
+        return list.stream().collect(Collectors.toMap(
+                item -> (Long) item[0],
+                item -> ((Number) item[1]).intValue()
+        ));
     }
 
     @Override

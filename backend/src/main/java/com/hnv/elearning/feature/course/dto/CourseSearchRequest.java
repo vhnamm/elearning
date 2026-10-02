@@ -12,8 +12,7 @@ import java.util.List;
 @Setter
 public class CourseSearchRequest {
     private String keyword;
-    // Mỗi khóa chỉ thuộc 1 danh mục cha nên chỉ lọc theo 1 id, không phải danh sách.
-    private Long categoryId;
+    private List<Long> categoryIds;
     private List<Long> subcategoryIds;
     private List<CourseLevel> levels;
     private Double minRating;

@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-
 import java.util.Optional;
 
 public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecificationExecutor<Course> {
@@ -19,7 +18,7 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
     @Override
     Page<Course> findAll(Specification<Course> spec, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"learningOutcomes", "requiredSkills"})
+    @EntityGraph(attributePaths = {"learningOutcomes", "requiredSkills", "category", "subcategory", "topics"})
     Optional<Course> findWithDetailById(Long id);
 
     boolean existsByIdAndInstructorId(Long id, Long instructorId);
@@ -66,6 +65,8 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
             ORDER BY s.name
             """)
     List<String> findRelatedSubcategoryNames(@Param("pattern") String pattern, Pageable pageable);
+
+
 
     @EntityGraph(attributePaths = {"sections", "learningOutcomes", "instructor", "requiredSkills"})
     Optional<Course> findCourseDetailById(Long id);
