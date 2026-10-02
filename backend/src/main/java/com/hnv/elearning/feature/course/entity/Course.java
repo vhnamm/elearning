@@ -2,7 +2,6 @@ package com.hnv.elearning.feature.course.entity;
 
 import com.hnv.elearning.feature.category.entity.Category;
 import com.hnv.elearning.feature.category.entity.Subcategory;
-import com.hnv.elearning.feature.category.entity.Subcategory;
 import com.hnv.elearning.feature.category.entity.Topic;
 import com.hnv.elearning.feature.course.enums.CourseLevel;
 import com.hnv.elearning.feature.course.enums.CourseStatus;
@@ -13,10 +12,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
@@ -36,21 +33,22 @@ public class Course {
     @Column(length = 255)
     private String title;
 
+    @Column(name = "short_description", length = 500)
+    private String shortDescription;
 
-    @Column(columnDefinition 
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
     @Column(name = "thumbnail_url", length = 1024)
     private String thumbnailUrl;
 
-
-
     private BigDecimal price;
-
 
     @Enumerated(EnumType.STRING)
     private CourseStatus status;
 
     @Enumerated(EnumType.STRING)
+    private CourseLevel level;
 
     @Column(name = "created_at")
     @CreationTimestamp
@@ -59,13 +57,16 @@ public class Course {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "instructor_id")
     private User instructor;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subcategory_id", nullable = false)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subcategory_id")
     private Subcategory subcategory;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -77,20 +78,12 @@ public class Course {
     @Builder.Default
     private Set<Topic> topics = new HashSet<>();
 
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subcategory_id")
-    private Subcategory  subcategory;
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<CourseLearningOutcome> learningOutcomes = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private Set<CourseLearningOutcome> learningOutcomes =  new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CourseRequiredSkill> requiredSkills = new LinkedHashSet<>();
 
     @PreUpdate

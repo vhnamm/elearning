@@ -1,0 +1,1159 @@
+$primary: #004ac6;
+$primary-container: #2563eb;
+$secondary: #4059aa;
+$tertiary: #784b00;
+$tertiary-container: #996100;
+$tertiary-fixed: #ffddb8;
+$on-tertiary-fixed-variant: #653e00;
+$surface-tint: #0053db;
+$error: #ba1a1a;
+$error-container: #ffdad6;
+$on-error-container: #93000a;
+
+$surface: #faf8ff;
+$surface-lowest: #ffffff;
+$surface-low: #f2f3ff;
+$surface-container: #eaedff;
+$surface-high: #e2e7ff;
+$surface-highest: #dae2fd;
+$surface-variant: #dae2fd;
+$inverse-surface: #283044;
+$inverse-on-surface: #eef0ff;
+
+$on-surface: #131b2e;
+$on-surface-variant: #434655;
+
+$shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+$shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+
+@mixin label-sm {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  line-height: 14px;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+
+@mixin label-md {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.025em;
+  font-weight: 600;
+}
+
+@mixin label-lg {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.01em;
+  font-weight: 600;
+}
+
+@mixin body-sm {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 22px;
+}
+
+@mixin button-base {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.textPrimary {
+  color: $primary;
+}
+
+.textError {
+  color: $error;
+}
+
+.textMuted {
+  color: $on-surface-variant;
+}
+
+.wrapper {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 24px;
+  padding: 24px;
+  background: $surface;
+  color: $on-surface;
+  font-family: var(--font-body);
+  min-height: 100%;
+}
+
+// Queue panel
+
+.queuePanel {
+  grid-column: span 12;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  @media (min-width: 1280px) {
+    grid-column: span 4;
+  }
+}
+
+.queuePanelFull {
+  @media (min-width: 1280px) {
+    grid-column: span 12;
+  }
+}
+
+.queueHint {
+  margin: -8px 0 0;
+  @include body-sm;
+  color: $on-surface-variant;
+}
+
+.queueHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.queueHeaderTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  @include label-lg;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $on-surface;
+}
+
+.queueCount {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: $surface-highest;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  @include label-sm;
+  color: $on-surface-variant;
+}
+
+.queueSort {
+  @include label-sm;
+  font-weight: 500;
+  color: $on-surface-variant;
+}
+
+.queueList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.queueListGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 20px;
+
+  .emptyQueue {
+    grid-column: 1 / -1;
+  }
+
+  .queueCard {
+    padding: 20px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .queueStatus {
+    top: 16px;
+    right: 16px;
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+
+  .queueBody {
+    gap: 14px;
+    flex: 1;
+  }
+
+  .queueThumb {
+    width: 128px;
+    height: 84px;
+    border-radius: 10px;
+  }
+
+  .queueInfo {
+    gap: 4px;
+    padding-right: 90px;
+  }
+
+  .queueCategory {
+    font-size: 12px;
+  }
+
+  .queueTitle {
+    font-size: 18px;
+    line-height: 1.4;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .queueFooter {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid $surface-container;
+  }
+
+  .queueInstructor {
+    gap: 8px;
+  }
+
+  .avatarXs {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .queueInstructorName {
+    font-size: 15px;
+    max-width: 180px;
+  }
+
+  .topRatedIcon {
+    font-size: 15px;
+  }
+
+  .queuePrice {
+    font-size: 16px;
+  }
+
+  .queueTime {
+    font-size: 12px;
+  }
+}
+
+.queueCard {
+  position: relative;
+  padding: 16px;
+  border-radius: 12px;
+  background: $surface-lowest;
+  border: 2px solid transparent;
+  box-shadow: $shadow-sm;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    box-shadow: $shadow-md;
+
+    .queueTitle {
+      color: $primary;
+    }
+  }
+}
+
+.queueCardActive {
+  border-color: $primary;
+  background: rgba($primary-container, 0.03);
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: $tertiary-fixed;
+  color: $on-tertiary-fixed-variant;
+  @include label-sm;
+}
+
+.queueStatus {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: $tertiary;
+}
+
+.queueBody {
+  display: flex;
+  gap: 8px;
+}
+
+.queueThumb {
+  position: relative;
+  width: 80px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: $surface-container;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.queueInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-right: 72px;
+}
+
+.queueCategory {
+  @include label-sm;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: $secondary;
+}
+
+.queueCategoryActive {
+  color: $primary;
+}
+
+.queueTitle {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 700;
+  color: $on-surface;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s;
+}
+
+.queueFooter {
+  margin-top: 8px;
+  padding-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: $on-surface-variant;
+}
+
+.queueInstructor {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.queueInstructorName {
+  @include body-sm;
+  font-weight: 500;
+  color: $on-surface;
+  max-width: 110px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topRatedIcon {
+  font-size: 13px;
+  color: $tertiary;
+}
+
+.queueMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.queuePrice {
+  @include label-md;
+  font-weight: 700;
+  color: $primary;
+}
+
+.queueTime {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  @include label-sm;
+  font-weight: 500;
+  color: $on-surface-variant;
+}
+
+.emptyQueue,
+.emptyDetail {
+  padding: 32px 16px;
+  border-radius: 12px;
+  background: $surface-lowest;
+  text-align: center;
+  @include body-sm;
+  color: $on-surface-variant;
+  box-shadow: $shadow-sm;
+}
+
+// Avatars
+
+.avatarXs,
+.avatarSm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 700;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.avatarXs {
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
+}
+
+.avatarSm {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+}
+
+.avatar_primary {
+  background: $primary-container;
+}
+
+.avatar_secondary {
+  background: $secondary;
+}
+
+.avatar_tertiary {
+  background: $tertiary-container;
+}
+
+.avatar_primaryDark {
+  background: $primary;
+}
+
+.avatar_tint {
+  background: $surface-tint;
+}
+
+// Detail panel
+
+.detailPanel {
+  grid-column: span 12;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  animation: detailIn 0.25s ease-out;
+
+  @media (min-width: 1280px) {
+    grid-column: span 8;
+  }
+}
+
+@keyframes detailIn {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.actionBarLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btnBack {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: $surface-high;
+  color: $on-surface-variant;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: $surface-variant;
+    color: $on-surface;
+  }
+}
+
+.actionBar {
+  position: sticky;
+  top: 80px;
+  z-index: 30;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba($surface-lowest, 0.95);
+  backdrop-filter: blur(12px);
+  box-shadow: $shadow-md;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.courseCode {
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: $surface-highest;
+  color: $on-surface;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.actionButtons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btnReject {
+  @include button-base;
+  @include label-lg;
+  font-weight: 700;
+  padding: 10px 24px;
+  background: $surface-high;
+  color: $on-surface;
+  box-shadow: $shadow-sm;
+  font-size: 14px;
+
+  :global(.anticon) {
+    font-size: 18px;
+  }
+
+  &:hover {
+    background: $error-container;
+    color: $on-error-container;
+  }
+}
+
+.btnApprove {
+  @include button-base;
+  @include label-lg;
+  font-weight: 700;
+  padding: 10px 40px;
+  background: $primary-container;
+  color: #fff;
+  box-shadow: $shadow-md;
+
+  :global(.anticon) {
+    font-size: 18px;
+  }
+
+  &:hover {
+    background: $primary;
+  }
+}
+
+.card {
+  padding: 24px;
+  border-radius: 16px;
+  background: $surface-lowest;
+  box-shadow: $shadow-sm;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.overviewHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.overviewText {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: $surface-container;
+  color: $on-surface-variant;
+  @include label-sm;
+  font-weight: 600;
+}
+
+.chipPrimary {
+  background: $surface-high;
+  color: $primary;
+}
+
+.courseTitle {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 36px;
+  line-height: 44px;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+  color: $on-surface;
+
+  @media (max-width: 768px) {
+    font-size: 28px;
+    line-height: 36px;
+  }
+}
+
+.courseSubtitle {
+  margin: 0;
+  font-size: 18px;
+  line-height: 28px;
+  font-style: italic;
+  color: $on-surface-variant;
+}
+
+.overviewThumb {
+  width: 144px;
+  height: 96px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: $surface-container;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (max-width: 640px) {
+    display: none;
+  }
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: $surface-low;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.infoLabel {
+  @include label-sm;
+  font-weight: 600;
+  color: $on-surface-variant;
+}
+
+.infoInstructor {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.infoInstructorName {
+  @include label-md;
+  font-weight: 700;
+  color: $on-surface;
+}
+
+.infoTopRated {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  color: $tertiary;
+}
+
+.infoValue {
+  margin-top: 2px;
+  font-family: var(--font-heading);
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 700;
+  color: $on-surface;
+}
+
+.infoValueSm {
+  font-size: 15px;
+}
+
+.infoSub {
+  font-size: 11px;
+  color: $on-surface-variant;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.blockTitle {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  color: $on-surface;
+
+  :global(.anticon) {
+    font-size: 18px;
+  }
+}
+
+.description {
+  padding: 16px;
+  border-radius: 12px;
+  background: $surface;
+  font-size: 16px;
+  line-height: 1.625;
+  color: $on-surface-variant;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.outcomes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.outcome {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  background: $surface;
+  @include body-sm;
+  color: $on-surface;
+
+  :global(.anticon) {
+    margin-top: 4px;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+}
+
+// Curriculum
+
+.curriculumHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.curriculumTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  :global(.anticon) {
+    font-size: 22px;
+  }
+
+  h3 {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 24px;
+    line-height: 32px;
+    letter-spacing: -0.01em;
+    font-weight: 700;
+    color: $on-surface;
+  }
+}
+
+.emptyText {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: $surface;
+  @include body-sm;
+  color: $on-surface-variant;
+}
+
+// Loading / error states
+
+.queueHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btnIcon {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: $surface-high;
+  color: $on-surface-variant;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background: $surface-variant;
+    color: $on-surface;
+  }
+}
+
+.btnLoadMore {
+  @include button-base;
+  @include label-lg;
+  justify-content: center;
+  width: 100%;
+  padding: 10px 16px;
+  background: $surface-lowest;
+  color: $primary;
+  box-shadow: $shadow-sm;
+
+  &:hover:not(:disabled) {
+    background: $surface-high;
+  }
+}
+
+.detailState {
+  padding: 48px 24px;
+  border-radius: 16px;
+  background: $surface-lowest;
+  box-shadow: $shadow-sm;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.detailStateActions {
+  display: flex;
+  gap: 8px;
+}
+
+.thumbPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $on-surface-variant;
+  font-size: 22px;
+}
+
+.wrapper button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+// Reject modal
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba($inverse-surface, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  width: 100%;
+  max-width: 576px;
+  border-radius: 16px;
+  background: $surface-lowest;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modalIn 0.2s ease-out;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modalHeader {
+  padding: 16px 24px;
+  background: $error-container;
+  color: $on-error-container;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modalHeaderTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: 700;
+
+  :global(.anticon) {
+    font-size: 22px;
+  }
+}
+
+.modalClose {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
+}
+
+.modalBody {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modalCourse {
+  padding: 8px;
+  border-radius: 8px;
+  background: $surface-low;
+}
+
+.modalCourseTitle {
+  margin: 0;
+  @include label-lg;
+  font-weight: 700;
+  color: $on-surface;
+}
+
+.modalCourseInstructor {
+  font-size: 11px;
+  color: $primary;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  textarea {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 8px;
+    background: $surface-low;
+    @include body-sm;
+    color: $on-surface;
+    resize: vertical;
+
+    &::placeholder {
+      color: $on-surface-variant;
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px $primary;
+    }
+  }
+}
+
+.fieldLabelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.fieldLabel {
+  @include label-md;
+  font-weight: 700;
+  color: $on-surface;
+}
+
+.fieldLabelMuted {
+  @include label-sm;
+  font-weight: 600;
+  color: $on-surface-variant;
+}
+
+.fieldHint {
+  margin: 0;
+  font-size: 11px;
+  color: $on-surface-variant;
+}
+
+.required {
+  color: $error;
+}
+
+.selectWrapper {
+  position: relative;
+
+  select {
+    width: 100%;
+    padding: 8px 36px 8px 8px;
+    border: none;
+    border-radius: 8px;
+    background: $surface-low;
+    @include body-sm;
+    color: $on-surface;
+    appearance: none;
+    cursor: pointer;
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px $primary;
+    }
+  }
+}
+
+.selectIcon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 12px;
+  color: $on-surface-variant;
+}
+
+.templates {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.templateBtn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  background: $surface-high;
+  color: $on-surface;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: $surface-variant;
+  }
+}
+
+.formError {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: $error-container;
+  color: $on-error-container;
+  font-size: 13px;
+}
+
+.modalActions {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btnSecondary {
+  @include button-base;
+  @include label-md;
+  font-weight: 700;
+  padding: 8px 16px;
+  background: $surface-high;
+  color: $on-surface;
+
+  &:hover {
+    background: $surface-variant;
+  }
+}
+
+.btnDanger {
+  @include button-base;
+  @include label-md;
+  font-weight: 700;
+  gap: 6px;
+  padding: 8px 24px;
+  background: $error;
+  color: #fff;
+  box-shadow: $shadow-md;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}

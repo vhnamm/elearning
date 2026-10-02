@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .wrapper {
+            width: 100%;
+            background-color: #f8fafc;
+            padding: 48px 0;
+        }
+        .container {
+            max-width: 560px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 40px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+        }
+        .badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #93000a;
+            background-color: #ffdad6;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        .brand {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #0f172a;
+            margin-bottom: 24px;
+        }
+        .brand span {
+            color: #2563eb;
+        }
+        .title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+        .content {
+            font-size: 14px;
+            color: #475569;
+            line-height: 1.65;
+            margin-bottom: 20px;
+        }
+        .course-box {
+            background: #f2f3ff;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 20px;
+        }
+        .label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+        .course-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #131b2e;
+        }
+        .reason {
+            background-color: #fff7ed;
+            border-left: 3px solid #ba1a1a;
+            padding: 12px 14px;
+            border-radius: 0 6px 6px 0;
+            margin-bottom: 20px;
+        }
+        .reason-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #93000a;
+            margin-bottom: 6px;
+        }
+        .reason-detail {
+            font-size: 14px;
+            color: #334155;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+        .divider {
+            border-top: 1px solid #f1f5f9;
+            margin: 24px 0;
+        }
+        .footer {
+            font-size: 12px;
+            color: #94a3b8;
+            line-height: 1.6;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="container">
+        <div class="badge">Kết quả kiểm duyệt</div>
+
+        <div class="brand">Mót<span>Edu</span>.</div>
+
+        <div class="title">Khoá học của bạn chưa được phê duyệt</div>
+
+        <div class="content">
+            Xin chào <b th:text="${instructorName}">Giảng viên</b>,<br>
+            Đội ngũ kiểm duyệt MótEdu đã xem xét khoá học bạn gửi và nhận thấy một số điểm cần chỉnh sửa trước khi mở bán.
+        </div>
+
+        <div class="course-box">
+            <div class="label" th:text="'Khoá học #' + ${courseId}">Khoá học</div>
+            <div class="course-title" th:text="${courseTitle}">Tên khoá học</div>
+        </div>
+
+        <div class="reason">
+            <div class="reason-label" th:text="${reasonLabel}">Nhóm lý do</div>
+            <div class="reason-detail" th:text="${detail}">Chi tiết yêu cầu chỉnh sửa</div>
+        </div>
+
+        <div class="content">
+            Sau khi hoàn tất chỉnh sửa, bạn có thể gửi lại khoá học để được kiểm duyệt từ Trung tâm Giảng viên.
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="footer">
+            Đây là email tự động từ hệ thống kiểm duyệt MótEdu.<br>
+            © MótEdu Platform. Đồng hành cùng bạn trên từng bài giảng.
+        </div>
+    </div>
+</div>
+</body>
+</html>

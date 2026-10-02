@@ -15,11 +15,15 @@ import CreateCourseLayout from "~layouts/CreateCourseLayout/CreateCourseLayout.j
 import CreateCourseOverview from "~pages/CreateCourse/CreateCourseOverview.jsx";
 import Home from "~pages/Home/Home.jsx";
 import Search from "~pages/Search/Search.jsx";
+import CourseApprove from "~pages/CourseApprove/CourseApprove.jsx";
+import AdminLayout from "~layouts/AdminLayout/AdminLayout.jsx";
 
 const AppRoutes = () => (
   <Routes>
       <Route path="/oauth2/callback" element={<Oauth2CallbackHandler/>}></Route>
-
+      <Route element={<AdminLayout/>}>
+          <Route path="/1" element={<CourseApprove/>}></Route>
+      </Route>
       <Route path="/" element={<MainLayout/>}>
           <Route index element={<Home />} />
           <Route path="/search" element={<Search />} />
@@ -63,6 +67,12 @@ const AppRoutes = () => (
       <Route element={<RouteGuard requireAuth allowedRoles={["INSTRUCTOR"]} redirectTo="/403"/>}>
           <Route path="/instructor" element={<InstructorLayout/>}>
               <Route path="courses" element={<InstructorCourses/>}></Route>
+          </Route>
+      </Route>
+
+      <Route element={<RouteGuard requireAuth allowedRoles={["ADMIN"]} redirectTo="/403"/>}>
+          <Route path="/admin" element={<AdminLayout/>}>
+              <Route path="courses/approve" element={<CourseApprove/>}></Route>
           </Route>
       </Route>
   </Routes>

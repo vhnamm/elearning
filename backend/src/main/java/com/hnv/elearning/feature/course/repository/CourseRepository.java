@@ -1,6 +1,7 @@
 package com.hnv.elearning.feature.course.repository;
 
 import com.hnv.elearning.feature.course.entity.Course;
+import com.hnv.elearning.feature.course.enums.CourseStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -23,6 +24,16 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
     Optional<Course> findWithDetailById(Long id);
 
     boolean existsByIdAndInstructorId(Long id, Long instructorId);
+
+    @EntityGraph(attributePaths = {"instructor", "category", "subcategory", "subcategory.category"})
+    Page<Course> findByStatus(CourseStatus status, Pageable pageable);
+
+    long countByStatus(CourseStatus status);
+
+    @EntityGraph(attributePaths = {
+            "instructor", "category", "subcategory", "subcategory.category", "learningOutcomes", "requiredSkills"
+    })
+    Optional<Course> findForReviewById(Long id);
 
     // Danh mục cha có nhiều khóa đã xuất bản nhất, dùng khi chưa nhập từ khóa.
     @Query("""

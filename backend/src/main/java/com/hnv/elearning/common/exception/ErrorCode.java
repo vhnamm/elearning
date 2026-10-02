@@ -51,7 +51,14 @@ public enum ErrorCode {
     // ==========================================
     // 50xx: COURSE MANAGEMENT
     // ==========================================
-    COURSE_NOT_FOUND(5001, "Không tìm thấy khoá học", HttpStatus.NOT_FOUND);
+    COURSE_NOT_FOUND(5001, "Không tìm thấy khoá học", HttpStatus.NOT_FOUND),
+
+    // ==========================================
+    // 60xx: COURSE MODERATION
+    // ==========================================
+    COURSE_NOT_PENDING_REVIEW(6001, "Khoá học không ở trạng thái chờ duyệt", HttpStatus.CONFLICT),
+    REJECT_REASON_REQUIRED(6002, "Vui lòng chọn nhóm lý do từ chối hợp lệ", HttpStatus.BAD_REQUEST),
+    REJECT_FEEDBACK_TOO_SHORT(6003, "Chi tiết yêu cầu chỉnh sửa phải có tối thiểu 30 ký tự", HttpStatus.BAD_REQUEST);
 
     private final int code;
     private final String message;

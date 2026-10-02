@@ -1,0 +1,162 @@
+$primary: #004ac6;
+$primary-container: #2563eb;
+$surface-lowest: #ffffff;
+$surface-low: #f2f3ff;
+$surface-high: #e2e7ff;
+$surface-highest: #dae2fd;
+$on-surface: #131b2e;
+$on-surface-variant: #434655;
+$error: #ba1a1a;
+
+.wrapper {
+  position: fixed;
+  top: 0;
+  left: 288px;
+  right: 0;
+  z-index: 40;
+  height: 64px;
+  padding: 0 24px;
+  background: rgba($surface-lowest, 0.9);
+  backdrop-filter: blur(24px);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.search {
+  position: relative;
+  flex: 1;
+  max-width: 448px;
+  display: flex;
+  align-items: center;
+
+  input {
+    width: 100%;
+    padding: 8px 16px 8px 40px;
+    border: none;
+    border-radius: 8px;
+    background: $surface-low;
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 22px;
+    color: $on-surface;
+
+    &::placeholder {
+      color: $on-surface-variant;
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px $primary-container;
+    }
+  }
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  font-size: 18px;
+  color: $on-surface-variant;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.iconBtn {
+  position: relative;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: $on-surface-variant;
+  font-size: 20px;
+  display: flex;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: $surface-high;
+    color: $on-surface;
+  }
+}
+
+.notifyDot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: $error;
+  box-shadow: 0 0 0 2px $surface-lowest;
+}
+
+.divider {
+  width: 1px;
+  height: 24px;
+  background: $surface-highest;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.profileName {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  line-height: 1.25;
+  font-weight: 600;
+  color: $on-surface;
+}
+
+.profileRole {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: $primary;
+}
+
+.roleDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: $primary-container;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: $primary;
+  color: #fff;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}

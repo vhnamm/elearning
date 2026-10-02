@@ -41,6 +41,7 @@ public class SecurityConfig{
                                 .requestMatchers(HttpMethod.GET, "/api/v1/courses/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/search/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
+                                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2Login -> {
