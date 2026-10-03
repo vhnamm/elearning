@@ -1,6 +1,7 @@
 package com.hnv.elearning.feature.course.controller;
 
 import com.hnv.elearning.common.response.ApiResponse;
+import com.hnv.elearning.feature.course.dto.CourseCurriculumResponse;
 import com.hnv.elearning.feature.course.dto.CourseDetailDto;
 import com.hnv.elearning.feature.course.dto.CourseSearchRequest;
 import com.hnv.elearning.feature.course.dto.CourseSearchResponse;
@@ -54,6 +55,18 @@ public class PublicCourseController {
 
         return ResponseEntity.ok(
                 ApiResponse.<CourseDetailDto>builder()
+                        .code(HttpStatus.OK.value())
+                        .data(result)
+                        .build()
+        );
+    }
+
+    @GetMapping("/{id}/curriculum")
+    public ResponseEntity<ApiResponse<CourseCurriculumResponse>> getCourseCurriculum(@PathVariable("id") Long id) {
+        CourseCurriculumResponse result = publicCourseService.getCourseCurriculum(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.<CourseCurriculumResponse>builder()
                         .code(HttpStatus.OK.value())
                         .data(result)
                         .build()

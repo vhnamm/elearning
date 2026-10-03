@@ -47,18 +47,18 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Transactional
     public void enrollFreeCourse(Long courseId, Long userId) {
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Khóa học không tồn tại"));
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND));
 
         if (course.getPrice() != null && course.getPrice().compareTo(BigDecimal.ZERO) > 0) {
-            throw new RuntimeException("Khóa học này có tính phí.");
+            throw new AppException(ErrorCode.COURSE_NOT_FREE);
         }
 
         if (enrollmentRepository.existsByCourse_IdAndStudent_Id(courseId, userId)) {
-            throw new RuntimeException("Bạn đã sở hữu khóa học này rồi!");
+            throw new AppException(ErrorCode.COURSE_ALREADY_ENROLLED);
         }
 
         User student = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy học viên"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         Enrollment enrollment = Enrollment.builder()
                 .student(student)

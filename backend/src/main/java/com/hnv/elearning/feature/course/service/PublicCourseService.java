@@ -1,5 +1,6 @@
 package com.hnv.elearning.feature.course.service;
 
+import com.hnv.elearning.feature.course.dto.CourseCurriculumResponse;
 import com.hnv.elearning.feature.course.dto.CourseDetailDto;
 import com.hnv.elearning.feature.course.dto.CourseSearchRequest;
 import com.hnv.elearning.feature.course.dto.CourseSearchResponse;
@@ -14,4 +15,7 @@ public interface PublicCourseService {
     CourseSearchResponse search(CourseSearchRequest request);
 
     CourseDetailDto getCourseDetail(Long courseId);
+
+    // Chương trình học công khai, chỉ của khóa học đã xuất bản.
+    CourseCurriculumResponse getCourseCurriculum(Long courseId);
 }

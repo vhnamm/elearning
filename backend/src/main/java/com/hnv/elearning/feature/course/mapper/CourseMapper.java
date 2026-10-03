@@ -3,7 +3,6 @@ package com.hnv.elearning.feature.course.mapper;
 import com.hnv.elearning.feature.category.mapper.TopicMapper;
 import com.hnv.elearning.feature.course.dto.*;
 import com.hnv.elearning.feature.course.entity.*;
-import com.hnv.elearning.feature.user.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValueMappingStrategy;
@@ -25,22 +24,18 @@ public interface CourseMapper {
     @Mapping(target = "averageStar", ignore = true)
     @Mapping(target = "reviewCount", ignore = true)
     @Mapping(target = "studentCount", ignore = true)
-    @Mapping(target = "totalDurationSeconds", ignore = true)
-    @Mapping(target = "totalQuizzes", ignore = true)
     @Mapping(source = "learningOutcomes", target = "learningOutcomes")
-    @Mapping(source = "instructor", target = "instructor")
+    @Mapping(target = "instructor", ignore = true)
     CourseDetailDto toCourseDetailDto(Course course);
 
-    CourseDetailDto.SectionDto toSectionDto(Section section);
+    SectionDto toSectionDto(Section section);
 
-    CourseDetailDto.InstructorInfoDto toInstructorInfoDto(User user);
-
-    default CourseDetailDto.CurriculumItemDto toCurriculumItemDto(CurriculumItem entity) {
+    default CurriculumItemDto toCurriculumItemDto(CurriculumItem entity) {
         if (entity == null) {
             return null;
         }
 
-        CourseDetailDto.CurriculumItemDto dto = new CourseDetailDto.CurriculumItemDto();
+        CurriculumItemDto dto = new CurriculumItemDto();
 
         dto.setId(entity.getId());
         dto.setTitle(entity.getTitle());
