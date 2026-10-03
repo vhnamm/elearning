@@ -10,7 +10,7 @@ export const getInstructorCourses = async ({
   size = 10,
   sort = "createdAt,desc",
 } = {}) => {
-  const { data } = await http.get("/users/me/instructed-courses", {
+  const { data } = await http.get("/courses/instructed-courses", {
     params: { keyword, status, min, max, page, size, sort },
   });
   return data.data;
@@ -83,17 +83,17 @@ export const getCourseDetailPublic = async (courseId) => {
   return data.data;
 };
 
+export const getCourseCurriculumPublic = async (courseId) => {
+  const { data } = await http.get(`/courses/${courseId}/curriculum`);
+  return data.data;
+};
+
 export const checkUserEnrollmentApi = async (courseId) => {
-  try {
-    const { data } = await http.get(`/enrollments/check/${courseId}`);
-    return data?.data === true;
-  } catch {
-    // Chưa đăng nhập (401) hoặc lỗi khác thì coi như chưa mua.
-    return false;
-  }
+  const { data } = await http.get(`/enrollments/${courseId}/status`);
+  return data?.data === true;
 };
 
 export const enrollFreeCourseApi = async (courseId) => {
-  const { data } = await http.post(`/enrollments/free/${courseId}`);
+  const { data } = await http.post('/enrollments', { courseId });
   return data;
 };

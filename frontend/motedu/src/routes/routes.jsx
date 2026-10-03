@@ -16,10 +16,13 @@ import CreateCourseInitial from "~pages/CreateCourse/CreateCourseInitial.jsx";
 import CreateCourseLayout from "~layouts/CreateCourseLayout/CreateCourseLayout.jsx";
 import CreateCourseOverview from "~pages/CreateCourse/CreateCourseOverview.jsx";
 import CourseDetail from "~pages/CourseDetail/CourseDetail.jsx";
+import NotFound from "~pages/NotFound/NotFound.jsx";
 
 const AppRoutes = () => (
   <Routes>
       <Route path="/oauth2/callback" element={<Oauth2CallbackHandler/>}></Route>
+
+      <Route path="*" element={<NotFound/>}></Route>
 
       <Route path="/" element={<MainLayout/>}>
           <Route index element={<Home />} />
@@ -41,7 +44,12 @@ const AppRoutes = () => (
 
           {/* Public: trang báo không đủ quyền, dùng làm redirectTo cho các RouteGuard có allowedRoles */}
           <Route path="/403" element={<Forbidden/>}></Route>
+
+
       </Route>
+
+          {/* Mọi đường dẫn không khớp route nào */}
+
 
       <Route element={<RouteGuard requireAuth allowedRoles={["INSTRUCTOR"]} redirectTo="/403" />}>
           <Route element={<HeaderBlankLayout/>}>
@@ -68,6 +76,9 @@ const AppRoutes = () => (
               <Route path="courses" element={<InstructorCourses/>}></Route>
           </Route>
       </Route>
+
+      {/* Mọi đường dẫn không khớp route nào, không dùng layout */}
+      <Route path="*" element={<NotFound/>}></Route>
   </Routes>
 );
 

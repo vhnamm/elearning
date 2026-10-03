@@ -114,12 +114,10 @@
 }
 
 .thumbnailContainer {
-  width: 100%;
   aspect-ratio: 16/9;
-  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  margin-bottom: 40px;
+  margin: -24px -24px 20px;
+  border-radius: 12px 12px 0 0;
 
   .thumbnailImg {
     width: 100%;
@@ -133,7 +131,7 @@
 }
 
 .whatYouWillLearn {
-  background: #f7f9fa;
+  background: #fff;
   border: 1px solid #d1d7dc;
   border-radius: 8px;
   padding: 24px 32px;
@@ -171,9 +169,67 @@
   }
 }
 
+.subtitle {
+  font-size: 18px;
+  line-height: 1.5;
+  color: #6a6f73;
+  margin: 0 0 16px;
+}
+
+.muted { color: #6a6f73; margin: 0; }
+
+.requirements,
+.description {
+  margin-top: 40px;
+  h2 { font-size: 24px; margin: 0 0 16px; color: #1c1d1f; }
+}
+
+.requirementList {
+  margin: 0;
+  padding-left: 20px;
+  line-height: 1.7;
+  color: #1c1d1f;
+}
+
+.descriptionBody {
+  white-space: pre-line;
+  line-height: 1.7;
+  color: #1c1d1f;
+  overflow-wrap: anywhere;
+}
+
+.descriptionCollapsed {
+  max-height: 220px;
+  overflow: hidden;
+  mask-image: linear-gradient(#000 60%, transparent);
+}
+
+.toggleAll {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #0056d2;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 8px;
+
+  &:hover { text-decoration: underline; }
+}
+
 .courseContent {
   h2 { font-size: 24px; margin-bottom: 8px; color: #1c1d1f;}
-  .summary { color: #6a6f73; margin-bottom: 24px; font-size: 15px; }
+
+  .contentHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    .summary { color: #6a6f73; margin: 0; font-size: 15px; }
+    .toggleAll { margin-top: 0; flex-shrink: 0; }
+  }
 
   .accordion {
     border: 1px solid #d1d7dc;
@@ -185,7 +241,7 @@
       &:last-child { border-bottom: none; }
 
       .chapterHeader {
-        background: #f7f9fa;
+        background: #fff;
         padding: 18px 24px;
         display: flex;
         justify-content: space-between;
@@ -194,7 +250,12 @@
         cursor: pointer;
         transition: background 0.2s;
 
-        &:hover { background: #e3e7ea; }
+        &:hover { background: #f7f9fa; }
+
+        .chapterTitle { display: flex; align-items: center; gap: 12px; }
+        .chapterCount { font-weight: 400; color: #6a6f73; font-size: 14px; }
+        .chevron { font-size: 12px; transition: transform 0.2s; }
+        .chevronOpen { transform: rotate(180deg); }
       }
 
       .chapterBody {
@@ -217,34 +278,23 @@
             align-items: center;
             gap: 12px;
 
-            .icon { font-size: 16px; }
+            .icon { font-size: 16px; color: #6a6f73; display: inline-flex; }
             .text { font-weight: 500; }
           }
 
           .duration { color: #6a6f73; }
 
-          &.previewable {
+          .lessonMeta { display: flex; align-items: center; gap: 24px; }
+
+          .previewLink {
+            background: none;
+            border: none;
+            padding: 0;
+            color: #0056d2;
+            font-weight: 700;
+            font-size: 14px;
             cursor: pointer;
-            color: #1c1d1f;
-
-            &:hover {
-              background: #f7f9fa;
-              .lessonTitle .text {
-                color: #0056d2;
-                text-decoration: underline;
-              }
-            }
-          }
-
-          &.locked {
-            cursor: not-allowed;
-            background: #fafafa;
-            opacity: 0.6;
-            color: #8c949c;
-
-            .duration { opacity: 0.7; }
-
-            &:hover { background: #f5f5f5; }
+            text-decoration: underline;
           }
         }
       }
@@ -320,7 +370,59 @@
           display: flex;
           align-items: center;
           gap: 12px;
+
+          :global(.anticon) { font-size: 16px; color: #6a6f73; }
         }
+      }
+    }
+
+    .purchasedSection {
+      margin-bottom: 24px;
+
+      .successBadge {
+        background: #e6f2ed;
+        color: #1a7b48;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 16px;
+        font-size: 15px;
+      }
+
+      .continueBtn {
+        width: 100%;
+        padding: 16px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        background: var(--color-primary);
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+
+        &:hover {
+          background: var(--color-primary-dark);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(37,99,235,0.3);
+        }
+      }
+    }
+    .enrollBtn {
+      background: var(--color-primary);
+      color: white;
+      border: none;
+
+      &:hover:not(:disabled) {
+        background: var(--color-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(37,99,235,0.3);
+      }
+
+      &:disabled {
+        background: #93b4f5;
+        cursor: not-allowed;
       }
     }
   }
@@ -378,55 +480,6 @@
       width: 100%;
       height: 100%;
       border: none;
-    }
-  }
-  .purchasedSection {
-    margin-bottom: 24px;
-
-    .successBadge {
-      background: #e6f2ed;
-      color: #1a7b48;
-      padding: 12px;
-      border-radius: 8px;
-      font-weight: 600;
-      text-align: center;
-      margin-bottom: 16px;
-      font-size: 15px;
-    }
-
-    .continueBtn {
-      width: 100%;
-      padding: 16px;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      background: #1c1d1f;
-      color: white;
-      border: none;
-      transition: all 0.3s ease;
-
-      &:hover {
-        background: #000;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-      }
-    }
-  }
-  .enrollBtn {
-    background: #1a7b48;
-    color: white;
-    border: none;
-
-    &:hover:not(:disabled) {
-      background: #145e37;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(26,123,72,0.3);
-    }
-
-    &:disabled {
-      background: #a3c9b3;
-      cursor: not-allowed;
     }
   }
 }
