@@ -51,7 +51,14 @@ public enum ErrorCode {
     // ==========================================
     // 50xx: COURSE MANAGEMENT
     // ==========================================
-    COURSE_NOT_FOUND(5001, "Không tìm thấy khoá học", HttpStatus.NOT_FOUND);
+    COURSE_NOT_FOUND(5001, "Không tìm thấy khoá học", HttpStatus.NOT_FOUND),
+    COURSE_NOT_FREE(5002, "Khoá học này có tính phí", HttpStatus.BAD_REQUEST),
+
+    // ==========================================
+    // 60xx: ENROLLMENT
+    // ==========================================
+    COURSE_ALREADY_ENROLLED(6001, "Bạn đã sở hữu khoá học này rồi", HttpStatus.CONFLICT),
+    COURSE_ID_REQUIRED(6002, "courseId không được để trống", HttpStatus.BAD_REQUEST);
 
     private final int code;
     private final String message;

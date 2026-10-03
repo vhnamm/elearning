@@ -3,12 +3,14 @@ package com.hnv.elearning.feature.user.service.impl;
 import com.hnv.elearning.common.exception.AppException;
 import com.hnv.elearning.common.exception.ErrorCode;
 import com.hnv.elearning.feature.auth.dto.LoginResponse;
+import com.hnv.elearning.feature.user.dto.InstructorInfoDto;
 import com.hnv.elearning.feature.user.dto.OnboardingRequest;
 import com.hnv.elearning.feature.user.entity.InstructorProfile;
 import com.hnv.elearning.feature.user.entity.Role;
 import com.hnv.elearning.feature.user.entity.User;
 import com.hnv.elearning.feature.user.entity.UserRole;
 import com.hnv.elearning.feature.user.mapper.InstructorProfileMapper;
+import com.hnv.elearning.feature.user.mapper.UserMapper;
 import com.hnv.elearning.feature.user.repository.InstructorProfileRepository;
 import com.hnv.elearning.feature.user.repository.RoleRepository;
 import com.hnv.elearning.feature.user.repository.UserRepository;
@@ -27,6 +29,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final InstructorProfileRepository instructorProfileRepository;
     private final InstructorProfileMapper instructorProfileMapper;
+    private final UserMapper userMapper;
     private final RoleRepository roleRepository;
     private final UserRoleRepository  userRoleRepository;
     private final JwtProvider jwtProvider;
@@ -56,5 +59,12 @@ public class UserServiceImpl implements UserService {
         return LoginResponse.builder()
                 .accessToken(accessToken)
                 .build();
+    }
+
+    @Override
+    public InstructorInfoDto getInstructorInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        return userMapper.toInstructorInfoDto(user);
     }
 }

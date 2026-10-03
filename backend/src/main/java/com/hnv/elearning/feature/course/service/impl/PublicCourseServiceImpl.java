@@ -1,16 +1,25 @@
 package com.hnv.elearning.feature.course.service.impl;
 
+import com.hnv.elearning.common.exception.AppException;
+import com.hnv.elearning.common.exception.ErrorCode;
 import com.hnv.elearning.feature.category.repository.CategoryRepository;
+import com.hnv.elearning.feature.course.dto.CourseCurriculumResponse;
+import com.hnv.elearning.feature.course.dto.CourseDetailDto;
 import com.hnv.elearning.feature.course.dto.CourseSearchRequest;
 import com.hnv.elearning.feature.course.dto.CourseSearchResponse;
 import com.hnv.elearning.feature.course.dto.PublicCourseCardDto;
 import com.hnv.elearning.feature.course.entity.Course;
+import com.hnv.elearning.feature.course.enums.CourseStatus;
+import com.hnv.elearning.feature.course.mapper.CourseMapper;
 import com.hnv.elearning.feature.course.repository.CourseRepository;
+import com.hnv.elearning.feature.course.service.CourseCurriculumService;
 import com.hnv.elearning.feature.course.service.PublicCourseService;
 import com.hnv.elearning.feature.course.specification.CourseSpecification;
 import com.hnv.elearning.feature.enrollment.service.EnrollmentService;
 import com.hnv.elearning.feature.review.service.CourseReviewService;
+import com.hnv.elearning.feature.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -29,6 +38,7 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class PublicCourseServiceImpl implements PublicCourseService {
     private static final Set<String> PRICE_TYPES = Set.of("ALL", "PAID", "FREE");
     private static final Set<String> SORTS = Set.of("popular", "rating", "newest", "price_asc", "price_desc");
@@ -36,7 +46,10 @@ public class PublicCourseServiceImpl implements PublicCourseService {
     private final CourseRepository courseRepository;
     private final CategoryRepository categoryRepository;
     private final EnrollmentService enrollmentService;
+    private final UserService userService;
+    private final CourseCurriculumService courseCurriculumService;
     private final CourseReviewService courseReviewService;
+    private final CourseMapper courseMapper;
 
     @Override
     public List<PublicCourseCardDto> getPopularCourses(int size) {
@@ -208,4 +221,41 @@ public class PublicCourseServiceImpl implements PublicCourseService {
         String normalized = sort.trim().toLowerCase(Locale.ROOT);
         return SORTS.contains(normalized) ? normalized : "popular";
     }
+
+    @Override
+    public CourseDetailDto getCourseDetail(Long courseId) {
+        Course course = courseRepository.findCourseDetailById(courseId)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND));
+
+
+        if (course.getStatus() != CourseStatus.PUBLISHED) {
+            throw new AppException(ErrorCode.COURSE_NOT_FOUND);
+        }
+
+        CourseDetailDto dto = courseMapper.toCourseDetailDto(course);
+        if (course.getInstructor() != null) {
+            dto.setInstructor(userService.getInstructorInfo(course.getInstructor().getId()));
+        }
+
+        List<Long> singleIdList = List.of(courseId);
+
+        Map<Long, Integer> enrollmentMap = enrollmentService.getEnrolledCountByCourseIds(singleIdList);
+        Map<Long, Double> ratingMap = courseReviewService.getAverageRatingsByCourseIds(singleIdList);
+        Map<Long, Long> reviewCountMap = courseReviewService.getReviewCountsByCourseIds(singleIdList);
+
+        dto.setStudentCount(enrollmentMap.getOrDefault(courseId, 0));
+        dto.setAverageStar(ratingMap.getOrDefault(courseId, 0.0));
+        dto.setReviewCount(reviewCountMap.getOrDefault(courseId, 0L).intValue());
+
+        return dto;
+    }
+
+    @Override
+    public CourseCurriculumResponse getCourseCurriculum(Long courseId) {
+        if (!courseRepository.existsByIdAndStatus(courseId, CourseStatus.PUBLISHED)) {
+            throw new AppException(ErrorCode.COURSE_NOT_FOUND);
+        }
+        return courseCurriculumService.getCurriculum(courseId);
+    }
+
 }

@@ -10,4 +10,6 @@ public interface CourseManagementService {
     CourseDraftDto createDraft(CourseDraftRequest courseDraftRequest, User user);
 
     CourseBasicInfoResponse getCourseBasicInfo(Long courseId, Long instructorId);
+
+    CourseCurriculumResponse getCourseCurriculum(Long courseId, Long instructorId);
 }

@@ -13,7 +13,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
-import java.util.Locale;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -65,6 +65,7 @@ public class Course {
     @JoinColumn(name = "instructor_id")
     private User instructor;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
@@ -88,6 +89,13 @@ public class Course {
             inverseJoinColumns = @JoinColumn(name = "topic_id")
     )
     private Set<Topic> topics;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("position ASC")
+    @Builder.Default
+    private Set<Section> sections = new LinkedHashSet<>();
+
+
 
     @PreUpdate
     protected void onUpdate() {

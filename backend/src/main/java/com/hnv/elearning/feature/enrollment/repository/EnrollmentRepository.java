@@ -20,4 +20,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment,Long> {
     List<Object[]> countEnrolledByCourseIds(@Param("courseIds") Collection<Long> courseIds);
 
     Collection<Long> course(Course course);
+
+    boolean existsByCourse_IdAndStudent_Id(Long courseId, Long studentId);
 }

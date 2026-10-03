@@ -1,6 +1,7 @@
 package com.hnv.elearning.feature.course.repository;
 
 import com.hnv.elearning.feature.course.entity.Course;
+import com.hnv.elearning.feature.course.enums.CourseStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -11,7 +12,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-
 import java.util.Optional;
 
 public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecificationExecutor<Course> {
@@ -23,6 +23,8 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
     Optional<Course> findWithDetailById(Long id);
 
     boolean existsByIdAndInstructorId(Long id, Long instructorId);
+
+    boolean existsByIdAndStatus(Long id, CourseStatus status);
 
     // Danh mục cha có nhiều khóa đã xuất bản nhất, dùng khi chưa nhập từ khóa.
     @Query("""
@@ -66,4 +68,9 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
             ORDER BY s.name
             """)
     List<String> findRelatedSubcategoryNames(@Param("pattern") String pattern, Pageable pageable);
+
+
+
+    @EntityGraph(attributePaths = {"learningOutcomes", "requiredSkills"})
+    Optional<Course> findCourseDetailById(Long id);
 }

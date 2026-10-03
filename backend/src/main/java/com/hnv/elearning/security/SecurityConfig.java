@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,6 +23,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig{
     private final JwtFilter jwtFilter;
@@ -38,7 +40,12 @@ public class SecurityConfig{
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/v1/auth/**").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/v1/courses/**").permitAll()
+                                // Chỉ liệt kê API public; {id:\d+} để không khớp nhầm /courses/instructed-courses.
+                                .requestMatchers(HttpMethod.GET,
+                                        "/api/v1/courses",
+                                        "/api/v1/courses/popular",
+                                        "/api/v1/courses/{id:\\d+}",
+                                        "/api/v1/courses/{id:\\d+}/curriculum").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/search/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                                 .anyRequest().authenticated()
