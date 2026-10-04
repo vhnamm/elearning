@@ -11,6 +11,7 @@ import {
     SafetyCertificateOutlined,
 } from '@ant-design/icons';
 import useAuth from '~hooks/useAuth';
+import { formatPrice } from '~/utils/course.util.js';
 import styles from './CourseDetail.module.scss';
 import {
     getCourseDetailPublic,
@@ -309,9 +310,7 @@ const CourseDetail = () => {
                             <>
                                 <div className={styles.priceSection}>
                                     <span className={styles.currentPrice}>
-                                        {isFree
-                                            ? 'Miễn phí'
-                                            : new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(course.price)}
+                                        {isFree ? 'Miễn phí' : formatPrice(course.price)}
                                     </span>
                                 </div>
 

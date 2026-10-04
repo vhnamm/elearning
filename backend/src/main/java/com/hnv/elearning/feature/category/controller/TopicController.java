@@ -4,6 +4,8 @@ import com.hnv.elearning.common.response.ApiResponse;
 import com.hnv.elearning.feature.category.dto.TopicDto;
 import com.hnv.elearning.feature.category.service.TopicService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,4 +30,16 @@ public class TopicController {
                 .build();
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/api/v1/topics/trending")
+    public ResponseEntity<ApiResponse<List<TopicDto>>> trendingTopics(Pageable pageable) {
+        List<TopicDto> rs = topicService.getTrendingTopics();
+
+        ApiResponse apiResponse = ApiResponse.builder()
+                .data(rs)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
 }

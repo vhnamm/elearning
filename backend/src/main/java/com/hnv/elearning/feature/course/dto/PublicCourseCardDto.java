@@ -19,10 +19,8 @@ public class PublicCourseCardDto {
     private BigDecimal price;
     private String level;
     private String instructorName;
-    private String categoryName;
     private String subcategoryName;
     private Double rating;
     private Long reviewCount;
-    private Integer totalEnrollments;
     private LocalDateTime createdAt;
 }

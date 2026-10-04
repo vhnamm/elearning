@@ -11,12 +11,15 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecificationExecutor<Course> {
 
+    // Fetch kèm instructor/subcategory để card khóa học không bị N+1 khi map DTO.
     @Override
+    @EntityGraph(attributePaths = {"instructor", "subcategory"})
     Page<Course> findAll(Specification<Course> spec, Pageable pageable);
 
     @EntityGraph(attributePaths = {"learningOutcomes", "requiredSkills", "category", "subcategory", "topics"})
@@ -25,6 +28,26 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
     boolean existsByIdAndInstructorId(Long id, Long instructorId);
 
     boolean existsByIdAndStatus(Long id, CourseStatus status);
+
+    // Khóa phổ biến cho trang chủ: điểm = (số ghi danh còn hiệu lực từ :since + 1) × điểm đánh giá đã làm mượt.
+    // Điểm làm mượt = (tổng sao + 5 × 3.5) / (số review + 5), nên khóa chưa có review được 3.5 và ít review không bị đẩy lên quá cao.
+    // Cộng 1 vào số ghi danh để khóa chưa ai học gần đây vẫn được xếp theo điểm đánh giá.
+    @EntityGraph(attributePaths = {"instructor", "subcategory"})
+    @Query("""
+            SELECT c
+            FROM Course c
+            WHERE c.status = com.hnv.elearning.feature.course.enums.CourseStatus.PUBLISHED
+            ORDER BY
+              ((SELECT COUNT(e) FROM Enrollment e
+                 WHERE e.course = c
+                   AND e.status <> com.hnv.elearning.feature.enrollment.enums.EnrollmentStatus.REVOKED
+                   AND e.enrolledAt >= :since) + 1)
+              * ((SELECT COALESCE(SUM(r.rating), 0) FROM CourseReview r WHERE r.course = c) + 17.5)
+              / ((SELECT COUNT(r2) FROM CourseReview r2 WHERE r2.course = c) + 5.0) DESC,
+              c.createdAt DESC,
+              c.id DESC
+            """)
+    List<Course> findPopularCourses(@Param("since") LocalDateTime since, Pageable pageable);
 
     // Danh mục cha có nhiều khóa đã xuất bản nhất, dùng khi chưa nhập từ khóa.
     @Query("""

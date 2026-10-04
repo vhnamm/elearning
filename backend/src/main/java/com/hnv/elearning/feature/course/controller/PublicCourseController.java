@@ -49,6 +49,20 @@ public class PublicCourseController {
         );
     }
 
+    // Gợi ý tìm kiếm liên quan, tách khỏi kết quả tìm kiếm: GET /api/v1/courses/related-queries?keyword=.
+    @GetMapping("/related-queries")
+    public ResponseEntity<ApiResponse<List<String>>> getRelatedQueries(
+            @RequestParam(required = false) String keyword
+    ) {
+        List<String> data = publicCourseService.getRelatedQueries(keyword);
+        return ResponseEntity.ok(
+                ApiResponse.<List<String>>builder()
+                        .code(HttpStatus.OK.value())
+                        .data(data)
+                        .build()
+        );
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<CourseDetailDto>> getCourseDetail(@PathVariable("id") Long id) {
         CourseDetailDto result = publicCourseService.getCourseDetail(id);

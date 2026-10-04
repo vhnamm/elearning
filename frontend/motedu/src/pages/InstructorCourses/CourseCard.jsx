@@ -1,5 +1,6 @@
 import {DeleteOutlined, MoreOutlined, PictureOutlined, StarFilled, TeamOutlined} from "@ant-design/icons"
 import {Link} from "react-router-dom";
+import {formatPrice} from "~/utils/course.util.js";
 import styles from "./InstructorCourses.module.scss"
 
 
@@ -11,27 +12,6 @@ const STATUS_META = {
     REJECTED: { label: "Bị từ chối", className: "statusRejected" },
 };
 
-
-const formatCoursePrice = (price) => {
-    // 1. Trường hợp chưa đặt giá (null, undefined, hoặc chuỗi rỗng)
-    if (price === null || price === undefined || price === "") {
-        // Nếu là bản nháp/quản lý khoá học của instructor
-        return "--";
-    }
-
-    const numPrice = Number(price);
-
-    // 2. Trường hợp giá bằng 0
-    if (numPrice === 0) {
-        return "Miễn phí";
-    }
-
-    // 3. Trường hợp có giá cụ thể -> format tiền VND
-    return new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND",
-    }).format(numPrice);
-};
 
 const formatRating = (rating) => {
     if(rating === 0) return "--";
@@ -70,7 +50,8 @@ const CourseCard = ({ course }) => {
                     </div>
 
 
-                    <h3 className={styles.price}>{formatCoursePrice(course?.price)}</h3>
+                    {/* Bản nháp chưa đặt giá thì formatPrice trả chuỗi rỗng, hiển thị "--" */}
+                    <h3 className={styles.price}>{formatPrice(course?.price) || "--"}</h3>
                 </div>
 
                 <div className={styles.actions}>

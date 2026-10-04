@@ -71,8 +71,17 @@ public class JwtFilter extends OncePerRequestFilter {
             "/api/v1/auth/logout"
     );
 
+    // GET công khai (khớp permitAll trong SecurityConfig, không dùng thông tin user) nên khỏi load user từ DB.
+    private static final java.util.regex.Pattern PUBLIC_GET_PATHS = java.util.regex.Pattern.compile(
+            "/api/v1/courses(/popular|/\\d+|/\\d+/curriculum)?|/api/v1/(search|categories)(/.*)?"
+    );
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return PUBLIC_AUTH_PATHS.contains(request.getRequestURI());
+        String uri = request.getRequestURI();
+        if (PUBLIC_AUTH_PATHS.contains(uri)) {
+            return true;
+        }
+        return "GET".equals(request.getMethod()) && PUBLIC_GET_PATHS.matcher(uri).matches();
     }
 }

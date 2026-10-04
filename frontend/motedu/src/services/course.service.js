@@ -38,6 +38,7 @@ export const searchCourses = async ({
   keyword,
   categoryIds = [],
   subcategoryIds = [],
+  topicId,
   levels = [],
   minRating,
   priceType,
@@ -48,15 +49,20 @@ export const searchCourses = async ({
   size = 5,
 } = {}) => {
   const params = new URLSearchParams();
-  if (keyword) params.set("keyword", keyword);
-  categoryIds.forEach((id) => params.append("categoryIds", id));
-  subcategoryIds.forEach((id) => params.append("subcategoryIds", id));
-  levels.forEach((level) => params.append("levels", level));
-  if (minRating) params.set("minRating", minRating);
-  if (priceType && priceType !== "all") params.set("priceType", priceType);
-  if (min !== "" && min != null) params.set("min", min);
-  if (max !== "" && max != null) params.set("max", max);
-  if (sort && sort !== "popular") params.set("sort", sort);
+    if (keyword) params.set("keyword", keyword);
+
+// Nối mảng thành chuỗi "1,2,3"
+    if (categoryIds?.length) params.set("categoryIds", categoryIds.join(","));
+    if (subcategoryIds?.length) params.set("subcategoryIds", subcategoryIds.join(","));
+    if(topicId) params.set("topicId", topicId)
+    if (levels?.length) params.set("levels", levels.join(","));
+    if (minRating) params.set("minRating", minRating);
+    if (priceType && priceType !== "all") params.set("priceType", priceType);
+    if (min !== "" && min != null) params.set("min", min);
+    if (max !== "" && max != null) params.set("max", max);
+    if (sort && sort !== "popular") params.set("sort", sort);
+
+
   params.set("page", String(page));
   params.set("size", String(size));
 
@@ -64,16 +70,12 @@ export const searchCourses = async ({
   return data.data;
 };
 
-export const getPublishedCourses = async ({
-  keyword,
-  min,
-  max,
-  page = 0,
-  size = 8,
-  sort = "newest",
-} = {}) => {
-  const { data } = await http.get("/courses", {
-    params: { keyword, min, max, page, size, sort },
+
+
+// Gợi ý tìm kiếm liên quan; chưa có từ khóa thì trả danh mục nổi bật.
+export const getRelatedQueries = async (keyword) => {
+  const { data } = await http.get("/courses/related-queries", {
+    params: keyword ? { keyword } : {},
   });
   return data.data;
 };

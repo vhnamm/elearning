@@ -7,71 +7,74 @@ import {
   faChevronRight,
   faStar,
 } from "@fortawesome/free-solid-svg-icons";
+import { Skeleton } from "antd";
 import clsx from "clsx";
 import {
   getPopularCourses,
-  getPublishedCourses,
 } from "~services/course.service.js";
+import { getTrendingTopics } from "~services/category.service.js";
+import { mapCourseCard } from "~/utils/course.util.js";
 import styles from "./Home.module.scss";
+import {searchCourses} from "~services/course.service.js";
 
-const SKILL_TABS = [
-  { label: "Trí tuệ nhân tạo (AI)", keyword: "AI" },
-  { label: "Python", keyword: "Python" },
-  { label: "Microsoft Excel", keyword: "Excel" },
-  { label: "AI Agents & Agentic AI", keyword: "AI Agent" },
-  { label: "Marketing số", keyword: "Marketing" },
-  { label: "Amazon AWS", keyword: "AWS" },
-];
+
+const POPULAR_SIZE = 4;
 
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80";
 
-// Giá 0 hiển thị "Miễn phí", giống thẻ khóa học ở trang quản lý khóa học của giảng viên.
-const formatPrice = (price) => {
-  if (price === null || price === undefined || price === "") return "";
-  const numPrice = Number(price);
-  if (numPrice === 0) return "Miễn phí";
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-    maximumFractionDigits: 0,
-  }).format(numPrice);
-};
+// Thẻ khóa học dùng chung cho lưới phổ biến và carousel theo topic.
+const CourseCard = ({ course, className }) => (
+  <Link
+    to={`/course/${course.id}`}
+    className={clsx(styles.courseCard, className)}
+  >
+    <div className={styles.courseThumb}>
+      <img src={course.image} alt={course.title} />
+    </div>
+    <div className={styles.courseBody}>
+      <h3>{course.title}</h3>
+      <p>{course.instructor}</p>
+      <div className={styles.courseMeta}>
+        <div className={styles.rating}>
+          <FontAwesomeIcon icon={faStar} />
+          <span>{course.rating}</span>
+          <span className={styles.reviews}>({course.reviews})</span>
+        </div>
+        <div className={styles.price}>{course.price}</div>
+      </div>
+    </div>
+  </Link>
+);
 
-// Chuẩn hóa số sao về 1 chữ số thập phân; chưa có đánh giá thì hiển thị "--".
-const formatRating = (rating) => {
-  const numRating = Number(rating) || 0;
-  if (numRating === 0) return "--";
-  return numRating.toFixed(1);
-};
-
-const formatReviewCount = (count) => {
-  const n = Number(count) || 0;
-  if (n >= 1000) {
-    return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k đánh giá`;
-  }
-  return `${n} đánh giá`;
-};
-
-const mapCourseCard = (course) => ({
-  id: course.id,
-  title: course.title,
-  instructor: course.instructorName || "Giảng viên MótEdu",
-  rating: formatRating(course.rating),
-  reviews: formatReviewCount(course.reviewCount),
-  price: formatPrice(course.price),
-  image: course.thumbnailUrl,
-});
+// Khung chờ cùng bố cục với thẻ khóa học để trang không bị nhảy khi dữ liệu về.
+const CourseCardSkeleton = ({ className }) => (
+  <div className={clsx(styles.courseCard, className)} aria-hidden>
+    <div className={styles.courseThumb}>
+      <Skeleton.Node active style={{ width: "100%", height: "100%" }}>
+        <span />
+      </Skeleton.Node>
+    </div>
+    <div className={styles.courseBody}>
+      <Skeleton active title={{ width: "90%" }} paragraph={{ rows: 2 }} />
+    </div>
+  </div>
+);
 
 const Home = () => {
-  const [activeTab, setActiveTab] = useState(SKILL_TABS[0]);
+  const [activeTab, setActiveTab] = useState(null);
   const [popularCourses, setPopularCourses] = useState([]);
-  const [skillCourses, setSkillCourses] = useState([]);
+  const [topicCourses, setTopicCourses] = useState([]);
   const [popularLoading, setPopularLoading] = useState(true);
   const [skillLoading, setSkillLoading] = useState(true);
+
   const [popularError, setPopularError] = useState(null);
   const [skillError, setSkillError] = useState(null);
   const carouselRef = useRef(null);
+  const [trendingTopics, setTrendingTopics] = useState([])
+
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 
   useEffect(() => {
     let cancelled = false;
@@ -79,8 +82,10 @@ const Home = () => {
     const loadPopular = async () => {
       setPopularLoading(true);
       setPopularError(null);
+
+      await sleep(1000)
       try {
-        const data = await getPopularCourses(4);
+        const data = await getPopularCourses(POPULAR_SIZE);
         if (!cancelled) {
           setPopularCourses((data || []).map(mapCourseCard));
         }
@@ -102,34 +107,55 @@ const Home = () => {
 
   useEffect(() => {
     let cancelled = false;
-
-    const loadSkillCourses = async () => {
-      setSkillLoading(true);
-      setSkillError(null);
-      try {
-        const page = await getPublishedCourses({
-          keyword: activeTab.keyword,
-          page: 0,
-          size: 8,
-        });
-        if (!cancelled) {
-          setSkillCourses((page?.content || []).map(mapCourseCard));
+    // Khi có topic thì loading của carousel do effect tải khóa học theo topic quản lý.
+    const loadTrendingTopic = async () => {
+        try {
+            const data = await getTrendingTopics()
+            if (cancelled) return
+            setTrendingTopics(data)
+            setActiveTab(data[0] ?? null)
+            if (data.length === 0) setSkillLoading(false)
         }
-      } catch {
-        if (!cancelled) {
-          setSkillError("Không tải được khóa học theo kỹ năng.");
-          setSkillCourses([]);
+        catch {
+            if(!cancelled){
+                setSkillError("Không tải được topic hot")
+                setTrendingTopics([])
+                setSkillLoading(false)
+            }
         }
-      } finally {
-        if (!cancelled) setSkillLoading(false);
-      }
-    };
+    }
 
-    loadSkillCourses();
+    loadTrendingTopic();
     return () => {
       cancelled = true;
     };
-  }, [activeTab]);
+  }, []);
+
+    useEffect(() => {
+        if (!activeTab) return;
+        let cancelled = false;
+        const fetchTopicCourses = async () => {
+            setSkillLoading(true)
+            setSkillError(null)
+            await sleep(1000)
+            try {
+                const data = await searchCourses({topicId: activeTab.id})
+                if (!cancelled) setTopicCourses((data?.content || []).map(mapCourseCard))
+            }catch{
+                if (!cancelled) {
+                    setSkillError("Không tải được khóa học theo chủ đề này.")
+                    setTopicCourses([])
+                }
+            }finally {
+                if(!cancelled) setSkillLoading(false)
+            }
+        }
+
+        fetchTopicCourses()
+        return () => {
+            cancelled = true;
+        };
+    }, [activeTab]);
 
   const scrollCarousel = (direction) => {
     const el = carouselRef.current;
@@ -170,55 +196,41 @@ const Home = () => {
             Xem tất cả
           </a>
         </div>
-        {popularLoading && <p>Đang tải khóa học...</p>}
         {popularError && <p>{popularError}</p>}
         {!popularLoading && !popularError && popularCourses.length === 0 && (
           <p>Chưa có khóa học phổ biến.</p>
         )}
         <div className={styles.courseGrid}>
+          {popularLoading &&
+            Array.from({ length: POPULAR_SIZE }, (_, i) => (
+              <CourseCardSkeleton key={i} />
+            ))}
           {popularCourses.map((course) => (
-            <article key={course.id} className={styles.courseCard}>
-              <div className={styles.courseThumb}>
-                <img src={course.image} alt={course.title} />
-              </div>
-              <div className={styles.courseBody}>
-                <h3>{course.title}</h3>
-                <p>{course.instructor}</p>
-                <div className={styles.courseMeta}>
-                  <div className={styles.rating}>
-                    <FontAwesomeIcon icon={faStar} />
-                    <span>{course.rating}</span>
-                    <span className={styles.reviews}>({course.reviews})</span>
-                  </div>
-                  <div className={styles.price}>{course.price}</div>
-                </div>
-              </div>
-            </article>
+            <CourseCard key={course.id} course={course} />
           ))}
         </div>
       </section>
 
       <section className={styles.section}>
         <div className={styles.skillsIntro}>
-          <h2>Kỹ năng thay đổi sự nghiệp và cuộc sống</h2>
+          <h2>Kỹ năng xu hướng được học nhiều nhất</h2>
           <p>
-            Từ kỹ năng thiết yếu đến chủ đề chuyên sâu, MótEdu đồng hành cùng
-            bạn phát triển nghề nghiệp.
+              Bỏ túi các kỹ năng thực chiến của doanh nghiệp trên MótEdu
           </p>
         </div>
 
         <div className={styles.tabs}>
-          {SKILL_TABS.map((tab) => (
+          {trendingTopics.map((topic) => (
             <button
-              key={tab.label}
+              key={topic.id}
               type="button"
               className={clsx(
                 styles.tab,
-                activeTab.label === tab.label && styles.tabActive
+                activeTab?.id === topic.id && styles.tabActive
               )}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => setActiveTab(topic)}
             >
-              {tab.label}
+              {topic.name}
             </button>
           ))}
         </div>
@@ -234,32 +246,22 @@ const Home = () => {
           </button>
 
           <div className={styles.carousel} ref={carouselRef}>
-            {skillLoading && <p>Đang tải...</p>}
             {skillError && <p>{skillError}</p>}
-            {!skillLoading && !skillError && skillCourses.length === 0 && (
+            {!skillLoading && !skillError && topicCourses.length === 0 && (
               <p>Chưa có khóa học cho chủ đề này.</p>
             )}
-            {skillCourses.map((course) => (
-              <article key={course.id} className={styles.skillCard}>
-                <img src={course.image} alt={course.title} />
-                <div className={styles.skillCardBody}>
-                  <h3>{course.title}</h3>
-                  <p>{course.instructor}</p>
-                  <div className={styles.skillCardMeta}>
-                    <div className={styles.ratingSm}>
-                      <span>{course.rating}</span>
-                      <FontAwesomeIcon icon={faStar} />
-                      <span className={styles.reviews}>
-                        ({course.reviews})
-                      </span>
-                    </div>
-                  </div>
-                  <div className={styles.priceRow}>
-                    <span>{course.price}</span>
-                  </div>
-                </div>
-              </article>
-            ))}
+            {skillLoading &&
+              Array.from({ length: POPULAR_SIZE }, (_, i) => (
+                <CourseCardSkeleton key={i} className={styles.carouselItem} />
+              ))}
+            {!skillLoading &&
+              topicCourses.map((course) => (
+                <CourseCard
+                  key={course.id}
+                  course={course}
+                  className={styles.carouselItem}
+                />
+              ))}
           </div>
 
           <button
@@ -273,7 +275,7 @@ const Home = () => {
         </div>
 
         <a href="#" className={styles.showAll}>
-          Xem tất cả khóa học {activeTab.label}
+          Xem tất cả khóa học {activeTab?.name}
           <FontAwesomeIcon icon={faArrowRight} />
         </a>
       </section>

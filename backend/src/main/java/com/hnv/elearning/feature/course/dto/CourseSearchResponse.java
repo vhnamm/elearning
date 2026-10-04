@@ -19,5 +19,4 @@ public class CourseSearchResponse {
     private int totalPages;
     private int page;
     private int size;
-    private List<String> relatedQueries;
 }

@@ -4,7 +4,10 @@ import java.util.Collection;
 import java.util.Map;
 
 public interface CourseReviewService {
-    Map<Long, Double> getAverageRatingsByCourseIds(Collection<Long> courseIds);
+    // Điểm trung bình + số review trong một truy vấn.
+    Map<Long, RatingSummary> getRatingSummariesByCourseIds(Collection<Long> courseIds);
 
-    Map<Long, Long> getReviewCountsByCourseIds(Collection<Long> courseIds);
+    record RatingSummary(double averageRating, long reviewCount) {
+        public static final RatingSummary EMPTY = new RatingSummary(0.0, 0L);
+    }
 }

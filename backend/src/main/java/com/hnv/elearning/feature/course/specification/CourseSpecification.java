@@ -39,26 +39,11 @@ public class CourseSpecification {
                         cb.like(cb.lower(root.get("title")), "%" +  title.toLowerCase() + "%");
     }
 
-    public static Specification<Course> priceBetween(BigDecimal min, BigDecimal max){
-        return (root, query, cb) -> {
-            if(min == null && max == null) return null;
-            if(min != null && max != null) return cb.between(root.get("price"), min, max);
-            if(min == null && max != null) return cb.lessThanOrEqualTo(root.get("price"), max);
-            else return cb.greaterThanOrEqualTo(root.get("price"), min);
-        };
-    }
-
     //custom cho actor cu the
     public static Specification<Course> forInstructor(Long instructorId, CourseStatus status, String keyword){
         return Specification.where(hasInstructorId(instructorId))
                 .and(hasCourseStatus(status))
                 .and(hasCourseTitle(keyword));
-    }
-
-    public static Specification<Course> forPublic(String keyword, BigDecimal min, BigDecimal max){
-        return Specification.where(hasCourseStatus(CourseStatus.PUBLISHED))
-                .and(hasCourseTitle(keyword))
-                .and(priceBetween(min, max));
     }
 
     // Khớp từ khóa với tên khóa, mô tả ngắn và giảng viên. Không còn khớp theo tên danh mục/danh mục con.
@@ -95,6 +80,10 @@ public class CourseSpecification {
                         : root.get("subcategory").get("id").in(subcategoryIds);
     }
 
+    public static Specification<Course> hasTopicId(Long topicId) {
+        return (root, query, cb) ->
+                topicId == null ? null : cb.equal(root.get("topics").get("id"), topicId);
+    }
     // Giữ khóa học có cấp độ nằm trong danh sách được chọn.
     public static Specification<Course> hasLevels(Collection<CourseLevel> levels) {
         return (root, query, cb) ->
@@ -127,6 +116,7 @@ public class CourseSpecification {
                 .and(matchesKeyword(req.getKeyword()))
                 .and(hasCategoryIds(req.getCategoryIds()))
                 .and(hasSubcategoryIds(req.getSubcategoryIds()))
+                .and(hasTopicId(req.getTopicId()))
                 .and(hasLevels(req.getLevels()))
                 .and(hasMinRating(req.getMinRating()))
                 .and(hasPriceFilter(req.getPriceType(), req.getMin(), req.getMax()));

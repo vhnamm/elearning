@@ -56,13 +56,13 @@ public class CourseManagementServiceImpl implements CourseManagementService {
         ).toList();
 
         Map<Long, Integer> enrollmentCountMap = enrollmentService.getEnrolledCountByCourseIds(courseIds);
-        Map<Long, Double> avgRatingMap = courseReviewService.getAverageRatingsByCourseIds(courseIds);
+        Map<Long, CourseReviewService.RatingSummary> ratingMap = courseReviewService.getRatingSummariesByCourseIds(courseIds);
 
         return courses.map(
                 course -> {
                     return InstructorCourseItemDto.builder()
                             .id(course.getId())
-                            .rating(avgRatingMap.get(course.getId()))
+                            .rating(ratingMap.containsKey(course.getId()) ? ratingMap.get(course.getId()).averageRating() : null)
                             .price(course.getPrice())
                             .status(course.getStatus())
                             .thumbnailUrl(course.getThumbnailUrl())

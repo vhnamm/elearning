@@ -14,6 +14,9 @@ public interface PublicCourseService {
     // Tìm khóa học đã xuất bản theo từ khóa, bộ lọc, sắp xếp và phân trang.
     CourseSearchResponse search(CourseSearchRequest request);
 
+    // Gợi ý từ khóa liên quan; chưa nhập từ khóa thì trả danh mục có nhiều khóa nhất.
+    List<String> getRelatedQueries(String keyword);
+
     CourseDetailDto getCourseDetail(Long courseId);
 
     // Chương trình học công khai, chỉ của khóa học đã xuất bản.

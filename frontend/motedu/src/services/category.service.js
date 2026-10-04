@@ -14,3 +14,8 @@ export const searchTopics = async (keyword = "") => {
     const {data} = await http.get("/topics", { params: { keyword } })
     return data.data;
 }
+
+export const getTrendingTopics = async () => {
+    const {data} = await http.get("/topics/trending")
+    return data.data;
+}

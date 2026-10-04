@@ -8,8 +8,9 @@ import {
   faStar,
 } from "@fortawesome/free-solid-svg-icons";
 import clsx from "clsx";
-import { searchCourses } from "~services/course.service.js";
+import { getRelatedQueries, searchCourses } from "~services/course.service.js";
 import { getAllCategories } from "~services/category.service.js";
+import { formatPrice } from "~/utils/course.util.js";
 import styles from "./Search.module.scss";
 
 const SORT_OPTIONS = [
@@ -37,13 +38,6 @@ const LEVEL_OPTIONS = Object.entries(LEVEL_LABELS).map(([key, label]) => ({
   key,
   label,
 }));
-
-// Hiển thị giá VND, giá 0 thì ghi Miễn phí.
-const formatPrice = (price) => {
-  const value = Number(price);
-  if (!value) return "Miễn phí";
-  return `${new Intl.NumberFormat("vi-VN").format(value)} đ`;
-};
 
 // Định dạng số lượng theo kiểu Việt Nam, ví dụ 1.240.
 const formatCount = (count) =>
@@ -90,6 +84,7 @@ const Search = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [relatedQueries, setRelatedQueries] = useState([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [priceDraft, setPriceDraft] = useState({ min, max });
   const [priceSource, setPriceSource] = useState(`${min}|${max}`);
@@ -114,6 +109,21 @@ const Search = () => {
       cancelled = true;
     };
   }, []);
+
+  // Gợi ý liên quan chỉ phụ thuộc từ khóa, nên không tải lại khi đổi trang hay bộ lọc.
+  useEffect(() => {
+    let cancelled = false;
+    getRelatedQueries(keyword)
+      .then((data) => {
+        if (!cancelled) setRelatedQueries(data || []);
+      })
+      .catch(() => {
+        if (!cancelled) setRelatedQueries([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [keyword]);
 
   useEffect(() => {
     let cancelled = false;
@@ -214,7 +224,6 @@ const Search = () => {
   const courses = result?.content || [];
   const total = result?.totalElements || 0;
   const totalPages = result?.totalPages || 0;
-  const relatedQueries = result?.relatedQueries || [];
   const hasFilters =
     categoryIds.length > 0 ||
     levels.length > 0 ||

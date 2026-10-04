@@ -14,6 +14,7 @@ public class CourseSearchRequest {
     private String keyword;
     private List<Long> categoryIds;
     private List<Long> subcategoryIds;
+    private Long topicId;
     private List<CourseLevel> levels;
     private Double minRating;
     private String priceType;
@@ -21,6 +22,6 @@ public class CourseSearchRequest {
     private BigDecimal max;
     private CourseStatus status;
     private String sort;
-    private Integer page;
-    private Integer size;
+    private Integer page = 0;
+    private Integer size = 5;
 }

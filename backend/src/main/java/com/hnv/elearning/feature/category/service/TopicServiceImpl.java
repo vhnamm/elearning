@@ -1,9 +1,11 @@
 package com.hnv.elearning.feature.category.service;
 
 import com.hnv.elearning.feature.category.dto.TopicDto;
+import com.hnv.elearning.feature.category.entity.Topic;
 import com.hnv.elearning.feature.category.mapper.TopicMapper;
 import com.hnv.elearning.feature.category.repository.TopicRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -25,5 +27,11 @@ public class TopicServiceImpl implements TopicService {
                 .stream()
                 .map(topicMapper::toTopicDto)
                 .toList();
+    }
+
+    @Override
+    public List<TopicDto> getTrendingTopics() {
+        List<Topic> topics = topicRepository.getRecentTrendingTopics(6L);
+        return topics.stream().map(topic ->  topicMapper.toTopicDto(topic)).toList();
     }
 }
