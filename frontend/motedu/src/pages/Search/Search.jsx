@@ -9,6 +9,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import clsx from "clsx";
 import { searchCourses } from "~services/course.service.js";
+import { getAllCategories } from "~services/category.service.js";
 import styles from "./Search.module.scss";
 
 const SORT_OPTIONS = [
@@ -32,11 +33,10 @@ const LEVEL_LABELS = {
   ADVANCED: "Chuyên sâu / Nâng cao",
 };
 
-const BADGES = {
-  FREE: { label: "Khóa học miễn phí", tone: "free" },
-  TOP_RATED: { label: "Đánh giá cao", tone: "rated" },
-  NEW: { label: "Mới ra mắt", tone: "new" },
-};
+const LEVEL_OPTIONS = Object.entries(LEVEL_LABELS).map(([key, label]) => ({
+  key,
+  label,
+}));
 
 // Hiển thị giá VND, giá 0 thì ghi Miễn phí.
 const formatPrice = (price) => {
@@ -81,8 +81,6 @@ const Search = () => {
   const priceType = searchParams.get("priceType") || "all";
   const minRating = searchParams.get("minRating") || "";
   const categoryIds = searchParams.getAll("categoryIds");
-  const subcategoryIds = searchParams.getAll("subcategoryIds");
-  const topicIds = searchParams.getAll("topicIds");
   const levels = searchParams.getAll("levels");
   const min = searchParams.get("min") || "";
   const max = searchParams.get("max") || "";
@@ -91,6 +89,7 @@ const Search = () => {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [priceDraft, setPriceDraft] = useState({ min, max });
   const [priceSource, setPriceSource] = useState(`${min}|${max}`);
@@ -100,6 +99,21 @@ const Search = () => {
     setPriceSource(`${min}|${max}`);
     setPriceDraft({ min, max });
   }
+
+  // Danh mục sidebar lấy từ API danh mục tĩnh, không phụ thuộc kết quả tìm kiếm.
+  useEffect(() => {
+    let cancelled = false;
+    getAllCategories()
+      .then((data) => {
+        if (!cancelled) setCategories(data || []);
+      })
+      .catch(() => {
+        if (!cancelled) setCategories([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -113,8 +127,6 @@ const Search = () => {
         const data = await searchCourses({
           keyword: params.get("keyword") || "",
           categoryIds: params.getAll("categoryIds"),
-          subcategoryIds: params.getAll("subcategoryIds"),
-          topicIds: params.getAll("topicIds"),
           levels: params.getAll("levels"),
           minRating: params.get("minRating") || "",
           priceType: params.get("priceType") || "all",
@@ -159,20 +171,17 @@ const Search = () => {
   };
 
   // Bật hoặc tắt một giá trị trong bộ lọc nhiều lựa chọn, như danh mục và cấp độ.
-  const toggleListValue = (key, value, current, resetKeys = []) => {
+  const toggleListValue = (key, value, current) => {
     const next = current.includes(value)
       ? current.filter((item) => item !== value)
       : [...current, value];
-    const reset = Object.fromEntries(resetKeys.map((resetKey) => [resetKey, []]));
-    updateParams({ [key]: next, ...reset });
+    updateParams({ [key]: next });
   };
 
   // Xóa bộ lọc, giữ lại từ khóa và cách sắp xếp.
   const clearFilters = () => {
     updateParams({
       categoryIds: [],
-      subcategoryIds: [],
-      topicIds: [],
       levels: [],
       minRating: "",
       priceType: "",
@@ -205,15 +214,9 @@ const Search = () => {
   const courses = result?.content || [];
   const total = result?.totalElements || 0;
   const totalPages = result?.totalPages || 0;
-  const categories = result?.categories || [];
-  const subcategoryFacets = result?.subcategories || [];
-  const topicFacets = result?.topics || [];
-  const levelFacets = result?.levels || [];
   const relatedQueries = result?.relatedQueries || [];
   const hasFilters =
     categoryIds.length > 0 ||
-    subcategoryIds.length > 0 ||
-    topicIds.length > 0 ||
     levels.length > 0 ||
     Boolean(minRating) ||
     priceType !== "all" ||
@@ -221,8 +224,6 @@ const Search = () => {
     Boolean(max);
   const activeFilterCount =
     categoryIds.length +
-    subcategoryIds.length +
-    topicIds.length +
     levels.length +
     (minRating ? 1 : 0) +
     (priceType !== "all" ? 1 : 0) +
@@ -273,8 +274,6 @@ const Search = () => {
                     updateParams({
                       keyword: query,
                       categoryIds: [],
-                      subcategoryIds: [],
-                      topicIds: [],
                       levels: [],
                       minRating: "",
                       priceType: "",
@@ -343,77 +342,15 @@ const Search = () => {
                           <input
                             type="checkbox"
                             checked={categoryIds.includes(id)}
-                            onChange={() =>
-                              toggleListValue("categoryIds", id, categoryIds, [
-                                "subcategoryIds",
-                                "topicIds",
-                              ])
-                            }
+                            onChange={() => toggleListValue("categoryIds", id, categoryIds)}
                           />
                           {category.name}
                         </span>
-                        <em>{formatCount(category.count)}</em>
                       </label>
                     );
                   })}
                 </div>
               </section>
-
-              {subcategoryFacets.length > 0 && (
-                <section className={styles.filterBlock}>
-                  <h3>
-                    Danh mục con
-                    <FontAwesomeIcon icon={faChevronDown} />
-                  </h3>
-                  <div className={styles.options}>
-                    {subcategoryFacets.map((subcategory) => {
-                      const id = String(subcategory.id);
-                      return (
-                        <label key={id} className={styles.checkRow}>
-                          <span>
-                            <input
-                              type="checkbox"
-                              checked={subcategoryIds.includes(id)}
-                              onChange={() =>
-                                toggleListValue("subcategoryIds", id, subcategoryIds, ["topicIds"])
-                              }
-                            />
-                            {subcategory.name}
-                          </span>
-                          <em>{formatCount(subcategory.count)}</em>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </section>
-              )}
-
-              {topicFacets.length > 0 && (
-                <section className={styles.filterBlock}>
-                  <h3>
-                    Topic
-                    <FontAwesomeIcon icon={faChevronDown} />
-                  </h3>
-                  <div className={styles.options}>
-                    {topicFacets.map((topic) => {
-                      const id = String(topic.id);
-                      return (
-                        <label key={id} className={styles.checkRow}>
-                          <span>
-                            <input
-                              type="checkbox"
-                              checked={topicIds.includes(id)}
-                              onChange={() => toggleListValue("topicIds", id, topicIds)}
-                            />
-                            {topic.name}
-                          </span>
-                          <em>{formatCount(topic.count)}</em>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </section>
-              )}
 
               <section className={styles.filterBlock}>
                 <h3>
@@ -517,7 +454,7 @@ const Search = () => {
                   <FontAwesomeIcon icon={faChevronDown} />
                 </h3>
                 <div className={styles.options}>
-                  {levelFacets.map((level) => (
+                  {LEVEL_OPTIONS.map((level) => (
                     <label key={level.key} className={styles.checkRow}>
                       <span>
                         <input
@@ -525,9 +462,8 @@ const Search = () => {
                           checked={levels.includes(level.key)}
                           onChange={() => toggleListValue("levels", level.key, levels)}
                         />
-                        {LEVEL_LABELS[level.key] || level.name}
+                        {level.label}
                       </span>
-                      <em>{formatCount(level.count)}</em>
                     </label>
                   ))}
                 </div>
@@ -550,17 +486,11 @@ const Search = () => {
               )}
 
               {courses.map((course) => {
-                const badge = BADGES[course.badge];
                 const isFree = Number(course.price) === 0;
                 return (
                   <article key={course.id} className={styles.card}>
                     <div className={styles.thumb}>
                       <img src={course.thumbnailUrl} alt={course.title} />
-                      {badge && (
-                        <span className={clsx(styles.badge, styles[badge.tone])}>
-                          {badge.label}
-                        </span>
-                      )}
                     </div>
                     <div className={styles.cardBody}>
                       <div>

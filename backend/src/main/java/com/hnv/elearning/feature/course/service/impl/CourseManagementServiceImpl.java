@@ -10,6 +10,7 @@ import com.hnv.elearning.feature.course.entity.Course;
 import com.hnv.elearning.feature.course.enums.CourseStatus;
 import com.hnv.elearning.feature.course.mapper.CourseMapper;
 import com.hnv.elearning.feature.course.repository.CourseRepository;
+import com.hnv.elearning.feature.course.service.CourseCurriculumService;
 import com.hnv.elearning.feature.course.service.CourseManagementService;
 import com.hnv.elearning.feature.course.specification.CourseSpecification;
 import com.hnv.elearning.feature.enrollment.service.EnrollmentService;
@@ -31,8 +32,9 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CourseManagementManagementServiceImpl implements CourseManagementService {
+public class CourseManagementServiceImpl implements CourseManagementService {
     private final CourseRepository courseRepository;
+    private final CourseCurriculumService courseCurriculumService;
     private final EnrollmentService enrollmentService;
     private final CourseReviewService  courseReviewService;
     private final UserRepository userRepository;
@@ -41,7 +43,7 @@ public class CourseManagementManagementServiceImpl implements CourseManagementSe
 
     @PreAuthorize("hasRole('INSTRUCTOR')")
     @Override
-    public Page<InstructorCourseItemDto> getMyCourses(CourseFilterRequest request, Long instructorId, Pageable pageable) {
+    public Page<InstructorCourseItemDto> getMyCourses(CourseSearchRequest request, Long instructorId, Pageable pageable) {
         Specification spec = CourseSpecification.forInstructor(instructorId, request.getStatus(), request.getKeyword());
         Page<Course> courses = courseRepository.findAll(spec, pageable);
 
@@ -100,5 +102,14 @@ public class CourseManagementManagementServiceImpl implements CourseManagementSe
         CourseBasicInfoResponse response = courseMapper.toBasicInfoResponse(course);
 
         return response;
+    }
+
+    @PreAuthorize("hasRole('INSTRUCTOR')")
+    @Override
+    public CourseCurriculumResponse getCourseCurriculum(Long courseId, Long instructorId) {
+        if (!courseRepository.existsByIdAndInstructorId(courseId, instructorId)) {
+            throw new AppException(ErrorCode.COURSE_NOT_FOUND);
+        }
+        return courseCurriculumService.getCurriculum(courseId);
     }
 }

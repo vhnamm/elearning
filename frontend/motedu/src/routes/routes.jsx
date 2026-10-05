@@ -10,9 +10,13 @@ import Forbidden from "~pages/Forbidden/Forbidden.jsx";
 import RouteGuard from "./RouteGuard.jsx";
 import InstructorLayout from "~layouts/InstructorLayout/InstructorLayout.jsx";
 import InstructorCourses from "~pages/InstructorCourses/InstructorCourses.jsx";
+import Home from "~pages/Home/Home.jsx";
+import Search from "~pages/Search/Search.jsx";
 import CreateCourseInitial from "~pages/CreateCourse/CreateCourseInitial.jsx";
 import CreateCourseLayout from "~layouts/CreateCourseLayout/CreateCourseLayout.jsx";
 import CreateCourseOverview from "~pages/CreateCourse/CreateCourseOverview.jsx";
+import CourseDetail from "~pages/CourseDetail/CourseDetail.jsx";
+import NotFound from "~pages/NotFound/NotFound.jsx";
 import Home from "~pages/Home/Home.jsx";
 import Search from "~pages/Search/Search.jsx";
 import CourseApprove from "~pages/CourseApprove/CourseApprove.jsx";
@@ -20,61 +24,100 @@ import AdminLayout from "~layouts/AdminLayout/AdminLayout.jsx";
 
 const AppRoutes = () => (
   <Routes>
-      <Route path="/oauth2/callback" element={<Oauth2CallbackHandler/>}></Route>
-      <Route element={<AdminLayout/>}>
-          <Route path="/1" element={<CourseApprove/>}></Route>
-      </Route>
-      <Route path="/" element={<MainLayout/>}>
-          <Route index element={<Home />} />
-          <Route path="/search" element={<Search />} />
+    <Route path="/oauth2/callback" element={<Oauth2CallbackHandler />}></Route>
+    <Route element={<AdminLayout />}>
+      <Route path="/1" element={<CourseApprove />}></Route>
+    </Route>
+    <Route path="/" element={<MainLayout />}>
+      <Route index element={<Home />} />
+      <Route path="/search" element={<Search />} />
 
-          {/* Nhóm 2: Auth/Guest-only -> đã login thì đá về "/" */}
-          <Route element={<RouteGuard guestOnly redirectTo="/" />}>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register/>}></Route>
-          </Route>
+      <Route path="/course/:courseId" element={<CourseDetail />} />
 
-          {/* Nhóm 3: Non-Role Landing -> Instructor/Admin đã có role thì đá sang trang của họ */}
-          {/* TODO: đổi redirectTo="/instructor/courses" khi trang đó đã có route thật, hiện chưa tồn tại */}
-          <Route element={<RouteGuard forbiddenRoles={["INSTRUCTOR", "ADMIN"]} redirectTo="/" />}>
-              <Route path="/teaching" element={<InstructorLandingPage/>}></Route>
-          </Route>
-
-          {/* Public: trang báo không đủ quyền, dùng làm redirectTo cho các RouteGuard có allowedRoles */}
-          <Route path="/403" element={<Forbidden/>}></Route>
+      {/* Nhóm 2: Auth/Guest-only -> đã login thì đá về "/" */}
+      <Route element={<RouteGuard guestOnly redirectTo="/" />}>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />}></Route>
       </Route>
 
-      <Route element={<RouteGuard requireAuth allowedRoles={["INSTRUCTOR"]} redirectTo="/403" />}>
-          <Route element={<HeaderBlankLayout/>}>
-              <Route path={"/instructor/course/create"} element={<CreateCourseInitial/>}></Route>
-          </Route>
-
-          <Route path="/instructor/course/:courseId/manage" element={<CreateCourseLayout/>}>
-              <Route path="overview" element={<CreateCourseOverview/>}></Route>
-          </Route>
-      </Route>
-
-
-      {/* Nhóm 4: Onboarding/Upgrade -> bắt buộc login; đã là Instructor/Admin thì đá sang trang của họ */}
+      {/* Nhóm 3: Non-Role Landing -> Instructor/Admin đã có role thì đá sang trang của họ */}
       {/* TODO: đổi redirectTo="/instructor/courses" khi trang đó đã có route thật, hiện chưa tồn tại */}
-      <Route element={<RouteGuard requireAuth forbiddenRoles={["INSTRUCTOR", "ADMIN"]} redirectTo="/instructor/courses" />}>
-        <Route path="/instructor/onboarding" element={<HeaderBlankLayout/>}>
-          <Route index={true} element={<Onboarding/>}></Route>
-        </Route>
+      <Route
+        element={
+          <RouteGuard forbiddenRoles={["INSTRUCTOR", "ADMIN"]} redirectTo="/" />
+        }
+      >
+        <Route path="/teaching" element={<InstructorLandingPage />}></Route>
       </Route>
 
+      {/* Public: trang báo không đủ quyền, dùng làm redirectTo cho các RouteGuard có allowedRoles */}
+      <Route path="/403" element={<Forbidden />}></Route>
+    </Route>
 
-      <Route element={<RouteGuard requireAuth allowedRoles={["INSTRUCTOR"]} redirectTo="/403"/>}>
-          <Route path="/instructor" element={<InstructorLayout/>}>
-              <Route path="courses" element={<InstructorCourses/>}></Route>
-          </Route>
+    {/* Mọi đường dẫn không khớp route nào */}
+
+    <Route
+      element={
+        <RouteGuard
+          requireAuth
+          allowedRoles={["INSTRUCTOR"]}
+          redirectTo="/403"
+        />
+      }
+    >
+      <Route element={<HeaderBlankLayout />}>
+        <Route
+          path={"/instructor/course/create"}
+          element={<CreateCourseInitial />}
+        ></Route>
       </Route>
 
-      <Route element={<RouteGuard requireAuth allowedRoles={["ADMIN"]} redirectTo="/403"/>}>
-          <Route path="/admin" element={<AdminLayout/>}>
-              <Route path="courses/approve" element={<CourseApprove/>}></Route>
-          </Route>
+      <Route
+        path="/instructor/course/:courseId/manage"
+        element={<CreateCourseLayout />}
+      >
+        <Route path="overview" element={<CreateCourseOverview />}></Route>
       </Route>
+    </Route>
+
+    {/* Nhóm 4: Onboarding/Upgrade -> bắt buộc login; đã là Instructor/Admin thì đá sang trang của họ */}
+    {/* TODO: đổi redirectTo="/instructor/courses" khi trang đó đã có route thật, hiện chưa tồn tại */}
+    <Route
+      element={
+        <RouteGuard
+          requireAuth
+          forbiddenRoles={["INSTRUCTOR", "ADMIN"]}
+          redirectTo="/instructor/courses"
+        />
+      }
+    >
+      <Route path="/instructor/onboarding" element={<HeaderBlankLayout />}>
+        <Route index={true} element={<Onboarding />}></Route>
+      </Route>
+    </Route>
+
+    <Route
+      element={
+        <RouteGuard
+          requireAuth
+          allowedRoles={["INSTRUCTOR"]}
+          redirectTo="/403"
+        />
+      }
+    >
+      <Route path="/instructor" element={<InstructorLayout />}>
+        <Route path="courses" element={<InstructorCourses />}></Route>
+      </Route>
+    </Route>
+    <Route
+      element={
+        <RouteGuard requireAuth allowedRoles={["ADMIN"]} redirectTo="/403" />
+      }
+    >
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route path="courses/approve" element={<CourseApprove />}></Route>
+      </Route>
+    </Route>
   </Routes>
 );
 

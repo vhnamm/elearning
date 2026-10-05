@@ -1,17 +1,17 @@
 package com.hnv.elearning.feature.course.controller;
 
 import com.hnv.elearning.common.response.ApiResponse;
-import com.hnv.elearning.feature.course.dto.CourseFilterRequest;
+import com.hnv.elearning.feature.course.dto.CourseCurriculumResponse;
+import com.hnv.elearning.feature.course.dto.CourseDetailDto;
+import com.hnv.elearning.feature.course.dto.CourseSearchRequest;
+import com.hnv.elearning.feature.course.dto.CourseSearchResponse;
 import com.hnv.elearning.feature.course.dto.PublicCourseCardDto;
 import com.hnv.elearning.feature.course.service.PublicCourseService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,16 +37,38 @@ public class PublicCourseController {
         );
     }
 
+    // API công khai cho trang tìm kiếm / khám phá khóa học: GET /api/v1/courses.
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<PublicCourseCardDto>>> getPublishedCourses(
-            CourseFilterRequest request,
-            @PageableDefault(page = 0, size = 8, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
-    ) {
-        Page<PublicCourseCardDto> data = publicCourseService.getPublishedCourses(request, pageable);
+    public ResponseEntity<ApiResponse<CourseSearchResponse>> search(CourseSearchRequest request) {
+        CourseSearchResponse data = publicCourseService.search(request);
         return ResponseEntity.ok(
-                ApiResponse.<Page<PublicCourseCardDto>>builder()
+                ApiResponse.<CourseSearchResponse>builder()
                         .code(HttpStatus.OK.value())
                         .data(data)
+                        .build()
+        );
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<CourseDetailDto>> getCourseDetail(@PathVariable("id") Long id) {
+        CourseDetailDto result = publicCourseService.getCourseDetail(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.<CourseDetailDto>builder()
+                        .code(HttpStatus.OK.value())
+                        .data(result)
+                        .build()
+        );
+    }
+
+    @GetMapping("/{id}/curriculum")
+    public ResponseEntity<ApiResponse<CourseCurriculumResponse>> getCourseCurriculum(@PathVariable("id") Long id) {
+        CourseCurriculumResponse result = publicCourseService.getCourseCurriculum(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.<CourseCurriculumResponse>builder()
+                        .code(HttpStatus.OK.value())
+                        .data(result)
                         .build()
         );
     }

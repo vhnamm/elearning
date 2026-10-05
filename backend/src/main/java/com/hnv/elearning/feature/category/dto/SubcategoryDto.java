@@ -1,19 +1,17 @@
-package com.hnv.elearning.feature.search.dto;
+package com.hnv.elearning.feature.category.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class SearchFacet {
+@NoArgsConstructor
+public class SubcategoryDto {
     private Long id;
-    private String key;
     private String name;
-    private long count;
+    private String slug;
+
 }

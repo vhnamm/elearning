@@ -1,4 +1,4 @@
-package com.hnv.elearning.feature.search.dto;
+package com.hnv.elearning.feature.course.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,14 +14,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CourseSearchResponse {
-    private List<SearchCourse> content;
+    private List<PublicCourseCardDto> content;
     private long totalElements;
     private int totalPages;
     private int page;
     private int size;
-    private List<SearchFacet> categories;
-    private List<SearchFacet> subcategories;
-    private List<SearchFacet> topics;
-    private List<SearchFacet> levels;
     private List<String> relatedQueries;
 }

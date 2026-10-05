@@ -19,14 +19,14 @@ import org.springframework.web.bind.annotation.*;
 public class CourseManagementController {
     private final CourseManagementService courseManagementService;
 
-    @GetMapping("/api/v1/users/me/instructed-courses")
+    @GetMapping("/api/v1/courses/instructed-courses")
     public ResponseEntity<?> getInstructorCourses(
             @AuthenticationPrincipal(expression = "id") Long instructorId,
-            CourseFilterRequest courseFilterRequest,
+            CourseSearchRequest request,
             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     )
     {
-        var data = courseManagementService.getMyCourses(courseFilterRequest, instructorId, pageable);
+        var data = courseManagementService.getMyCourses(request, instructorId, pageable);
         ApiResponse<Page<InstructorCourseItemDto>> response = ApiResponse.<Page<InstructorCourseItemDto>>builder()
                 .code(HttpStatus.OK.value())
                 .data(data)
@@ -62,5 +62,19 @@ public class CourseManagementController {
                 .code(HttpStatus.OK.value())
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/api/v1/instructor/courses/{id}/curriculum")
+    public ResponseEntity<ApiResponse<CourseCurriculumResponse>> getCourseCurriculum(
+            @PathVariable(name = "id") Long courseId,
+            @AuthenticationPrincipal User user
+    ) {
+        CourseCurriculumResponse dto = courseManagementService.getCourseCurriculum(courseId, user.getId());
+        return ResponseEntity.ok(
+                ApiResponse.<CourseCurriculumResponse>builder()
+                        .code(HttpStatus.OK.value())
+                        .data(dto)
+                        .build()
+        );
     }
 }

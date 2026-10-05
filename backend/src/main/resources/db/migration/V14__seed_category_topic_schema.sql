@@ -133,28 +133,3 @@ INSERT INTO topics (id, subcategory_id, name, slug, status, created_at) VALUES
 -- Topics cho Sub 22 (Video)
 (34, 22, 'Adobe Premiere Pro',     'adobe-premiere-pro',     'approved', NOW()),
 (35, 22, 'CapCut Video Editing',   'capcut-video-editing',   'approved', NOW());
-
-
--- 2. Gắn tags chủ đề (Topics) vào từng khoá học qua bảng course_topics
--- Áp dụng cho bảng có PK (course_id, topic_id) hoặc tự tăng id:
-INSERT IGNORE INTO course_topics (course_id, topic_id) VALUES
-    -- Khóa 1 (Spring Boot) gắn tag: Spring Boot (1), Java (6)
-    (1, 1),
-    (1, 6),
-
-    -- Khóa 2 (Figma UI/UX) gắn tag: Figma (12), Design System (13)
-    (2, 12),
-    (2, 13),
-
-    -- Khóa 3 (OpenCV YOLO) gắn tag: OpenCV (17), YOLO Object Detection (18), Python (7)
-    (3, 17),
-    (3, 18),
-    (3, 7),
-
-    -- Khóa 4 (HeyGen Video AI) gắn tag: HeyGen Video AI (22), ChatGPT & Prompt Eng (23)
-    (4, 22),
-    (4, 23),
-
-    -- Khóa 5 (IELTS) gắn tag: IELTS Writing Task 2 (31), IELTS Overall (32)
-    (5, 31),
-    (5, 32);
