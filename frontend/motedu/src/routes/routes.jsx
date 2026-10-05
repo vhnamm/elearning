@@ -17,8 +17,6 @@ import CreateCourseLayout from "~layouts/CreateCourseLayout/CreateCourseLayout.j
 import CreateCourseOverview from "~pages/CreateCourse/CreateCourseOverview.jsx";
 import CourseDetail from "~pages/CourseDetail/CourseDetail.jsx";
 import NotFound from "~pages/NotFound/NotFound.jsx";
-import Home from "~pages/Home/Home.jsx";
-import Search from "~pages/Search/Search.jsx";
 import CourseApprove from "~pages/CourseApprove/CourseApprove.jsx";
 import AdminLayout from "~layouts/AdminLayout/AdminLayout.jsx";
 
@@ -53,8 +51,6 @@ const AppRoutes = () => (
       {/* Public: trang báo không đủ quyền, dùng làm redirectTo cho các RouteGuard có allowedRoles */}
       <Route path="/403" element={<Forbidden />}></Route>
     </Route>
-
-    {/* Mọi đường dẫn không khớp route nào */}
 
     <Route
       element={
@@ -118,6 +114,9 @@ const AppRoutes = () => (
         <Route path="courses/approve" element={<CourseApprove />}></Route>
       </Route>
     </Route>
+
+    {/* Mọi đường dẫn không khớp route nào, không dùng layout */}
+    <Route path="*" element={<NotFound />}></Route>
   </Routes>
 );
 

@@ -8,8 +8,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-
-import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -21,20 +19,12 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
     @Override
     Page<Course> findAll(Specification<Course> spec, Pageable pageable);
 
-
-        Optio
-
-    al<Course> findWithDetai
-
-    
-    boolean existsByIdAndInstructorId(Long id, Long instructorId);
-
-    boolean existsByIdAndStatus(Long id, CourseStatus status);
-
-    @EntityGraph(attributePaths = {"learningOutcomes", "requiredSkills"})
+    @EntityGraph(attributePaths = {"learningOutcomes", "requiredSkills", "category", "subcategory", "topics"})
     Optional<Course> findWithDetailById(Long id);
 
     boolean existsByIdAndInstructorId(Long id, Long instructorId);
+
+    boolean existsByIdAndStatus(Long id, CourseStatus status);
 
     @EntityGraph(attributePaths = {"instructor", "category", "subcategory", "subcategory.category"})
     Page<Course> findByStatus(CourseStatus status, Pageable pageable);
@@ -67,14 +57,13 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
               AND (
                 LOWER(c.title) LIKE :pattern ESCAPE '\\'
                 OR LOWER(COALESCE(c.shortDescription, '')) LIKE :pattern ESCAPE '\\'
-                OR LOWER(COALESCE(s.name, '')) LIKE :pattern ESCAPE '\\'         
-
-              )  
+                OR LOWER(COALESCE(s.name, '')) LIKE :pattern ESCAPE '\\'
+                OR LOWER(cat.name) LIKE :pattern ESCAPE '\\'
+              )
             ORDER BY cat.name
             """)
-    List<String> findRelatedCategoryNames(@Param("pattern") String
+    List<String> findRelatedCategoryNames(@Param("pattern") String pattern, Pageable pageable);
 
-    
     // Tên danh mục con của các khóa đã xuất bản khớp từ khóa.
     @Query("""
             SELECT DISTINCT s.name
@@ -89,8 +78,6 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
             ORDER BY s.name
             """)
     List<String> findRelatedSubcategoryNames(@Param("pattern") String pattern, Pageable pageable);
-
-
 
     @EntityGraph(attributePaths = {"learningOutcomes", "requiredSkills"})
     Optional<Course> findCourseDetailById(Long id);

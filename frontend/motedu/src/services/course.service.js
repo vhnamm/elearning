@@ -82,13 +82,6 @@ export const getCourseDetailPublic = async (courseId) => {
   const { data } = await http.get(`/courses/${courseId}`);
   return data.data;
 };
-export const saveDraftCourse = async ({ title, categoryId }) => {
-  const { data } = await http.post("/courses", {
-    title: title,
-    categoryId: categoryId,
-  });
-  return data.data;
-};
 
 export const getCourseCurriculumPublic = async (courseId) => {
   const { data } = await http.get(`/courses/${courseId}/curriculum`);
@@ -103,8 +96,4 @@ export const checkUserEnrollmentApi = async (courseId) => {
 export const enrollFreeCourseApi = async (courseId) => {
   const { data } = await http.post('/enrollments', { courseId });
   return data;
-};
-export const getCourseBasicInfo = async (courseId) => {
-  const { data } = await http.get(`/courses/${courseId}/basic-info`);
-  return data.data;
 };
