@@ -120,3 +120,8 @@ export const updateCourseBasicInfo = async (courseId, versionId, payload) => {
      const {data} = await  http.post(`/courses/${courseId}/versions/${versionId}/sections`, payload)
      return data;
  }
+
+ export const deleteSection = async (courseId, versionId, sectionId) => {
+   const {data} = await http.delete(`/courses/${courseId}/versions/${versionId}/sections/${sectionId}`)
+   return data;
+ }

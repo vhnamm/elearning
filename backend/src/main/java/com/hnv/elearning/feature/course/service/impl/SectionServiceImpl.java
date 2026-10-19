@@ -45,7 +45,7 @@ public class SectionServiceImpl implements SectionService {
     @Transactional
     public void deleteSection(Long courseId, Long versionId, Long sectionId, Long instructorId) {
         assertOwnsVersion(courseId, versionId, instructorId);
-        Section section = sectionRepository.findByIdAndCourseVersionId(versionId, sectionId).orElseThrow(() -> new AppException(ErrorCode.SECTION_NOT_EXIST));
+        Section section = sectionRepository.findByIdAndCourseVersionId(sectionId, versionId).orElseThrow(() -> new AppException(ErrorCode.SECTION_NOT_EXIST));
 
         int positionToShift = section.getPosition();
         sectionRepository.delete(section);

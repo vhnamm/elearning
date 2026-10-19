@@ -38,6 +38,15 @@ public class SectionController {
             @PathVariable("sectionId") Long sectionId,
             @AuthenticationPrincipal User user
     ){
-        return null;
+        sectionService.deleteSection(courseId, versionId, sectionId, user.getId());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+                ApiResponse.<Void>builder()
+                        .code(HttpStatus.NO_CONTENT.value())
+                        .message("Xóa section thành công")
+                        .build()
+        );
+
     }
+
+
 }

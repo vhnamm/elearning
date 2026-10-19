@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useOutletContext, useParams } from "react-router-dom";
 import { Button, Dropdown, Form, Input, Modal, Radio, Spin, Switch, Tooltip, message } from "antd";
-import {getInstructorCurriculum, createNewSection } from "~services/course.service.js";
+import {getInstructorCurriculum, createNewSection, deleteSection as deleteSectionApi } from "~services/course.service.js";
 import {
     CaretDownOutlined,
     CaretRightOutlined,
@@ -168,24 +168,7 @@ export default function CreateCourseCurriculum() {
         setNewSectionTitle("");
     };
 
-    // // Chỉ gọi API khi GV bấm "Thêm phần"; Hủy thì không lưu gì.
-    // const submitAddSection = async () => {
-    //     const title = newSectionTitle.trim();
-    //     if (!title) {
-    //         message.warning("Vui lòng nhập tên phần");
-    //         return;
-    //     }
-    //     setCreatingSection(true);
-    //     try {
-    //         const section = await createNewSection(courseId, versionId, { title });
-    //         setSections((prev) => [...prev, { ...section, curriculumItems: section.curriculumItems ?? [] }]);
-    //         cancelAddSection();
-    //     } catch {
-    //         message.error("Không thể tạo phần mới!");
-    //     } finally {
-    //         setCreatingSection(false);
-    //     }
-    // };
+
 
     const onCreateSection = async () => {
         const title = newSectionTitle.trim();
@@ -214,9 +197,21 @@ export default function CreateCourseCurriculum() {
             okText: "Xóa",
             cancelText: "Hủy",
             okButtonProps: { danger: true },
-            onOk: () => setSections((prev) => prev.filter((s) => s.id !== section.id)),
+            onOk: () => handleConfirmDeleteSection(section.id),
         });
 
+    const handleConfirmDeleteSection = async (sectionId) => {
+        try {
+            setSections((prev) => prev.filter(s => s.id != sectionId))
+            const data = await deleteSectionApi(courseId, versionId, sectionId);
+
+            message.success(data?.message || "Xóa thành công")
+        }catch {
+            message.error("Không thể xóa section, có lỗi xảy ra")
+        }
+
+
+    }
     const addItem = (sectionId, type) => {
         const item = {
             id: uid(),

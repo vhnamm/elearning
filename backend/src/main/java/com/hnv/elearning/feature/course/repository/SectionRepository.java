@@ -21,7 +21,7 @@ public interface SectionRepository extends JpaRepository<Section, Long> {
             """)
     List<Section> findCurriculumByVersionId(@Param("versionId") Long versionId);
 
-    Optional<Section> findByIdAndCourseVersionId(Long courseVersionId, Long sectionId);
+    Optional<Section> findByIdAndCourseVersionId(Long sectionId, Long versionId);
 
     @Query("SELECT COALESCE(MAX(s.position), 0)  FROM Section s WHERE s.courseVersion.id = :versionId")
     int findMaxPosition(@Param("versionId") Long versionId);
