@@ -19,24 +19,30 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
 
     // Fetch kèm instructor/subcategory để card khóa học không bị N+1 khi map DTO.
     @Override
-    @EntityGraph(attributePaths = {"instructor", "subcategory"})
+    @EntityGraph(attributePaths = {"instructor", "publishedVersion", "publishedVersion.subcategory"})
     Page<Course> findAll(Specification<Course> spec, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"learningOutcomes", "requiredSkills", "category", "subcategory", "topics"})
-    Optional<Course> findWithDetailById(Long id);
+
+    @Query("""
+        SELECT c.publishedVersion.id FROM Course c
+        WHERE c.id = :courseId AND
+            c.status = com.hnv.elearning.feature.course.enums.CourseStatus.PUBLISHED
+    """)
+    Optional<Long> getPublishedVersionId(@Param("courseId") Long courseId);
+
 
     boolean existsByIdAndInstructorId(Long id, Long instructorId);
 
-    boolean existsByIdAndStatus(Long id, CourseStatus status);
 
     // Khóa phổ biến cho trang chủ: điểm = (số ghi danh còn hiệu lực từ :since + 1) × điểm đánh giá đã làm mượt.
     // Điểm làm mượt = (tổng sao + 5 × 3.5) / (số review + 5), nên khóa chưa có review được 3.5 và ít review không bị đẩy lên quá cao.
     // Cộng 1 vào số ghi danh để khóa chưa ai học gần đây vẫn được xếp theo điểm đánh giá.
-    @EntityGraph(attributePaths = {"instructor", "subcategory"})
+    @EntityGraph(attributePaths = {"instructor", "publishedVersion", "publishedVersion.subcategory"})
     @Query("""
             SELECT c
             FROM Course c
             WHERE c.status = com.hnv.elearning.feature.course.enums.CourseStatus.PUBLISHED
+              AND c.publishedVersion IS NOT NULL
             ORDER BY
               ((SELECT COUNT(e) FROM Enrollment e
                  WHERE e.course = c
@@ -53,7 +59,8 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
     @Query("""
             SELECT cat.name
             FROM Course c
-            JOIN c.category cat
+            JOIN c.publishedVersion v 
+            JOIN v.category cat
             WHERE c.status = com.hnv.elearning.feature.course.enums.CourseStatus.PUBLISHED
             GROUP BY cat.id, cat.name
             ORDER BY COUNT(c.id) DESC, cat.name ASC
@@ -64,12 +71,13 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
     @Query("""
             SELECT DISTINCT cat.name
             FROM Course c
-            JOIN c.category cat
-            LEFT JOIN c.subcategory s
+            JOIN c.publishedVersion v 
+            JOIN v.category cat
+            LEFT JOIN v.subcategory s
             WHERE c.status = com.hnv.elearning.feature.course.enums.CourseStatus.PUBLISHED
               AND (
-                LOWER(c.title) LIKE :pattern ESCAPE '\\'
-                OR LOWER(COALESCE(c.shortDescription, '')) LIKE :pattern ESCAPE '\\'
+                LOWER(v.title) LIKE :pattern ESCAPE '\\'
+                OR LOWER(COALESCE(v.shortDescription, '')) LIKE :pattern ESCAPE '\\'
                 OR LOWER(COALESCE(s.name, '')) LIKE :pattern ESCAPE '\\'
                 OR LOWER(cat.name) LIKE :pattern ESCAPE '\\'
               )
@@ -81,11 +89,12 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
     @Query("""
             SELECT DISTINCT s.name
             FROM Course c
-            JOIN c.subcategory s
+            JOIN c.publishedVersion v 
+             JOIN v.subcategory s
             WHERE c.status = com.hnv.elearning.feature.course.enums.CourseStatus.PUBLISHED
               AND (
-                LOWER(c.title) LIKE :pattern ESCAPE '\\'
-                OR LOWER(COALESCE(c.shortDescription, '')) LIKE :pattern ESCAPE '\\'
+                LOWER(v.title) LIKE :pattern ESCAPE '\\'
+                OR LOWER(COALESCE(v.shortDescription, '')) LIKE :pattern ESCAPE '\\'
                 OR LOWER(s.name) LIKE :pattern ESCAPE '\\'
               )
             ORDER BY s.name
@@ -94,6 +103,5 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
 
 
 
-    @EntityGraph(attributePaths = {"learningOutcomes", "requiredSkills"})
-    Optional<Course> findCourseDetailById(Long id);
+
 }

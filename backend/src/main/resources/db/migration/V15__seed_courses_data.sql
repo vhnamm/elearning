@@ -12,12 +12,28 @@
 --   - Course 4 (HeyGen AI)     -> subcategory_id = 12 (Công cụ AI Sáng tạo)
 --   - Course 5 (IELTS Writing) -> subcategory_id = 19 (Luyện thi Tiếng Anh (IELTS/TOEIC))
 
-INSERT INTO courses (
-    id, slug, instructor_id, subcategory_id, title,
+-- OLD (courses chứa luôn nội dung):
+-- INSERT INTO courses (
+--     id, slug, instructor_id, subcategory_id, title,
+--     short_description, description,
+--     thumbnail_url, price, status, level
+-- ) VALUES
+--   Nay tách: courses (thương mại) + course_versions (nội dung hiển thị, version 1, id = id khóa).
+
+INSERT INTO courses (id, slug, instructor_id, price, status) VALUES
+      (1, 'spring-boot-tu-co-ban-den-nang-cao', 2, 1000.00, 'PUBLISHED'),
+      (2, 'thiet-ke-ui-ux-chuyen-nghiep-voi-figma', 2, 10000.00, 'PUBLISHED'),
+      (3, 'thi-giac-may-tinh-voi-opencv-va-yolo', 2, 2000.00, 'DRAFT'),
+      (4, 'san-xuat-video-ai-chuyen-nghiep-voi-heygen', 2, 1000.00, 'PENDING_REVIEW'),
+      (5, 'chinh-phuc-ielts-writing-task-2-band-7', 2, 0.00, 'PUBLISHED');
+
+INSERT INTO course_versions (
+    id, course_id, version_no, status, title,
     short_description, description,
-    thumbnail_url, price, status, level
+    thumbnail_key, level, subcategory_id
 ) VALUES
-      (1, 'spring-boot-tu-co-ban-den-nang-cao', 2, 1, 'Spring Boot từ cơ bản đến nâng cao',
+      -- OLD: (1, 'spring-boot-tu-co-ban-den-nang-cao', 2, 1, 'Spring Boot từ cơ bản đến nâng cao',
+      (1, 1, 1, 'PUBLISHED', 'Spring Boot từ cơ bản đến nâng cao',
        'Xây dựng REST API chuẩn doanh nghiệp với Spring Boot 3 và MySQL.',
        'Khóa học trang bị toàn diện kỹ năng Backend thực chiến từ số 0:
 
@@ -28,9 +44,11 @@ INSERT INTO courses (
       - Phần 5: Quản lý version database bằng Flyway, đóng gói Docker và deploy VPS.
 
       Yêu cầu đầu vào: Nắm chắc lập trình hướng đối tượng (OOP) với Java căn bản.',
-       'https://pub-5ab381ad35034ad6b27959e4a6136657.r2.dev/courses/1/thumbnail/khoa_1_thumb_1.jpg', 1000.00, 'PUBLISHED', 'INTERMEDIATE'),
+       -- OLD: 'https://pub-5ab381ad35034ad6b27959e4a6136657.r2.dev/courses/1/thumbnail/khoa_1_thumb_1.jpg', 1000.00, 'PUBLISHED', 'INTERMEDIATE'),
+       'courses/1/thumbnail/khoa_1_thumb_1.jpg', 'INTERMEDIATE', 1),
 
-      (2, 'thiet-ke-ui-ux-chuyen-nghiep-voi-figma', 2, 7, 'Thiết kế UI/UX chuyên nghiệp với Figma',
+      -- OLD: (2, 'thiet-ke-ui-ux-chuyen-nghiep-voi-figma', 2, 7, 'Thiết kế UI/UX chuyên nghiệp với Figma',
+      (2, 2, 1, 'PUBLISHED', 'Thiết kế UI/UX chuyên nghiệp với Figma',
        'Làm chủ tư duy trải nghiệm người dùng, Design System và Prototype.',
        'Khóa học dẫn dắt bạn qua quy trình thiết kế sản phẩm số thực tế:
 
@@ -41,9 +59,11 @@ INSERT INTO courses (
       - Chương 5: Tạo tương tác mượt mà với Advanced Prototyping và bàn giao dự án cho Developer.
 
       Dành cho: Người mới bắt đầu chuyển ngành hoặc lập trình viên muốn nâng cao mắt thẩm mỹ.',
-       'https://pub-5ab381ad35034ad6b27959e4a6136657.r2.dev/courses/2/thumbnail/khoa2.webp', 10000.00, 'PUBLISHED', 'BEGINNER'),
+       -- OLD: 'https://pub-5ab381ad35034ad6b27959e4a6136657.r2.dev/courses/2/thumbnail/khoa2.webp', 10000.00, 'PUBLISHED', 'BEGINNER'),
+       'courses/2/thumbnail/khoa2.webp', 'BEGINNER', 7),
 
-      (3, 'thi-giac-may-tinh-voi-opencv-va-yolo', 2, 10, 'Thị giác máy tính với OpenCV và YOLO',
+      -- OLD: (3, 'thi-giac-may-tinh-voi-opencv-va-yolo', 2, 10, 'Thị giác máy tính với OpenCV và YOLO',
+      (3, 3, 1, 'DRAFT', 'Thị giác máy tính với OpenCV và YOLO',
        'Nhận diện đối tượng, phân tích luồng camera thời gian thực bằng Python.',
        'Nội dung khóa học đang trong quá trình biên soạn và hoàn thiện tài liệu lab:
 
@@ -53,9 +73,11 @@ INSERT INTO courses (
       - Tối ưu hóa mô hình với ONNX Runtime để chạy mượt trên thiết bị CPU và Edge.
 
       Dự kiến phát hành vào quý tới với đầy đủ source code và dataset mẫu.',
-       'https://pub-5ab381ad35034ad6b27959e4a6136657.r2.dev/courses/3/thumbnail/khoa3.webp', 2000.00, 'DRAFT', 'ADVANCED'),
+       -- OLD: 'https://pub-5ab381ad35034ad6b27959e4a6136657.r2.dev/courses/3/thumbnail/khoa3.webp', 2000.00, 'DRAFT', 'ADVANCED'),
+       'courses/3/thumbnail/khoa3.webp', 'ADVANCED', 10),
 
-      (4, 'san-xuat-video-ai-chuyen-nghiep-voi-heygen', 2, 12, 'Sản xuất Video AI chuyên nghiệp với HeyGen',
+      -- OLD: (4, 'san-xuat-video-ai-chuyen-nghiep-voi-heygen', 2, 12, 'Sản xuất Video AI chuyên nghiệp với HeyGen',
+      (4, 4, 1, 'PENDING_REVIEW', 'Sản xuất Video AI chuyên nghiệp với HeyGen',
        'Ứng dụng MC ảo, nhân bản giọng nói và tự động hóa sản xuất video bán hàng.',
        'Khóa học hướng dẫn quy trình tạo video marketing và bài giảng không cần quay mặt:
 
@@ -63,9 +85,11 @@ INSERT INTO courses (
       - Module 2: Viết kịch bản video viral với ChatGPT kết hợp kỹ thuật ngắt nghỉ câu cho HeyGen.
       - Module 3: Kỹ thuật phối nền, chèn b-roll, hiệu ứng chuyển cảnh và logo thương hiệu.
       - Module 4: Tự động hóa sản xuất video hàng loạt phục vụ chạy quảng cáo TikTok và Reels.',
-       'https://pub-5ab381ad35034ad6b27959e4a6136657.r2.dev/courses/4/thumbnail/khoa4.webp', 1000.00, 'PENDING_REVIEW', 'INTERMEDIATE'),
+       -- OLD: 'https://pub-5ab381ad35034ad6b27959e4a6136657.r2.dev/courses/4/thumbnail/khoa4.webp', 1000.00, 'PENDING_REVIEW', 'INTERMEDIATE'),
+       'courses/4/thumbnail/khoa4.webp', 'INTERMEDIATE', 12),
 
-      (5, 'chinh-phuc-ielts-writing-task-2-band-7', 2, 19, 'Chinh phục IELTS Writing Task 2 Band 7.0+',
+      -- OLD: (5, 'chinh-phuc-ielts-writing-task-2-band-7', 2, 19, 'Chinh phục IELTS Writing Task 2 Band 7.0+',
+      (5, 5, 1, 'PUBLISHED', 'Chinh phục IELTS Writing Task 2 Band 7.0+',
        'Nâng cấp tư duy phát triển luận điểm, từ vựng học thuật và liên kết câu.',
        'Khóa học tập trung giải quyết dứt điểm các lỗi mất điểm trong bài thi viết Task 2:
 
@@ -75,12 +99,23 @@ INSERT INTO courses (
       - Kỹ thuật đa dạng hóa cấu trúc ngữ pháp (Grammatical Range) và cách sửa các lỗi sai kinh điển.
 
       Mục tiêu đầu ra: Tự tin viết bài đạt band điểm từ 6.5 đến 7.5+ trong phòng thi.',
-       'https://pub-5ab381ad35034ad6b27959e4a6136657.r2.dev/courses/5/thumbnail/khoa5.webp', 0.00, 'PUBLISHED', 'BEGINNER');
+       -- OLD: 'https://pub-5ab381ad35034ad6b27959e4a6136657.r2.dev/courses/5/thumbnail/khoa5.webp', 0.00, 'PUBLISHED', 'BEGINNER');
+       'courses/5/thumbnail/khoa5.webp', 'BEGINNER', 19);
+
+-- category_id của version suy ra từ subcategory
+UPDATE course_versions v
+    JOIN subcategories s ON s.id = v.subcategory_id
+SET v.category_id = s.category_id;
+
+-- Khóa PUBLISHED trỏ vào version 1 đang live
+UPDATE courses SET published_version_id = id WHERE status = 'PUBLISHED';
 
 
 -- 2. Gắn tags chủ đề (Topics) vào từng khoá học qua bảng course_topics
 -- (chuyển từ V14 sang đây vì courses phải tồn tại trước khi chèn FK)
-INSERT IGNORE INTO course_topics (course_id, topic_id) VALUES
+-- OLD: INSERT IGNORE INTO course_topics (course_id, topic_id) VALUES
+-- Nay gắn topic vào version (id version = id khóa)
+INSERT IGNORE INTO course_version_topics (course_version_id, topic_id) VALUES
     -- Khóa 1 (Spring Boot): Spring Boot (1), Java (6)
     (1, 1), (1, 6),
     -- Khóa 2 (Figma UI/UX): Figma (12), Design System (13)
@@ -95,12 +130,20 @@ INSERT IGNORE INTO course_topics (course_id, topic_id) VALUES
 
 -- 3. Enrollments (chỉ enroll vào course đã PUBLISHED) để tính studentsCount
 -- Chuẩn hóa tên cột user_id và enum status ('in_progress', 'completed') theo DBML
+-- OLD:
+-- INSERT IGNORE INTO enrollments
+--     (id, student_id, course_id, order_item_id, status, enrolled_at, completed_at)
+-- VALUES
+--     (1, 3, 1, NULL, 'in_progress', '2026-08-01 09:00:00', NULL),
+--     (2, 4, 1, NULL, 'completed',   '2026-08-03 09:00:00', '2026-09-01 14:00:00'),
+--     (3, 3, 2, NULL, 'completed',   '2026-07-15 10:30:00', '2026-08-10 14:00:00');
+-- Thêm baseline_version_id = version của khóa lúc mua (v1, id = id khóa)
 INSERT IGNORE INTO enrollments
-    (id, student_id, course_id, order_item_id, status, enrolled_at, completed_at)
+    (id, student_id, course_id, baseline_version_id, order_item_id, status, enrolled_at, completed_at)
 VALUES
-    (1, 3, 1, NULL, 'in_progress', '2026-08-01 09:00:00', NULL),
-    (2, 4, 1, NULL, 'completed',   '2026-08-03 09:00:00', '2026-09-01 14:00:00'),
-    (3, 3, 2, NULL, 'completed',   '2026-07-15 10:30:00', '2026-08-10 14:00:00');
+    (1, 3, 1, 1, NULL, 'ACTIVE', '2026-08-01 09:00:00', NULL),
+    (2, 4, 1, 1, NULL, 'COMPLETED', '2026-08-03 09:00:00', '2026-09-01 14:00:00'),
+    (3, 3, 2, 2, NULL, 'COMPLETED', '2026-07-15 10:30:00', '2026-08-10 14:00:00');
 
 
 -- 4. Course reviews (chỉ review course đã PUBLISHED) để tính avgRating

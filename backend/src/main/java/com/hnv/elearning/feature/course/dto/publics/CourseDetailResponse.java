@@ -1,4 +1,4 @@
-package com.hnv.elearning.feature.course.dto;
+package com.hnv.elearning.feature.course.dto.publics;
 
 import com.hnv.elearning.feature.course.enums.CourseStatus;
 import com.hnv.elearning.feature.user.dto.InstructorInfoDto;
@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CourseDetailDto {
+public class CourseDetailResponse {
     private Long id;
     private String title;
     private String thumbnailUrl;

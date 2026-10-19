@@ -4,5 +4,5 @@ public enum LectureVideoStatus {
     UPLOADING,
     PROCESSING,
     READY,
-    FAILEDV
+    FAILED
 }

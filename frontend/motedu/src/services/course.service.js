@@ -21,18 +21,28 @@ export const saveDraftCourse = async ({ title, categoryId }) => {
   return data.data;
 };
 
-export const getCourseBasicInfo = async (courseId) => {
-  const { data } = await http.get(`/courses/${courseId}/basic-info`);
+export const getCourseBasicInfo = async (courseId, versionId) => {
+  const { data } = await http.get(`/courses/${courseId}/versions/${versionId}/basic-info`);
   return data.data;
 };
 
-export const getPopularCourses = async (size = 4) => {
+// Đề cương của một version, dành cho giảng viên soạn thảo (có trạng thái upload, số câu hỏi...).
+export const getInstructorCurriculum = async (courseId, versionId) => {
+  const { data } = await http.get(`/courses/${courseId}/versions/${versionId}/curriculum`);
+  return data.data;
+};
+
+export const getPopularCourses =async (size = 4) => {
   const { data } = await http.get("/courses/popular", {
     params: { size },
   });
   return data.data;
 };
 
+export const getPresignedUrl = async (contentType, courseId) => {
+    const {data} = await http.post(`/courses/${courseId}/thumbnail/presigned-url`, {contentType: contentType});
+    return data;
+}
 // Gọi GET /courses với từ khóa, bộ lọc, sắp xếp và phân trang.
 export const searchCourses = async ({
   keyword,
@@ -99,3 +109,14 @@ export const enrollFreeCourseApi = async (courseId) => {
   const { data } = await http.post('/enrollments', { courseId });
   return data;
 };
+
+
+export const updateCourseBasicInfo = async (courseId, versionId, payload) => {
+    const { data } = await http.put(`/courses/${courseId}/versions/${versionId}/basic-info`, payload);
+    return data;
+};
+
+ export const createNewSection = async (courseId, versionId, payload ) => {
+     const {data} = await  http.post(`/courses/${courseId}/versions/${versionId}/sections`, payload)
+     return data;
+ }

@@ -3,28 +3,26 @@ package com.hnv.elearning.feature.course.service.impl;
 import com.hnv.elearning.common.exception.AppException;
 import com.hnv.elearning.common.exception.ErrorCode;
 import com.hnv.elearning.feature.category.repository.CategoryRepository;
-import com.hnv.elearning.feature.course.dto.CourseCurriculumResponse;
-import com.hnv.elearning.feature.course.dto.CourseDetailDto;
-import com.hnv.elearning.feature.course.dto.CourseSearchRequest;
-import com.hnv.elearning.feature.course.dto.CourseSearchResponse;
-import com.hnv.elearning.feature.course.dto.PublicCourseCardDto;
+import com.hnv.elearning.feature.course.dto.publics.*;
 import com.hnv.elearning.feature.course.entity.Course;
+import com.hnv.elearning.feature.course.entity.CourseVersion;
 import com.hnv.elearning.feature.course.enums.CourseStatus;
 import com.hnv.elearning.feature.course.mapper.CourseMapper;
 import com.hnv.elearning.feature.course.repository.CourseRepository;
+import com.hnv.elearning.feature.course.repository.CourseVersionRepository;
 import com.hnv.elearning.feature.course.service.CourseCurriculumService;
 import com.hnv.elearning.feature.course.service.PublicCourseService;
 import com.hnv.elearning.feature.course.specification.CourseSpecification;
 import com.hnv.elearning.feature.enrollment.service.EnrollmentService;
 import com.hnv.elearning.feature.review.service.CourseReviewService;
 import com.hnv.elearning.feature.user.service.UserService;
+import com.hnv.elearning.infrastructure.storage.StorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -35,7 +33,6 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Slf4j
 public class PublicCourseServiceImpl implements PublicCourseService {
     private static final int POPULAR_WINDOW_DAYS = 30;
@@ -47,6 +44,8 @@ public class PublicCourseServiceImpl implements PublicCourseService {
     private final CourseCurriculumService courseCurriculumService;
     private final CourseReviewService courseReviewService;
     private final CourseMapper courseMapper;
+    private final CourseVersionRepository courseVersionRepository;
+    private final StorageService storageService;;
 
     @Override
     public List<PublicCourseCardDto> getPopularCourses(int size) {
@@ -88,16 +87,18 @@ public class PublicCourseServiceImpl implements PublicCourseService {
 
     private PublicCourseCardDto toCardDto(Course course, Double rating, Long reviewCount) {
         String instructorName = course.getInstructor() != null ? course.getInstructor().getFullName() : null;
-        String subcategoryName = course.getSubcategory() != null ? course.getSubcategory().getName() : null;
+        String subcategoryName = course.getPublishedVersion().getSubcategory() != null ? course.getPublishedVersion().getSubcategory().getName() : null;
+
+        CourseVersion version = course.getPublishedVersion();
 
         return PublicCourseCardDto.builder()
                 .id(course.getId())
                 .slug(course.getSlug())
-                .title(course.getTitle())
-                .shortDescription(course.getShortDescription())
-                .thumbnailUrl(course.getThumbnailUrl())
+                .title(version.getTitle())
+                .shortDescription(version.getShortDescription())
+                .thumbnailUrl(version.getThumbnailKey() == null ? null : storageService.publicUrl(version.getThumbnailKey()))
                 .price(course.getPrice())
-                .level(course.getLevel() == null ? null : course.getLevel().name())
+                .level(version.getLevel() == null ? null : version.getLevel().name())
                 .instructorName(instructorName)
                 .subcategoryName(subcategoryName)
                 .rating(rating)
@@ -133,16 +134,21 @@ public class PublicCourseServiceImpl implements PublicCourseService {
     }
 
     @Override
-    public CourseDetailDto getCourseDetail(Long courseId) {
-        Course course = courseRepository.findCourseDetailById(courseId)
+    public CourseDetailResponse getCourseDetail(Long courseId) {
+        Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND));
 
-
-        if (course.getStatus() != CourseStatus.PUBLISHED) {
+        // Công khai chỉ đọc bản đang published; khóa chưa có bản published coi như không tồn tại.
+        if (course.getStatus() != CourseStatus.PUBLISHED || course.getPublishedVersion() == null) {
             throw new AppException(ErrorCode.COURSE_NOT_FOUND);
         }
 
-        CourseDetailDto dto = courseMapper.toCourseDetailDto(course);
+        CourseVersion version = courseVersionRepository
+                .findPublicDetailByIdAndCourseId(course.getPublishedVersion().getId(), courseId)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND));
+
+        CourseDetailResponse dto = courseMapper.toCourseDetailDto(version);
+        dto.setThumbnailUrl(version.getThumbnailKey() == null ? null : storageService.publicUrl(version.getThumbnailKey()));
         if (course.getInstructor() != null) {
             dto.setInstructor(userService.getInstructorInfo(course.getInstructor().getId()));
         }
@@ -162,10 +168,11 @@ public class PublicCourseServiceImpl implements PublicCourseService {
 
     @Override
     public CourseCurriculumResponse getCourseCurriculum(Long courseId) {
-        if (!courseRepository.existsByIdAndStatus(courseId, CourseStatus.PUBLISHED)) {
-            throw new AppException(ErrorCode.COURSE_NOT_FOUND);
-        }
-        return courseCurriculumService.getCurriculum(courseId);
+        //tim version dang dc Published
+        Long publishedVersionId = courseRepository.getPublishedVersionId(courseId)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_NOT_FOUND));
+
+        return courseCurriculumService.getCurriculum(publishedVersionId);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.hnv.elearning.feature.moderation.entity;
 
 import com.hnv.elearning.feature.course.entity.Course;
+import com.hnv.elearning.feature.course.entity.CourseVersion;
 import com.hnv.elearning.feature.moderation.enums.ModerationAction;
 import com.hnv.elearning.feature.user.entity.User;
 import jakarta.persistence.*;
@@ -21,8 +22,8 @@ public class CourseModerationLog {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id")
-    private Course course;
+    @JoinColumn(name = "course_version_id")
+    private CourseVersion courseVersion;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "moderator_id")

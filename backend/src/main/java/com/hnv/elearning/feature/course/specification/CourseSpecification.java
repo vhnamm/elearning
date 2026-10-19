@@ -1,7 +1,8 @@
 package com.hnv.elearning.feature.course.specification;
 
-import com.hnv.elearning.feature.course.dto.CourseSearchRequest;
+import com.hnv.elearning.feature.course.dto.publics.CourseSearchRequest;
 import com.hnv.elearning.feature.course.entity.Course;
+import com.hnv.elearning.feature.course.entity.CourseVersion;
 import com.hnv.elearning.feature.course.enums.CourseLevel;
 import com.hnv.elearning.feature.course.enums.CourseStatus;
 import com.hnv.elearning.feature.enrollment.entity.Enrollment;
@@ -10,6 +11,8 @@ import com.hnv.elearning.feature.review.entity.CourseReview;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
@@ -23,27 +26,25 @@ import java.util.List;
 import java.util.Locale;
 
 public class CourseSpecification {
-    public static Specification<Course> hasInstructorId(Long id){
-        return (root, query, cb) -> id == null ? null :  cb.equal(root.get("instructor").get("id"), id);
+    // Chỉ khóa đã có bản published mới hiển thị công khai. Chỉ kiểm tra cột published_version_id, không sinh join.
+    public static Specification<Course> hasPublishedVersion() {
+        return (root, query, cb) -> cb.isNotNull(root.get("publishedVersion"));
+    }
+
+    // Nội dung (title, category, topics...) nằm ở bản đang published; join một lần rồi dùng lại cho mọi spec.
+    @SuppressWarnings("unchecked")
+    private static Join<Course, CourseVersion> version(Root<Course> root) {
+        return root.getJoins().stream()
+                .filter(j -> j.getAttribute().getName().equals("publishedVersion"))
+                .map(j -> (Join<Course, CourseVersion>) j)
+                .findFirst()
+                .orElseGet(() -> root.join("publishedVersion", JoinType.INNER));
     }
 
     public static Specification<Course> hasCourseStatus(CourseStatus status){
         return (root, query, cb) ->
                 status == null ? null :
                 cb.equal(root.get("status"), status);
-    }
-
-    public static Specification<Course> hasCourseTitle(String title){
-        return (root, query, cb) ->
-                (title == null || title.isBlank()) ? null :
-                        cb.like(cb.lower(root.get("title")), "%" +  title.toLowerCase() + "%");
-    }
-
-    //custom cho actor cu the
-    public static Specification<Course> forInstructor(Long instructorId, CourseStatus status, String keyword){
-        return Specification.where(hasInstructorId(instructorId))
-                .and(hasCourseStatus(status))
-                .and(hasCourseTitle(keyword));
     }
 
     // Khớp từ khóa với tên khóa, mô tả ngắn và giảng viên. Không còn khớp theo tên danh mục/danh mục con.
@@ -53,8 +54,8 @@ public class CourseSpecification {
                 return null;
             }
             String pattern = likePattern(keyword);
-            Expression<String> title = cb.lower(root.get("title"));
-            Expression<String> description = cb.lower(cb.coalesce(root.get("shortDescription"), ""));
+            Expression<String> title = cb.lower(version(root).get("title"));
+            Expression<String> description = cb.lower(cb.coalesce(version(root).get("shortDescription"), ""));
             Expression<String> instructor = cb.lower(cb.coalesce(root.get("instructor").get("fullName"), ""));
             return cb.or(
                     cb.like(title, pattern, '\\'),
@@ -69,7 +70,7 @@ public class CourseSpecification {
         return (root, query, cb) ->
                 (categoryIds == null || categoryIds.isEmpty())
                         ? null
-                        : root.get("category").get("id").in(categoryIds);
+                        : version(root).get("category").get("id").in(categoryIds);
     }
 
     // Giữ khóa học thuộc các danh mục con được chọn.
@@ -77,17 +78,22 @@ public class CourseSpecification {
         return (root, query, cb) ->
                 (subcategoryIds == null || subcategoryIds.isEmpty())
                         ? null
-                        : root.get("subcategory").get("id").in(subcategoryIds);
+                        : version(root).get("subcategory").get("id").in(subcategoryIds);
     }
 
     public static Specification<Course> hasTopicId(Long topicId) {
-        return (root, query, cb) ->
-                topicId == null ? null : cb.equal(root.get("topics").get("id"), topicId);
+        return (root, query, cb) -> {
+            if (topicId == null) {
+                return null;
+            }
+            query.distinct(true);
+            return cb.equal(version(root).join("topics").get("id"), topicId);
+        };
     }
     // Giữ khóa học có cấp độ nằm trong danh sách được chọn.
     public static Specification<Course> hasLevels(Collection<CourseLevel> levels) {
         return (root, query, cb) ->
-                (levels == null || levels.isEmpty()) ? null : root.get("level").in(levels);
+                (levels == null || levels.isEmpty()) ? null : version(root).get("level").in(levels);
     }
 
     // Giữ khóa học có điểm trung bình đánh giá từ mức tối thiểu trở lên.
@@ -113,6 +119,7 @@ public class CourseSpecification {
     // bỏ qua khi query là câu đếm phân trang (getResultType() == Long/long).
     public static Specification<Course> buildSearchSpec(CourseSearchRequest req) {
         Specification<Course> filters = Specification.where(hasCourseStatus(CourseStatus.PUBLISHED))
+                .and(hasPublishedVersion())
                 .and(matchesKeyword(req.getKeyword()))
                 .and(hasCategoryIds(req.getCategoryIds()))
                 .and(hasSubcategoryIds(req.getSubcategoryIds()))

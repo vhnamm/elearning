@@ -1,6 +1,5 @@
-package com.hnv.elearning.feature.course.dto;
+package com.hnv.elearning.feature.course.dto.instructor;
 
-import com.hnv.elearning.feature.course.enums.CourseLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,15 +12,15 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CourseBasicInfoRequest {
+public class CourseBasicInfoUpdateRequest {
     private String title;
     private String description;
     private String shortDescription;
+    private String thumbnailKey;
+    private String level;
+    private List<String> learningOutcomes;
+    private List<String> requiredSkills;
     private Long categoryId;
     private Long subcategoryId;
-    private List<String> requiredSkills;
-    private List<String> learningOutcomes;
-    private CourseLevel level;
     private Set<Long> topicIds;
-
 }

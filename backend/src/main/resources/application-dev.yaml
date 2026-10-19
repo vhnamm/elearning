@@ -55,3 +55,15 @@ jwt:
 
 otp:
   expiration: ${OTP_EXPIRATION}
+
+r2:
+  endpoint: ${R2_ENDPOINT}
+  access-key: ${R2_ACCESS_KEY_ID}
+  secret-key: ${R2_SECRET_ACCESS_KEY}
+  public-bucket: ${R2_PUBLIC_BUCKET}
+  private-bucket: ${R2_PRIVATE_BUCKET}
+  public-base-url: ${R2_PUBLIC_BASE_URL}
+  ttl:
+    image-upload: 5m
+    video-upload: 2h
+    video-download: 2h

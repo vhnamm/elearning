@@ -1,11 +1,7 @@
 package com.hnv.elearning.feature.course.controller;
 
 import com.hnv.elearning.common.response.ApiResponse;
-import com.hnv.elearning.feature.course.dto.CourseCurriculumResponse;
-import com.hnv.elearning.feature.course.dto.CourseDetailDto;
-import com.hnv.elearning.feature.course.dto.CourseSearchRequest;
-import com.hnv.elearning.feature.course.dto.CourseSearchResponse;
-import com.hnv.elearning.feature.course.dto.PublicCourseCardDto;
+import com.hnv.elearning.feature.course.dto.publics.*;
 import com.hnv.elearning.feature.course.service.PublicCourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -64,11 +60,11 @@ public class PublicCourseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<CourseDetailDto>> getCourseDetail(@PathVariable("id") Long id) {
-        CourseDetailDto result = publicCourseService.getCourseDetail(id);
+    public ResponseEntity<ApiResponse<CourseDetailResponse>> getCourseDetail(@PathVariable("id") Long id) {
+        CourseDetailResponse result = publicCourseService.getCourseDetail(id);
 
         return ResponseEntity.ok(
-                ApiResponse.<CourseDetailDto>builder()
+                ApiResponse.<CourseDetailResponse>builder()
                         .code(HttpStatus.OK.value())
                         .data(result)
                         .build()

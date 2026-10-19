@@ -1,4 +1,4 @@
-package com.hnv.elearning.feature.course.dto;
+package com.hnv.elearning.feature.course.dto.publics;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,7 +1,8 @@
 -- ==============================================================================
--- 1. LEARNING OUTCOMES & REQUIRED SKILLS (Khóa 1 và Khóa 4)
+-- 1. LEARNING OUTCOMES & REQUIRED SKILLS (Khóa 1 và Khóa 4) - gắn vào version (id version = id khóa)
 -- ==============================================================================
-INSERT INTO course_learning_outcomes (course_id, content) VALUES
+-- OLD: INSERT INTO course_learning_outcomes (course_id, content) VALUES
+INSERT INTO course_learning_outcomes (course_version_id, content) VALUES
 -- Khóa 1: Spring Boot
 (1, 'Hiểu sâu nguyên lý IoC, Dependency Injection và Bean Lifecycle trong Spring'),
 (1, 'Thiết kế RESTful API chuẩn chuẩn doanh nghiệp kèm validation và global exception'),
@@ -12,7 +13,8 @@ INSERT INTO course_learning_outcomes (course_id, content) VALUES
 (4, 'Tự động hóa kịch bản video viral đa kênh kết hợp ChatGPT'),
 (4, 'Quy trình sản xuất hàng loạt video bán hàng không cần xuất hiện trước ống kính');
 
-INSERT INTO course_required_skills (course_id, content) VALUES
+-- OLD: INSERT INTO course_required_skills (course_id, content) VALUES
+INSERT INTO course_required_skills (course_version_id, content) VALUES
 -- Khóa 1: Spring Boot
 (1, 'Nắm chắc kiến thức nền tảng Lập trình hướng đối tượng (OOP) với Java'),
 (1, 'Biết sử dụng cơ bản SQL và hệ quản trị cơ sở dữ liệu MySQL'),

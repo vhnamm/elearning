@@ -3,6 +3,7 @@ package com.hnv.elearning.feature.enrollment.service.impl;
 import com.hnv.elearning.common.exception.AppException;
 import com.hnv.elearning.common.exception.ErrorCode;
 import com.hnv.elearning.feature.course.entity.Course;
+import com.hnv.elearning.feature.course.entity.CourseVersion;
 import com.hnv.elearning.feature.course.repository.CourseRepository;
 import com.hnv.elearning.feature.enrollment.entity.Enrollment;
 import com.hnv.elearning.feature.enrollment.enums.EnrollmentStatus;
@@ -53,6 +54,12 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             throw new AppException(ErrorCode.COURSE_NOT_FREE);
         }
 
+        // Chỉ ghi danh vào khóa đã có version published; baseline = version đang live lúc ghi danh
+        CourseVersion publishedVersion = course.getPublishedVersion();
+        if (publishedVersion == null) {
+            throw new AppException(ErrorCode.COURSE_NOT_FOUND);
+        }
+
         if (enrollmentRepository.existsByCourse_IdAndStudent_Id(courseId, userId)) {
             throw new AppException(ErrorCode.COURSE_ALREADY_ENROLLED);
         }
@@ -63,6 +70,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Enrollment enrollment = Enrollment.builder()
                 .student(student)
                 .course(course)
+                .baselineVersion(publishedVersion)
                 .status(EnrollmentStatus.ACTIVE)
                 .build();
         enrollmentRepository.save(enrollment);

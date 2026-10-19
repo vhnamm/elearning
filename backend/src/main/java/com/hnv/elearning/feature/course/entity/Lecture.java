@@ -19,6 +19,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "lectures")
 @Getter
@@ -50,6 +52,24 @@ public class Lecture {
     @Column(name = "video_duration_seconds")
     private Integer videoDurationSeconds;
 
-    @Column(name = "thumbnail_url", length = 1024)
-    private String thumbnailUrl;
+    @Column(name = "video_size_bytes")
+    private Long videoSizeBytes;
+
+    @Column(name = "thumbnail_key", length = 1024)
+    private String thumbnailKey;
+
+    @Column(name = "file_key", length = 1024)
+    private String fileKey;
+
+    @Column(name = "file_name")
+    private String fileName;
+
+    @Column(name = "file_size_bytes")
+    private Long fileSizeBytes;
+
+    @Column(name = "file_mime_type", length = 127)
+    private String fileMimeType;
+
+    @Column(name = "updated_at", insertable = false, updatable = false)
+    private Instant updatedAt;
 }

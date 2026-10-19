@@ -1,10 +1,10 @@
 package com.hnv.elearning.feature.course.service;
 
-import com.hnv.elearning.feature.course.dto.CourseCurriculumResponse;
-import com.hnv.elearning.feature.course.dto.CourseDetailDto;
-import com.hnv.elearning.feature.course.dto.CourseSearchRequest;
-import com.hnv.elearning.feature.course.dto.CourseSearchResponse;
-import com.hnv.elearning.feature.course.dto.PublicCourseCardDto;
+import com.hnv.elearning.feature.course.dto.publics.CourseCurriculumResponse;
+import com.hnv.elearning.feature.course.dto.publics.CourseDetailResponse;
+import com.hnv.elearning.feature.course.dto.publics.CourseSearchRequest;
+import com.hnv.elearning.feature.course.dto.publics.CourseSearchResponse;
+import com.hnv.elearning.feature.course.dto.publics.PublicCourseCardDto;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public interface PublicCourseService {
     // Gợi ý từ khóa liên quan; chưa nhập từ khóa thì trả danh mục có nhiều khóa nhất.
     List<String> getRelatedQueries(String keyword);
 
-    CourseDetailDto getCourseDetail(Long courseId);
+    CourseDetailResponse getCourseDetail(Long courseId);
 
     // Chương trình học công khai, chỉ của khóa học đã xuất bản.
     CourseCurriculumResponse getCourseCurriculum(Long courseId);

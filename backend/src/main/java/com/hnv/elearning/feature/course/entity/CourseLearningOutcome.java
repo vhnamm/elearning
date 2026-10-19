@@ -9,7 +9,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class CourseLearningOutcome {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,8 +16,8 @@ public class CourseLearningOutcome {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    @JoinColumn(name = "course_version_id", nullable = false)
+    private CourseVersion courseVersion;
 
     @Column(name = "content", nullable = false, length = 1024)
     private String content;

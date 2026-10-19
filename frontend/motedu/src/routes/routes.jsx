@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "~pages/Login/Login";
 import MainLayout from "~layouts/MainLayout/MainLayout.jsx";
 import Register from "~pages/Register/Register.jsx";
@@ -15,6 +15,7 @@ import Search from "~pages/Search/Search.jsx";
 import CreateCourseInitial from "~pages/CreateCourse/CreateCourseInitial.jsx";
 import CreateCourseLayout from "~layouts/CreateCourseLayout/CreateCourseLayout.jsx";
 import CreateCourseOverview from "~pages/CreateCourse/CreateCourseOverview.jsx";
+import CreateCourseCurriculum from "~pages/CreateCourse/CreateCourseCurriculum.jsx";
 import CourseDetail from "~pages/CourseDetail/CourseDetail.jsx";
 import NotFound from "~pages/NotFound/NotFound.jsx";
 
@@ -56,8 +57,10 @@ const AppRoutes = () => (
               <Route path={"/instructor/course/create"} element={<CreateCourseInitial/>}></Route>
           </Route>
 
-          <Route path="/instructor/course/:courseId/manage" element={<CreateCourseLayout/>}>
+          <Route path="/instructor/course/:courseId/version/:versionId/manage" element={<CreateCourseLayout/>}>
+              <Route index element={<Navigate to="overview" replace />}></Route>
               <Route path="overview" element={<CreateCourseOverview/>}></Route>
+              <Route path="curriculum" element={<CreateCourseCurriculum/>}></Route>
           </Route>
       </Route>
 

@@ -1,4 +1,4 @@
-package com.hnv.elearning.feature.course.dto;
+package com.hnv.elearning.feature.course.dto.publics;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,9 +7,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class CourseRequiredSkillResponse {
+@AllArgsConstructor
+public class CourseLearningOutcomeResponse {
     private Long id;
     private String content;
 }

@@ -30,28 +30,21 @@ public class Course {
 
     @Column(unique = true, length = 255)
     private String slug;
-    @Column(length = 255)
-    private String title;
-
-    @Column(name = "short_description", length = 500)
-    private String shortDescription;
-
-    @Column(columnDefinition = "TEXT")
-    private String description;
-
-    @Column(name = "thumbnail_url", length = 1024)
-    private String thumbnailUrl;
-
-
 
     private BigDecimal price;
-
 
     @Enumerated(EnumType.STRING)
     private CourseStatus status;
 
-    @Enumerated(EnumType.STRING)
-    private CourseLevel level;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "instructor_id")
+    private User instructor;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "published_version_id")
+    private CourseVersion publishedVersion;
 
     @Column(name = "created_at")
     @CreationTimestamp
@@ -61,44 +54,10 @@ public class Course {
     private LocalDateTime updatedAt;
 
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "instructor_id")
-    private User instructor;
-
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subcategory_id")
-    private Subcategory subcategory;
-
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private Set<CourseLearningOutcome> learningOutcomes = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private Set<CourseRequiredSkill> requiredSkills = new LinkedHashSet<>();
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "course_topics",
-           joinColumns = @JoinColumn(name = "course_id"),
-            inverseJoinColumns = @JoinColumn(name = "topic_id")
-    )
-    private Set<Topic> topics;
-
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("position ASC")
-    @Builder.Default
-    private Set<Section> sections = new LinkedHashSet<>();
-
-
-
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+
 }

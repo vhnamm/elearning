@@ -3,6 +3,8 @@ package com.hnv.elearning.feature.course.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "quizzes")
 @AllArgsConstructor
@@ -21,4 +23,7 @@ public class Quizz {
 
     @Column(name = "passing_score")
     private Integer passingScore;
+
+    @OneToMany(mappedBy = "quiz",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Question> questions;
 }

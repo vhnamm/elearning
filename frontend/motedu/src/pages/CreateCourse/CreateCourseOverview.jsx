@@ -3,6 +3,7 @@ import { useOutletContext, useParams } from "react-router-dom";
 import { Form, Input, Select, Button, Upload, message, Spin } from "antd";
 import { getCourseBasicInfo } from "~services/course.service.js";
 import {getCategoryTree, searchTopics} from "~services/category.service.js";
+import {getPresignedUrl, updateCourseBasicInfo} from "~services/course.service.js";
 import useDebounce from "~hooks/useDebounce.js";
 
 import {
@@ -53,7 +54,7 @@ const EDITOR_TOOLBAR_ICONS = [
 
 export default function CreateCourseOverview() {
     const { setPageTitle } = useOutletContext() || {};
-    const { courseId } = useParams();
+    const { courseId, versionId } = useParams();
 
     useEffect(() => {
         setPageTitle?.("Tổng quan khóa học");
@@ -69,6 +70,7 @@ export default function CreateCourseOverview() {
     const [thumbnailPreview, setThumbnailPreview] = useState(null);
     const [isThumbnailBlobUrl, setIsThumbnailBlobUrl] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     const [categoryTree, setCategoryTree] = useState([])
     const [topicOptions, setTopicOptions] = useState([])
@@ -85,7 +87,7 @@ export default function CreateCourseOverview() {
 
 
     useEffect(() => {
-        if (!courseId) return;
+        if (!courseId || !versionId) return;
 
         const fetchFormData = async () => {
             setLoading(true);
@@ -93,7 +95,7 @@ export default function CreateCourseOverview() {
             try {
 
                 const [courseData, categoryTreeData] = await Promise.all([
-                    getCourseBasicInfo(courseId),
+                    getCourseBasicInfo(courseId, versionId),
                     getCategoryTree()
                 ]);
 
@@ -111,6 +113,11 @@ export default function CreateCourseOverview() {
                     ? courseData.requiredSkills.map((item) => item.content)
                     : ["", ""];
 
+                if (courseData?.thumbnailUrl) {
+                    setIsThumbnailBlobUrl(false);
+                    setThumbnailPreview(courseData.thumbnailUrl);
+                }
+
                 form.setFieldsValue({
                     title: courseData?.title,
                     shortDescription: courseData?.shortDescription,
@@ -120,7 +127,6 @@ export default function CreateCourseOverview() {
                     outcomes,
                     prerequisites,
                     topics: (courseData?.topics ?? []).map((t) => t.id),
-                    thumbnail: courseData?.thumbnailUrl ? [{ uid: "-1", name: "thumbnail", url: courseData.thumbnailUrl }] : [],
                     courseLevel: courseData?.level
                 });
 
@@ -137,7 +143,7 @@ export default function CreateCourseOverview() {
         };
 
         fetchFormData();
-    }, [courseId, form]);
+    }, [courseId, versionId, form]);
 
 
     const mainCategoryOptions = useMemo(() => {
@@ -213,8 +219,8 @@ export default function CreateCourseOverview() {
         setIsThumbnailBlobUrl(true);
         setThumbnailPreview(URL.createObjectURL(file));
 
-        form.setFieldValue("thumbnail", [file]);
-
+        // Form CHỈ LƯU 1 ĐỐI TƯỢNG FILE DUY NHẤT
+        form.setFieldValue("thumbnail", file);
         form.validateFields(["thumbnail"]);
 
         return false; // Chặn Antd tự gửi request ngầm
@@ -225,25 +231,64 @@ export default function CreateCourseOverview() {
         setIsThumbnailBlobUrl(false);
         setThumbnailPreview(null);
 
-        form.setFieldValue("thumbnail", []);
-
+        // Xóa sạch
+        form.setFieldValue("thumbnail", null);
         form.validateFields(["thumbnail"]);
     };
 
 
-    const normalizeThumbnailFileList = (e) => {
-        if (Array.isArray(e)) return e;
-        return e?.fileList ?? [];
-    };
 
-    const onFinish = (values) => {
-        console.log("Lưu nháp tổng quan khóa học:", values);
+    const onFinish = async (values) => {
+        setSubmitting(true);
+        try {
+            const newFile = values.thumbnail;
+            console.log("thumbnail:", newFile, "| type:", newFile?.type, "| name:", newFile?.name);
+            let thumbnailKey;
+
+            if(newFile){
+                const data = await getPresignedUrl(newFile.type, courseId)
+                const {uploadUrl, objectKey} = data.data;
+
+                // 2. Upload R2
+                const upLoadRes = await fetch(uploadUrl, {
+                    method: "PUT",
+                    headers: {"Content-Type": newFile.type},
+                    body: newFile
+                });
+
+                thumbnailKey = objectKey;
+
+                await updateCourseBasicInfo(courseId, versionId, {
+                    title: values.title,
+                    shortDescription: values.shortDescription,
+                    description: values.longDescription,
+                    level: values.courseLevel,
+                    categoryId: values.mainCategory,
+                    subcategoryId: values.subCategory,
+                    topicIds: values.topics,
+                    learningOutcomes: values.outcomes,
+                    requiredSkills: values.prerequisites,
+                    thumbnailKey,            // undefined thì JSON bỏ qua -> backend giữ ảnh cũ
+                });
+
+                // 3. Đã lưu xong thì bỏ file đã upload, để lần lưu sau không upload lại
+                form.setFieldValue("thumbnail", null);
+                message.success("Đã lưu nháp!");
+            }
+        } catch (error) {
+            message.error("Lưu khóa học thất bại!");
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
         <div className={styles.container}>
             <div className={styles.wrapper}>
-                <Spin spinning={loading} tip="Đang tải thông tin khóa học...">
+                <Spin
+                    spinning={loading || submitting}
+                    tip={submitting ? "Đang lưu khóa học..." : "Đang tải thông tin khóa học..."}
+                >
                 <Form
                     form={form}
                     layout="vertical"
@@ -263,6 +308,7 @@ export default function CreateCourseOverview() {
                             type="primary"
                             htmlType="submit"
                             size="large"
+                            loading={submitting}
                             icon={<SaveOutlined />}
                             className={styles.submitBtn}
                         >
@@ -338,6 +384,9 @@ export default function CreateCourseOverview() {
 
                     <Form.Item
                         name="thumbnail"
+                        // Input file ẩn của Upload làm sự kiện change nổi lên Form.Item, antd ghi đè giá trị bằng một
+                        // đường dẫn giả của input file (fakepath). Chỉ nhận đối tượng File, còn lại giữ giá trị cũ.
+                        normalize={(value, prevValue) => (value instanceof File ? value : prevValue)}
                         colon={false}
                         className={styles.formItem}
                         label={
@@ -348,8 +397,8 @@ export default function CreateCourseOverview() {
                         rules={[
                             {
                                 validator(_, value) {
-                                    // Kiểm tra xem mảng thumbnail có file nào không
-                                    if (value && value.length > 0) {
+                                    // Hợp lệ nếu: có chọn file mới (value) HOẶC đã có sẵn ảnh cũ trên preview
+                                    if (value || thumbnailPreview) {
                                         return Promise.resolve();
                                     }
                                     return Promise.reject(new Error("Vui lòng tải lên ảnh đại diện khóa học!"));

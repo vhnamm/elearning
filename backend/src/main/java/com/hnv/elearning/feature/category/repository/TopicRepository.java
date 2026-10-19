@@ -8,13 +8,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Set;
 
 public interface TopicRepository extends JpaRepository<Topic, Long> {
     Page<Topic> findByNameContainingIgnoreCase(String keyword, Pageable pageable);
 
     @Query(""" 
         SELECT t FROM Course c 
-        JOIN c.topics t 
+        JOIN c.publishedVersion v
+        JOIN v.topics t 
         JOIN Enrollment e ON e.course = c 
         WHERE c.status = com.hnv.elearning.feature.course.enums.CourseStatus.PUBLISHED
             AND t.status = com.hnv.elearning.feature.category.enums.TopicStatus.APPROVED
@@ -25,4 +27,10 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
         LIMIT :limit
     """)
     List<Topic> getRecentTrendingTopics(@Param("limit") Long limit);
+
+    @Query("""
+        SELECT t FROM Topic t 
+        WHERE t.id IN :ids
+    """)
+    List<Topic> findAllByIds(@Param("ids") Set<Long> ids);
 }

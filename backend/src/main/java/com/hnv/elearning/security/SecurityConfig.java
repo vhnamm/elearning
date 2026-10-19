@@ -48,6 +48,7 @@ public class SecurityConfig{
                                         "/api/v1/courses/{id:\\d+}/curriculum").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/search/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/topics/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2Login -> {

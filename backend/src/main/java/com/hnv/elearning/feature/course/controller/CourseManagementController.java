@@ -1,9 +1,11 @@
 package com.hnv.elearning.feature.course.controller;
 
 import com.hnv.elearning.common.response.ApiResponse;
-import com.hnv.elearning.feature.course.dto.*;
+import com.hnv.elearning.feature.course.dto.instructor.*;
+import com.hnv.elearning.feature.course.dto.publics.CourseSearchRequest;
 import com.hnv.elearning.feature.course.service.CourseManagementService;
 import com.hnv.elearning.feature.user.entity.User;
+import com.hnv.elearning.infrastructure.storage.PresignedUploadResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +28,7 @@ public class CourseManagementController {
             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     )
     {
-        var data = courseManagementService.getMyCourses(request, instructorId, pageable);
+        var data = courseManagementService.getInstructedCourses(request, instructorId, pageable);
         ApiResponse<Page<InstructorCourseItemDto>> response = ApiResponse.<Page<InstructorCourseItemDto>>builder()
                 .code(HttpStatus.OK.value())
                 .data(data)
@@ -36,12 +38,12 @@ public class CourseManagementController {
     }
 
     @PostMapping("/api/v1/courses")
-    public ResponseEntity<ApiResponse<CourseDraftDto>> createDraftCourse(
+    public ResponseEntity<ApiResponse<CourseDraftResponse>> createDraftCourse(
             @RequestBody CourseDraftRequest courseDraftRequest,
             @AuthenticationPrincipal User user
 
     ){
-        CourseDraftDto dto = courseManagementService.createDraft(courseDraftRequest, user);
+        CourseDraftResponse dto = courseManagementService.createDraft(courseDraftRequest, user);
         ApiResponse apiResponse = ApiResponse
                 .builder()
                 .data(dto)
@@ -51,12 +53,13 @@ public class CourseManagementController {
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
 
-    @GetMapping("/api/v1/courses/{id}/basic-info")
+    @GetMapping("/api/v1/courses/{courseId}/versions/{versionId}/basic-info")
     public ResponseEntity<ApiResponse<CourseBasicInfoResponse>> getCourseBasicInfo(
-            @PathVariable(name = "id") Long courseId,
+            @PathVariable(name = "courseId") Long courseId,
+            @PathVariable(name = "versionId") Long versionId,
             @AuthenticationPrincipal User user
     ){
-        CourseBasicInfoResponse dto = courseManagementService.getCourseBasicInfo(courseId, user.getId());
+        CourseBasicInfoResponse dto = courseManagementService.getCourseBasicInfo(courseId, user.getId(), versionId);
         ApiResponse response =  ApiResponse.builder()
                 .data(dto)
                 .code(HttpStatus.OK.value())
@@ -64,17 +67,48 @@ public class CourseManagementController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @GetMapping("/api/v1/instructor/courses/{id}/curriculum")
-    public ResponseEntity<ApiResponse<CourseCurriculumResponse>> getCourseCurriculum(
-            @PathVariable(name = "id") Long courseId,
+
+
+    @PostMapping("/api/v1/courses/{id}/thumbnail/presigned-url")
+    public ResponseEntity<ApiResponse<PresignedUploadResponse>> getPresignedUrl(
+            @RequestBody CourseThumbnailPresignedRequest request,
+            @PathVariable("id") Long courseId,
             @AuthenticationPrincipal User user
-    ) {
-        CourseCurriculumResponse dto = courseManagementService.getCourseCurriculum(courseId, user.getId());
-        return ResponseEntity.ok(
-                ApiResponse.<CourseCurriculumResponse>builder()
-                        .code(HttpStatus.OK.value())
-                        .data(dto)
-                        .build()
-        );
+    ){
+        PresignedUploadResponse rs = courseManagementService.getPresignedUrl(request, courseId, user);
+        ApiResponse response = ApiResponse.builder()
+                .code(HttpStatus.OK.value())
+                .data(rs)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PutMapping("/api/v1/courses/{courseId}/versions/{versionId}/basic-info")
+    public ResponseEntity<ApiResponse<Void>> updateCourseBasicInfo(
+            @RequestBody CourseBasicInfoUpdateRequest request,
+            @AuthenticationPrincipal User user,
+            @PathVariable(name = "courseId") Long courseId,
+            @PathVariable(name = "versionId") Long versionId
+    ){
+        courseManagementService.updateCourseBasicInfo(courseId, versionId, request, user);
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .code(HttpStatus.OK.value())
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/api/v1/courses/{courseId}/versions/{versionId}/curriculum")
+    public ResponseEntity<ApiResponse<CourseCurriculumInstructorResponse>> getCurriculum(
+            @AuthenticationPrincipal User user,
+            @PathVariable("versionId") Long versionId,
+            @PathVariable("courseId") Long courseId
+    ){
+        CourseCurriculumInstructorResponse dto = courseManagementService.getCurriculumInstructor(user.getId(), courseId, versionId);
+        ApiResponse<CourseCurriculumInstructorResponse> response = ApiResponse.<CourseCurriculumInstructorResponse>builder()
+                .data(dto)
+                .code(HttpStatus.OK.value())
+                .build();
+        return ResponseEntity.ok(response);
     }
 }

@@ -1,18 +1,6 @@
 package com.hnv.elearning.feature.course.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,6 +10,8 @@ import lombok.Setter;
 import com.hnv.elearning.feature.course.enums.CurriculumItemType;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Entity
 @Table(name = "curriculum_items")
 @AllArgsConstructor
@@ -33,6 +23,9 @@ public class CurriculumItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "stable_key", nullable = false, updatable = false)
+    private String stableKey;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "section_id")
@@ -57,4 +50,9 @@ public class CurriculumItem {
 
     @OneToOne(mappedBy = "curriculumItem", cascade = CascadeType.ALL)
     private Quizz quizz;
+
+    @PrePersist
+    void ensureStableKey() {
+        if (stableKey == null) stableKey = UUID.randomUUID().toString();
+    }
 }

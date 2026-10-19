@@ -1,6 +1,7 @@
 package com.hnv.elearning.feature.enrollment.entity;
 
 import com.hnv.elearning.feature.course.entity.Course;
+import com.hnv.elearning.feature.course.entity.CourseVersion;
 import com.hnv.elearning.feature.enrollment.enums.EnrollmentStatus;
 import com.hnv.elearning.feature.order.entity.OrderItem;
 import com.hnv.elearning.feature.user.entity.User;
@@ -29,6 +30,11 @@ public class Enrollment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id")
     private Course course;
+
+    // version của khóa lúc mua (bất biến), dùng để tính bài bắt buộc / chứng chỉ
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "baseline_version_id")
+    private CourseVersion baselineVersion;
 
     @Enumerated(EnumType.STRING)
     private EnrollmentStatus status;

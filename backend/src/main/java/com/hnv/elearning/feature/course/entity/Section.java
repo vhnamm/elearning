@@ -20,8 +20,8 @@ public class Section {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id")
-    private Course course;
+    @JoinColumn(name = "course_version_id")
+    private CourseVersion courseVersion;
 
     private String title;
 

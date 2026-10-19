@@ -53,13 +53,22 @@ public enum ErrorCode {
     // ==========================================
     COURSE_NOT_FOUND(5001, "Không tìm thấy khoá học", HttpStatus.NOT_FOUND),
     COURSE_NOT_FREE(5002, "Khoá học này có tính phí", HttpStatus.BAD_REQUEST),
-
+    COURSE_ACCESS_DENIED(5003, "Tài khoản không có quyền quản lý khoá học này",  HttpStatus.FORBIDDEN),
+    COURSE_ALREADY_EXIST(5004, "Khoá học đã tồn tại", HttpStatus.CONFLICT),
+    COURSE_VERSION_NOT_EXIST(5005, "Không tìm thấy phiên bản này của khoá học", HttpStatus.NOT_FOUND),
+    COURSE_VERSION_NOT_EDITABLE(5006, "Phiên bản này của khoá học không thể chỉnh sửa", HttpStatus.CONFLICT),
+    SECTION_NOT_EXIST(5007, "Section không tồn tại", HttpStatus.NOT_FOUND),
     // ==========================================
     // 60xx: ENROLLMENT
     // ==========================================
     COURSE_ALREADY_ENROLLED(6001, "Bạn đã sở hữu khoá học này rồi", HttpStatus.CONFLICT),
-    COURSE_ID_REQUIRED(6002, "courseId không được để trống", HttpStatus.BAD_REQUEST);
+    COURSE_ID_REQUIRED(6002, "courseId không được để trống", HttpStatus.BAD_REQUEST),
 
+    // ==========================================
+    // 70xx: MEDIA
+    // ==========================================
+    IMAGE_TYPE_NOT_SUPPORTED(7001, "Khổng hỗ trợ tải lên định dạng ảnh này", HttpStatus.UNSUPPORTED_MEDIA_TYPE),
+    IMAGE_NOT_UPLOADED(7002, "Chưa up ảnh lên storage", HttpStatus.BAD_REQUEST);
     private final int code;
     private final String message;
     private final HttpStatus httpStatus;

@@ -1,7 +1,7 @@
-package com.hnv.elearning.feature.course.dto;
+package com.hnv.elearning.feature.course.dto.publics;
 
 import com.hnv.elearning.feature.course.enums.CourseLevel;
-import com.hnv.elearning.feature.course.enums.CourseStatus;
+import com.hnv.elearning.feature.course.enums.CourseVersionStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,7 +20,7 @@ public class CourseSearchRequest {
     private String priceType;
     private BigDecimal min;
     private BigDecimal max;
-    private CourseStatus status;
+    private CourseVersionStatus status;
     private String sort;
     private Integer page = 0;
     private Integer size = 5;

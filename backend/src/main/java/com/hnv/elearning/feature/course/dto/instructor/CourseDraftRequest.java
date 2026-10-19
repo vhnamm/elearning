@@ -1,4 +1,4 @@
-package com.hnv.elearning.feature.course.dto;
+package com.hnv.elearning.feature.course.dto.instructor;
 
 import lombok.Getter;
 import lombok.Setter;

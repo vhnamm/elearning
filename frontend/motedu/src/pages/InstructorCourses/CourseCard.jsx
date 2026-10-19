@@ -20,7 +20,7 @@ const formatRating = (rating) => {
 }
 
 const CourseCard = ({ course }) => {
-    const status = STATUS_META[course.status] ?? STATUS_META.draft;
+    const status = STATUS_META[course.status] ?? STATUS_META.DRAFT;
 
     return (
         <div className={styles.card}>
@@ -31,7 +31,7 @@ const CourseCard = ({ course }) => {
                     <PictureOutlined className={styles.thumbPlaceholder} />
                 )}
                 <span className={`${styles.statusBadge} ${styles[status.className]}`}>
-                  {status.label}
+                  {status.label} · v{course.versionNo}
                 </span>
             </div>
 
@@ -55,7 +55,7 @@ const CourseCard = ({ course }) => {
                 </div>
 
                 <div className={styles.actions}>
-                    <Link to={`/instructor/course/${course.id}/manage/overview`} className={styles.editBtn}>
+                    <Link to={`/instructor/course/${course.id}/version/${course.versionId}/manage/overview`} className={styles.editBtn}>
                         Sửa
                     </Link>
                     <button type="button" className={styles.iconBtn} aria-label="Xoá khoá học">
