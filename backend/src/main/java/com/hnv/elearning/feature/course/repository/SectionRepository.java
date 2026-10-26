@@ -23,6 +23,13 @@ public interface SectionRepository extends JpaRepository<Section, Long> {
 
     Optional<Section> findByIdAndCourseVersionId(Long sectionId, Long versionId);
 
+    @Query("""
+            SELECT s FROM Section s
+            JOIN FETCH s.courseVersion v
+            WHERE s.id = :sectionId AND v.course.instructor.id = :instructorId
+            """)
+    Optional<Section> findOwnedSection(@Param("sectionId") Long sectionId, @Param("instructorId") Long instructorId);
+
     @Query("SELECT COALESCE(MAX(s.position), 0)  FROM Section s WHERE s.courseVersion.id = :versionId")
     int findMaxPosition(@Param("versionId") Long versionId);
 
@@ -32,4 +39,7 @@ public interface SectionRepository extends JpaRepository<Section, Long> {
             WHERE s.courseVersion.id = :versionId AND s.position > :position
            """)
     void shiftPositionAfterDelete(@Param("versionId") Long versionId, @Param("position") int position);
+
+
+    List<Section> findSectionByCourseVersionId(@Param("versionId") Long versionId);
 }

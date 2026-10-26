@@ -66,4 +66,5 @@ r2:
   ttl:
     image-upload: 5m
     video-upload: 2h
+    document-upload: 30m
     video-download: 2h

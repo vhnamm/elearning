@@ -3,6 +3,7 @@ package com.hnv.elearning.feature.course.service.impl;
 import com.hnv.elearning.common.exception.AppException;
 import com.hnv.elearning.common.exception.ErrorCode;
 import com.hnv.elearning.feature.course.dto.instructor.SectionCreateRequest;
+import com.hnv.elearning.feature.course.dto.instructor.SectionReorderRequest;
 import com.hnv.elearning.feature.course.entity.CourseVersion;
 import com.hnv.elearning.feature.course.enums.CourseVersionStatus;
 import com.hnv.elearning.feature.course.dto.instructor.SectionCreateResponse;
@@ -15,6 +16,12 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +57,28 @@ public class SectionServiceImpl implements SectionService {
         int positionToShift = section.getPosition();
         sectionRepository.delete(section);
         sectionRepository.shiftPositionAfterDelete(versionId, positionToShift);
+    }
+
+    @PreAuthorize("hasRole('INSTRUCTOR')")
+    @Override
+    @Transactional
+    public void reorderSection(Long courseId, Long versionId, Long instructorId, SectionReorderRequest request) {
+        assertOwnsVersion(courseId, versionId, instructorId);
+        List<Section> sections = sectionRepository.findSectionByCourseVersionId(versionId);
+        List<Long> toOrderIds = request.getSectionIds();
+
+        Set<Long> rootIds = sections.stream().map(Section::getId).collect(Collectors.toSet());
+
+        if(rootIds.size() != toOrderIds.size() || !rootIds.equals(new HashSet<>(toOrderIds))) {
+            throw new AppException(ErrorCode.SECTION_ORDER_INVALID);
+        }
+
+        Map<Long, Section> map = sections.stream().collect(Collectors.toMap(Section::getId, s -> s));
+
+        for(int i = 0; i < toOrderIds.size(); i++) {
+            Section section = map.get(toOrderIds.get(i));
+            section.setPosition(i + 1);
+        }
     }
 
     private CourseVersion assertOwnsVersion(Long courseId, Long versionId, Long instructorId) {

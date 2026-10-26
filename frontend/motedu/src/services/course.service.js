@@ -125,3 +125,23 @@ export const updateCourseBasicInfo = async (courseId, versionId, payload) => {
    const {data} = await http.delete(`/courses/${courseId}/versions/${versionId}/sections/${sectionId}`)
    return data;
  }
+
+ export const createCurriculumItem = async (sectionId, payload) => {
+     const {data} = await http.post(`/sections/${sectionId}/items`, payload)
+     return data;
+ }
+
+ export const reorderSection = async (courseId, versionId, payload) => {
+     const {data} = await http.patch(`courses/${courseId}/versions/${versionId}/sections/position`, payload)
+     return data;
+ }
+
+ export const getContentPresignedUrl = async (itemId, payload) => {
+     const { data } = await http.post(`/curriculum-items/${itemId}/content/presigned-url`, payload);
+     return data.data;
+ }
+
+export const completeContentUpload = async (itemId, payload) => {
+    const { data } = await http.post(`/curriculum-items/${itemId}/content/complete`, payload);
+    return data;
+};

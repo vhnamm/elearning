@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useOutletContext, useParams } from "react-router-dom";
 import { Button, Dropdown, Form, Input, Modal, Radio, Spin, Switch, Tooltip, message } from "antd";
-import {getInstructorCurriculum, createNewSection, deleteSection as deleteSectionApi } from "~services/course.service.js";
+import {getInstructorCurriculum, createNewSection, deleteSection as deleteSectionApi, reorderSection, createCurriculumItem } from "~services/course.service.js";
 import {
     CaretDownOutlined,
     CaretRightOutlined,
@@ -115,6 +115,9 @@ export default function CreateCourseCurriculum() {
     const [creatingSection, setCreatingSection] = useState(false);
     const [questionModal, setQuestionModal] = useState(null); // { sectionId, itemId, question|null }
     const [saving, setSaving] = useState(false);
+    const [addingItem, setAddingItem] = useState(null); // { sectionId, type }
+    const [newItemTitle, setNewItemTitle] = useState("");
+    const [creatingItem, setCreatingItem] = useState(false);
 
     const dragRef = useRef(null); // { kind: "section" | "item", sectionId, id }
     const fileInputRef = useRef(null);
@@ -212,13 +215,33 @@ export default function CreateCourseCurriculum() {
 
 
     }
-    const addItem = (sectionId, type) => {
-        const item = {
-            id: uid(),
-            type,
-            title: type === "QUIZ" ? "Bài trắc nghiệm mới" : "Bài giảng mới",
-        };
-        updateSection(sectionId, (s) => ({ ...s, curriculumItems: [...s.curriculumItems, item] }));
+    const openAddItem = (sectionId, type) => {
+        setNewItemTitle("");
+        setAddingItem({ sectionId, type });
+    };
+
+    const cancelAddItem = () => {
+        setAddingItem(null);
+        setNewItemTitle("");
+    };
+
+    const onCreateItem = async () => {
+        const title = newItemTitle.trim();
+        if (!title) {
+            message.warning("Vui lòng nhập tiêu đề cho bài học này");
+            return;
+        }
+        const { sectionId, type } = addingItem;
+        setCreatingItem(true);
+        try {
+            const result = await createCurriculumItem(sectionId, { type, title });
+            updateSection(sectionId, (s) => ({ ...s, curriculumItems: [...s.curriculumItems, result.data] }));
+            cancelAddItem();
+        } catch {
+            message.error("Không thể tạo bài học mới");
+        } finally {
+            setCreatingItem(false);
+        }
     };
 
     const deleteItem = (sectionId, itemId) =>
@@ -323,17 +346,25 @@ export default function CreateCourseCurriculum() {
     };
 
     /* ---------- drag & drop (HTML5 native) ---------- */
-    const dropSection = (targetId) => {
+    const dropSection = async (targetId) => {
         const drag = dragRef.current;
         dragRef.current = null;
         if (drag?.kind !== "section") return;
-        setSections((prev) =>
-            reorder(
-                prev,
-                prev.findIndex((s) => s.id === drag.id),
-                prev.findIndex((s) => s.id === targetId),
-            ),
-        );
+
+        const from = sections.findIndex((s) => s.id === drag.id);
+        const to = sections.findIndex((s) => s.id === targetId);
+        if (from === -1 || to === -1 || from === to) return;
+
+        const prev = sections;
+        const next = reorder(prev, from, to);
+        setSections(next);                       // cập nhật UI ngay (optimistic)
+
+        try {
+            await reorderSection(courseId, versionId, {sectionIds: next.map((s) => s.id)});
+        } catch {
+            setSections(prev);                   // lỗi thì trả về thứ tự cũ
+            message.error("Không thể thay đổi thứ tự phần");
+        }
     };
 
     const dropItem = (sectionId, targetId) => {
@@ -553,7 +584,7 @@ export default function CreateCourseCurriculum() {
             { key: "LECTURE", icon: <PlayCircleOutlined />, label: "Bài giảng (Lecture)" },
             { key: "QUIZ", icon: <FileTextOutlined />, label: "Bài trắc nghiệm (Quiz)" },
         ],
-        onClick: ({ key }) => addItem(sectionId, key),
+        onClick: ({ key }) => openAddItem(sectionId, key),
     });
 
     return (
@@ -641,9 +672,33 @@ export default function CreateCourseCurriculum() {
                             </div>
 
                             <div className={styles.sectionFooter}>
-                                <Dropdown menu={addMenu(section.id)} trigger={["click"]}>
-                                    <Button icon={<PlusOutlined />}>Thêm bài giảng / bài tập</Button>
-                                </Dropdown>
+                                {addingItem?.sectionId === section.id ? (
+                                    <div className={styles.addSectionForm}>
+                                        <Input
+                                            autoFocus
+                                            maxLength={255}
+                                            value={newItemTitle}
+                                            placeholder={
+                                                addingItem.type === "QUIZ"
+                                                    ? "Nhập tên bài trắc nghiệm"
+                                                    : "Nhập tên bài giảng"
+                                            }
+                                            onChange={(e) => setNewItemTitle(e.target.value)}
+                                            onPressEnter={onCreateItem}
+                                            onKeyDown={(e) => e.key === "Escape" && cancelAddItem()}
+                                        />
+                                        <Button onClick={cancelAddItem} disabled={creatingItem}>
+                                            Hủy
+                                        </Button>
+                                        <Button type="primary" loading={creatingItem} onClick={onCreateItem}>
+                                            Thêm
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <Dropdown menu={addMenu(section.id)} trigger={["click"]}>
+                                        <Button icon={<PlusOutlined />}>Thêm bài giảng / bài tập</Button>
+                                    </Dropdown>
+                                )}
                             </div>
                         </div>
                     ))}

@@ -58,6 +58,12 @@ public enum ErrorCode {
     COURSE_VERSION_NOT_EXIST(5005, "Không tìm thấy phiên bản này của khoá học", HttpStatus.NOT_FOUND),
     COURSE_VERSION_NOT_EDITABLE(5006, "Phiên bản này của khoá học không thể chỉnh sửa", HttpStatus.CONFLICT),
     SECTION_NOT_EXIST(5007, "Section không tồn tại", HttpStatus.NOT_FOUND),
+    SECTION_ORDER_INVALID(5008, "Thứ tự section không hợp lệ, kiểm tra lại danh sách id", HttpStatus.BAD_REQUEST),
+    CURRICULUM_ITEM_INVALID(5009, "Loại và tiêu đề bài học không được để trống", HttpStatus.BAD_REQUEST),
+    CURRICULUM_ITEM_NOT_EXIST(5010, "Bài giảng không tồn tại", HttpStatus.BAD_REQUEST),
+    CURRICULUM_ITEM_NOT_LECTURE(5011, "Bài học này không phải bài giảng", HttpStatus.BAD_REQUEST),
+    LECTURE_CONTENT_TYPE_INVALID(5012, "Loại nội dung bài giảng không hợp lệ", HttpStatus.BAD_REQUEST),
+
     // ==========================================
     // 60xx: ENROLLMENT
     // ==========================================
@@ -68,7 +74,14 @@ public enum ErrorCode {
     // 70xx: MEDIA
     // ==========================================
     IMAGE_TYPE_NOT_SUPPORTED(7001, "Khổng hỗ trợ tải lên định dạng ảnh này", HttpStatus.UNSUPPORTED_MEDIA_TYPE),
-    IMAGE_NOT_UPLOADED(7002, "Chưa up ảnh lên storage", HttpStatus.BAD_REQUEST);
+    IMAGE_NOT_UPLOADED(7002, "Chưa up ảnh lên storage", HttpStatus.BAD_REQUEST),
+    VIDEO_TYPE_NOT_SUPPORTED(7003, "Không hỗ trợ tải lên định dạng video này", HttpStatus.UNSUPPORTED_MEDIA_TYPE),
+    DOCUMENT_TYPE_NOT_SUPPORTED(7004, "Không hỗ trợ tải lên định dạng tài liệu này", HttpStatus.UNSUPPORTED_MEDIA_TYPE),
+    FILE_SIZE_INVALID(7005, "Dung lượng tệp không hợp lệ hoặc vượt quá giới hạn", HttpStatus.BAD_REQUEST),
+    UPLOAD_NOT_STARTED(7006, "Chưa bắt đầu tải nội dung lên cho bài giảng này", HttpStatus.BAD_REQUEST),
+    CONTENT_NOT_UPLOADED(7007, "Tệp chưa được tải lên storage", HttpStatus.BAD_REQUEST),
+    VIDEO_DURATION_INVALID(7008, "Thời lượng video không hợp lệ", HttpStatus.BAD_REQUEST);
+
     private final int code;
     private final String message;
     private final HttpStatus httpStatus;

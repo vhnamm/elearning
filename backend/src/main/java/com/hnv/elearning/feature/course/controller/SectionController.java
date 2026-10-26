@@ -3,6 +3,7 @@ package com.hnv.elearning.feature.course.controller;
 import com.hnv.elearning.common.response.ApiResponse;
 import com.hnv.elearning.feature.course.dto.instructor.SectionCreateRequest;
 import com.hnv.elearning.feature.course.dto.instructor.SectionCreateResponse;
+import com.hnv.elearning.feature.course.dto.instructor.SectionReorderRequest;
 import com.hnv.elearning.feature.course.service.SectionService;
 import com.hnv.elearning.feature.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -48,5 +49,19 @@ public class SectionController {
 
     }
 
-
+    @PatchMapping("/api/v1/courses/{courseId}/versions/{versionId}/sections/position")
+    public ResponseEntity<ApiResponse<Void>> reorderSection(
+            @PathVariable("courseId") Long courseId,
+            @PathVariable("versionId") Long versionId,
+            @AuthenticationPrincipal User user,
+            @RequestBody SectionReorderRequest request
+    ){
+        sectionService.reorderSection(courseId, versionId, user.getId(), request);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+                ApiResponse.<Void>builder()
+                        .code(HttpStatus.NO_CONTENT.value())
+                        .message("Thay đổi thứ tự section thành công")
+                        .build()
+        );
+    }
 }
