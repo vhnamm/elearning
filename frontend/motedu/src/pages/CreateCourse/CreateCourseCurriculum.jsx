@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useOutletContext, useParams } from "react-router-dom";
 import { Button, Dropdown, Form, Input, Modal, Radio, Spin, Switch, Tooltip, message } from "antd";
-import {getInstructorCurriculum, createNewSection, deleteSection as deleteSectionApi, reorderSection, createCurriculumItem } from "~services/course.service.js";
+import {getInstructorCurriculum, createNewSection, deleteSection as deleteSectionApi, reorderSection, createCurriculumItem, getContentPresignedUrl } from "~services/course.service.js";
 import {
     CaretDownOutlined,
     CaretRightOutlined,
@@ -46,7 +46,8 @@ const readVideoMeta = (file) =>
         video.onerror = () => done({ duration: 0, thumbnail: null });
         video.onloadedmetadata = () => {
             const duration = video.duration;
-            video.currentTime = Math.min(1, duration / 2);
+            video.currentTime = Math.min(Math.max(0.1, duration / 2), 1);
+
             video.onseeked = () => {
                 try {
                     const canvas = document.createElement("canvas");
@@ -263,7 +264,23 @@ export default function CreateCourseCurriculum() {
         e.target.value = "";
         const target = pendingUploadRef.current;
         if (!file || !target) return;
+
+        //     private LectureType kind;
+        //     private String contentType;
+        //     private String fileName;
+        //     private Long fileSizeBytes;
+        //     // chỉ dùng cho VIDEO, null = không upload thumbnail
+        //     private String thumbnailContentType;
+
+
         if (target.kind === "DOCUMENT") {
+            const data = await getContentPresignedUrl(target.itemId , {
+                kind: target.kind,
+                contentType: file.type,
+                fileName: file.name,
+                fileSizeBytes: file.si
+            })
+
             updateItem(target.sectionId, target.itemId, {
                 contentType: "DOCUMENT",
                 fileName: file.name,
@@ -279,16 +296,18 @@ export default function CreateCourseCurriculum() {
         //  3. POST /lectures/{id}/video/complete { durationSeconds } -> BE HeadObject kiểm tra file,
         //     set videoKey = videoRawKey, videoStatus = READY
         //  Lecture phải được lưu xuống BE (có id thật) trước bước 1.
+        else if(kind == "VIDEO"){
+            const meta = await readVideoMeta(file);
+            updateItem(target.sectionId, target.itemId, {
+                contentType: "VIDEO",
+                videoStatus: "READY", // tạm, tới khi có luồng upload thật
+                fileName: file.name,
+                videoDurationSeconds: meta.duration,
+                thumbnailUrl: meta.thumbnail,
+            });
+        }
 
 
-        const meta = await readVideoMeta(file);
-        updateItem(target.sectionId, target.itemId, {
-            contentType: "VIDEO",
-            videoStatus: "READY", // tạm, tới khi có luồng upload thật
-            fileName: file.name,
-            videoDurationSeconds: meta.duration,
-            thumbnailUrl: meta.thumbnail,
-        });
         setExpanded((prev) => ({ ...prev, [target.itemId]: true }));
     };
 
