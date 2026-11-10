@@ -8,7 +8,7 @@ import com.hnv.elearning.feature.category.entity.Subcategory;
 import com.hnv.elearning.feature.category.entity.Topic;
 import com.hnv.elearning.feature.category.repository.CategoryRepository;
 import com.hnv.elearning.feature.category.repository.TopicRepository;
-import com.hnv.elearning.feature.course.dto.instructor.*;
+import com.hnv.elearning.feature.course.dto.privates.*;
 import com.hnv.elearning.feature.course.dto.publics.CourseSearchRequest;
 import com.hnv.elearning.feature.course.entity.Course;
 import com.hnv.elearning.feature.course.entity.CourseVersion;

@@ -64,6 +64,24 @@
   }
 }
 
+// Bước có thể bấm (NavLink)
+.stepLink {
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover:not(.active) {
+    background: #f1f5f9;
+    color: #334155;
+  }
+}
+
+// Bước chưa có trang
+.stepDisabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .stepIcon {
   display: inline-flex;
   align-items: center;
@@ -85,43 +103,10 @@
   flex-shrink: 0;
 }
 
-.stepStatus {
-  font-size: 11px;
-  font-weight: 500;
-  color: #94a3b8;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
 .bottom {
   display: flex;
   flex-direction: column;
   gap: 10px;
-}
-
-.progressBox {
-  padding: 12px 10px;
-}
-
-.progressHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: #475569;
-  margin-bottom: 8px;
-}
-
-.progressPercent {
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.progressNote {
-  margin: 8px 0 0;
-  font-size: 11.5px;
-  color: #94a3b8;
 }
 
 .submitBtn {

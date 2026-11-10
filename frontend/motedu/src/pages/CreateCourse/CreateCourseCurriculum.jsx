@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useOutletContext, useParams } from "react-router-dom";
-import { Button, Dropdown, Form, Input, Modal, Radio, Spin, Switch, Tooltip, message } from "antd";
-import {getInstructorCurriculum, createNewSection, deleteSection as deleteSectionApi, reorderSection, createCurriculumItem, getContentPresignedUrl } from "~services/course.service.js";
+import { Button, Dropdown, Form, Input, Modal, Progress, Radio, Spin, Switch, Tooltip, message } from "antd";
+import {getInstructorCurriculum, createNewSection, deleteSection as deleteSectionApi, reorderSection, createCurriculumItem,
+    getContentPresignedUrl, putToStorage, completeContentUpload, getContentAccess, updateCurriculumItem,
+    updateSection as updateSectionApi, deleteCurriculumItem
+
+} from "~services/course.service.js";
+
+import {createQuestion, deleteQuestion as deleteQuestionApi, getQuestions, updateQuestion} from "~services/quiz.service.js";
+
 import {
     CaretDownOutlined,
     CaretRightOutlined,
@@ -18,8 +25,7 @@ import {
     SaveOutlined,
 } from "@ant-design/icons";
 import styles from "./CreateCourseCurriculum.module.scss";
-
-const uid = () => Math.random().toString(36).slice(2, 10);
+import axios from "axios";
 
 const formatDuration = (seconds) => {
     const total = Math.max(0, Math.round(seconds || 0));
@@ -30,7 +36,6 @@ const formatDuration = (seconds) => {
 
 /**
  * Đọc thời lượng + chụp 1 khung hình làm thumbnail từ file video cục bộ.
- * Blob URL chỉ dùng tạm để đọc metadata, được thu hồi ngay, KHÔNG dùng để phát video.
  */
 const readVideoMeta = (file) =>
     new Promise((resolve) => {
@@ -43,7 +48,7 @@ const readVideoMeta = (file) =>
         video.preload = "metadata";
         video.muted = true;
         video.src = url;
-        video.onerror = () => done({ duration: 0, thumbnail: null });
+        video.onerror = () => done({ duration: 0, thumbnailBlob: null });
         video.onloadedmetadata = () => {
             const duration = video.duration;
             video.currentTime = Math.min(Math.max(0.1, duration / 2), 1);
@@ -54,9 +59,14 @@ const readVideoMeta = (file) =>
                     canvas.width = 320;
                     canvas.height = 180;
                     canvas.getContext("2d").drawImage(video, 0, 0, 320, 180);
-                    done({ duration, thumbnail: canvas.toDataURL("image/jpeg", 0.8) });
+                    canvas.toBlob(
+                        (blob) => done({ duration, thumbnailBlob: blob }),
+                        "image/jpeg",
+                        0.8
+                    );
+
                 } catch {
-                    done({ duration, thumbnail: null });
+                    done({ duration, thumbnailBlob: null });
                 }
             };
         };
@@ -96,6 +106,14 @@ const itemSubtitle = (item) => {
     return isDocument(item) ? "Bài đọc" : `Video • ${formatDuration(item.videoDurationSeconds)}`;
 };
 
+// Đổi câu hỏi từ dạng BE (đáp án là object có isCorrect) sang dạng form/state của FE (mảng chuỗi + chỉ số đúng).
+const toFormQuestion = (q) => ({
+    id: q.id,
+    text: q.content,
+    options: q.options.map((o) => ({ id: o.id, content: o.content })),
+    correct: q.options.findIndex((o) => o.isCorrect),
+});
+
 const reorder = (list, from, to) => {
     if (from === to || from < 0 || to < 0) return list;
     const next = [...list];
@@ -119,10 +137,53 @@ export default function CreateCourseCurriculum() {
     const [addingItem, setAddingItem] = useState(null); // { sectionId, type }
     const [newItemTitle, setNewItemTitle] = useState("");
     const [creatingItem, setCreatingItem] = useState(false);
-
+    const [uploads, setUploads] = useState({}) //itemId: {percent, status}
+    const [videoPreview, setVideoPreview] = useState(null); // { url, title }
     const dragRef = useRef(null); // { kind: "section" | "item", sectionId, id }
+    const titleBackupRef = useRef(""); // tên item lúc bắt đầu sửa, để trả lại nếu để trống hoặc lưu lỗi
+
+    const togglePreview = async (sectionId, itemId, checked) => {
+        updateItem(sectionId, itemId, { preview: checked }); // đổi UI ngay
+        try {
+            await updateCurriculumItem(itemId, { preview: checked });
+        } catch (err) {
+            updateItem(sectionId, itemId, { preview: !checked }); // lỗi thì trả lại
+            message.error(err?.response?.data?.message ?? "Không thể cập nhật xem trước");
+        }
+    };
+
+    const saveSectionTitle = async (section, rawTitle) => {
+        setEditingSectionId(null);
+        const title = rawTitle.trim();
+        if (!title || title === section.title) return; // để trống hoặc không đổi thì giữ tên cũ
+        try {
+            await updateSectionApi(courseId, versionId, section.id, { title });
+            updateSection(section.id, (s) => ({ ...s, title }));
+        } catch (err) {
+            message.error(err?.response?.data?.message ?? "Không thể đổi tên phần");
+        }
+    };
+
+    const saveItemTitle = async (sectionId, item) => {
+        const title = (item.title ?? "").trim();
+        const old = titleBackupRef.current;
+        if (title === old) return;
+        if (!title) {
+            updateItem(sectionId, item.id, { title: old });
+            message.warning("Tên bài học không được để trống");
+            return;
+        }
+        try {
+            await updateCurriculumItem(item.id, { title });
+            updateItem(sectionId, item.id, { title });
+        } catch (err) {
+            updateItem(sectionId, item.id, { title: old });
+            message.error(err?.response?.data?.message ?? "Không thể đổi tên bài học");
+        }
+    };
     const fileInputRef = useRef(null);
     const pendingUploadRef = useRef(null); // { sectionId, itemId }
+    const [savingQuestion, setSavingQuestion] = useState(false)
     const [form] = Form.useForm();
 
     useEffect(() => {
@@ -236,7 +297,10 @@ export default function CreateCourseCurriculum() {
         setCreatingItem(true);
         try {
             const result = await createCurriculumItem(sectionId, { type, title });
-            updateSection(sectionId, (s) => ({ ...s, curriculumItems: [...s.curriculumItems, result.data] }));
+            // Quiz mới chưa có câu hỏi: gán sẵn danh sách rỗng và mở rộng luôn để thấy nút "Thêm câu hỏi mới".
+            const created = type === "QUIZ" ? { ...result.data, questions: [] } : result.data;
+            updateSection(sectionId, (s) => ({ ...s, curriculumItems: [...s.curriculumItems, created] }));
+            if (type === "QUIZ") setExpanded((prev) => ({ ...prev, [created.id]: true }));
             cancelAddItem();
         } catch {
             message.error("Không thể tạo bài học mới");
@@ -245,10 +309,41 @@ export default function CreateCourseCurriculum() {
         }
     };
 
-    const deleteItem = (sectionId, itemId) =>
-        updateSection(sectionId, (s) => ({ ...s, curriculumItems: s.curriculumItems.filter((i) => i.id !== itemId) }));
+    const deleteItem = (sectionId, item) =>
+        Modal.confirm({
+            title: "Xóa bài học này?",
+            content: `Bài học "${item.title}" và nội dung của nó sẽ bị xóa.`,
+            okText: "Xóa",
+            cancelText: "Hủy",
+            okButtonProps: { danger: true },
+            onOk: async () => {
+                try {
+                    await deleteCurriculumItem(sectionId, item.id);
+                    updateSection(sectionId, (s) => ({
+                        ...s,
+                        curriculumItems: s.curriculumItems.filter((i) => i.id !== item.id),
+                    }));
+                    message.success("Đã xóa bài học");
+                } catch (err) {
+                    message.error(err?.response?.data?.message ?? "Không thể xóa bài học");
+                }
+            },
+        });
 
-    const toggleExpand = (itemId) => setExpanded((prev) => ({ ...prev, [itemId]: !prev[itemId] }));
+    const toggleExpand = async (sectionId, item) => {
+        const opening = !expanded[item.id];
+        setExpanded((prev) => ({ ...prev, [item.id]: opening }));
+
+        // Quiz chưa có danh sách câu hỏi trong state (vừa F5) thì tải từ BE, mỗi item chỉ tải một lần.
+        if (opening && item.type === "QUIZ" && !item.questions) {
+            try {
+                const data = await getQuestions(item.id);
+                updateItem(sectionId, item.id, { questions: data.questions.map(toFormQuestion) });
+            } catch {
+                message.error("Không thể tải danh sách câu hỏi");
+            }
+        }
+    };
 
     /* ---------- video ---------- */
     const pickFile = (sectionId, itemId, kind) => {
@@ -264,105 +359,195 @@ export default function CreateCourseCurriculum() {
         e.target.value = "";
         const target = pendingUploadRef.current;
         if (!file || !target) return;
+        const { sectionId, itemId, kind } = target;
 
-        //     private LectureType kind;
-        //     private String contentType;
-        //     private String fileName;
-        //     private Long fileSizeBytes;
-        //     // chỉ dùng cho VIDEO, null = không upload thumbnail
-        //     private String thumbnailContentType;
+        setUploads((prev) => ({...prev, [itemId]: {percent: 0}}))
+        try {
+            //0. Video thi phai cat ra lay thumb
+            let metadata = null
+            if(kind == "VIDEO") metadata = await readVideoMeta(file);
+            const thumbBlob = metadata?.thumbnailBlob ?? null;
 
-
-        if (target.kind === "DOCUMENT") {
-            const data = await getContentPresignedUrl(target.itemId , {
-                kind: target.kind,
+            //1. Xin presigned url chung cho ca 2 loai VIDEO va DOC
+            const presigned = await getContentPresignedUrl(itemId, {
+                kind: kind,
                 contentType: file.type,
                 fileName: file.name,
-                fileSizeBytes: file.si
+                fileSizeBytes: file.size,
+                thumbnailContentType: thumbBlob ? "image/jpeg" : undefined
             })
 
-            updateItem(target.sectionId, target.itemId, {
-                contentType: "DOCUMENT",
-                fileName: file.name,
-                fileSizeBytes: file.size,
-                fileUrl: URL.createObjectURL(file),
-            });
+            //2. PUT len R2
+            if(thumbBlob && presigned.thumbnailUploadUrl){
+                await putToStorage(presigned.thumbnailUploadUrl, thumbBlob)
+            }
+            await putToStorage(presigned.uploadUrl, file, (percent) => setUploads(
+                (prev) => ({...prev, [itemId]: { percent: percent }}))
+            )
+
+            //3.goi api complete
+            await completeContentUpload(itemId, {
+                durationSeconds: Math.round(metadata?.duration ?? 0)
+            })
+
+            //4.Cap nhat UI
+            if(kind == "VIDEO"){
+                updateItem(sectionId, itemId, {
+                    contentType: "VIDEO",
+                    videoStatus: "READY",
+                    fileName: file.name,
+                    videoDurationSeconds: metadata.duration,
+                    thumbnailUrl: thumbBlob ? URL.createObjectURL(thumbBlob) : null
+                })
+            }else{
+                updateItem(sectionId, itemId, {
+                    contentType: "DOCUMENT",
+                    fileName: file.name,
+                    fileSizeBytes: file.size,
+                    fileUrl: URL.createObjectURL(file),
+                });
+            }
             setExpanded((prev) => ({ ...prev, [target.itemId]: true }));
-            return;
-        }
-        // TODO(video-upload MVP): thay đoạn local-state này bằng luồng upload thật lên R2:
-        //  1. POST /lectures/{id}/video/presigned-url  -> { uploadUrl }  (BE lưu videoRawKey, videoStatus=UPLOADING)
-        //  2. PUT file lên uploadUrl (header Content-Type: video/mp4), hiển thị tiến độ upload
-        //  3. POST /lectures/{id}/video/complete { durationSeconds } -> BE HeadObject kiểm tra file,
-        //     set videoKey = videoRawKey, videoStatus = READY
-        //  Lecture phải được lưu xuống BE (có id thật) trước bước 1.
-        else if(kind == "VIDEO"){
-            const meta = await readVideoMeta(file);
-            updateItem(target.sectionId, target.itemId, {
-                contentType: "VIDEO",
-                videoStatus: "READY", // tạm, tới khi có luồng upload thật
-                fileName: file.name,
-                videoDurationSeconds: meta.duration,
-                thumbnailUrl: meta.thumbnail,
+        }catch (err){
+            if (axios.isCancel(err)) message.info("Đã hủy tải lên");
+            else message.error(err?.response?.data?.message ?? "Tải lên thất bại, vui lòng thử lại");
+        }finally {
+            setUploads((prev) => {
+                const next = { ...prev };
+                delete next[itemId];
+                return next;
             });
         }
-
-
-        setExpanded((prev) => ({ ...prev, [target.itemId]: true }));
     };
 
-    const previewDocument = (item) => {
-        if (!item.fileUrl) {
-            message.info("Chưa có bản xem trước cho tệp này.");
-            return;
+    const previewDocument = async (item) => {
+        // Mở tab trống ngay trong lúc bấm, nếu chờ API xong mới mở thì trình duyệt chặn popup.
+        const tab = window.open("about:blank", "_blank");
+        try {
+            const access = await getContentAccess(item.id);
+            if (tab) tab.location.href = access.accessUrl;
+        } catch (err) {
+            tab?.close();
+            message.error(err?.response?.data?.message ?? "Không thể xem trước tệp này");
         }
-        window.open(item.fileUrl, "_blank", "opener");
     };
 
-    // TODO(video-preview MVP): khi giảng viên bấm xem trước:
-    //  1. GET /lectures/{id}/video/play-url -> { url } (presigned GET, TTL ~2h, BE kiểm tra quyền + videoStatus=READY)
-    //  2. Mở Modal với <video src={url} controls autoPlay /> (trình duyệt tự gửi Range request để tua)
-    //  Không phát từ blob cục bộ: preview phải đi qua đúng đường mà học viên sẽ xem.
-    const previewVideo = () => {
-        message.info("Xem trước video sẽ có sau khi tích hợp upload lên R2.");
+    // Link có hạn nên không lưu lâu, mỗi lần bấm "Xem trước" xin link mới.
+    const previewVideo = async (item) => {
+        try {
+            const access = await getContentAccess(item.id);
+            setVideoPreview({ url: access.accessUrl, title: item.title });
+        } catch (err) {
+            message.error(err?.response?.data?.message ?? "Không thể xem trước video này");
+        }
     };
 
-    /* ---------- quiz questions ---------- */
-    // TODO(quiz-api): đồng bộ với DB (question_options: content, is_correct, position), FE chưa sửa:
-    //  - Lưu (submitQuestion): đổi `correct` (chỉ số) thành cờ trên từng đáp án:
-    //      options: values.options.map((content, i) => ({ content: content.trim(), isCorrect: i === values.correct }))
-    //    KHÔNG gửi position, BE tự gán theo thứ tự mảng.
-    //  - Mở sửa (openQuestionModal): đổi ngược lại:
-    //      options: question.options.map((o) => o.content), correct: question.options.findIndex((o) => o.isCorrect)
-    //  - Mỗi câu tối đa 4 đáp án (A-D): đổi giới hạn `fields.length < 6` thành `< 4` ở Form.List bên dưới.
-    //  - hasContent của quiz tự tính ở FE từ questionCount > 0 (BE không trả hasContent).
+
     const openQuestionModal = (sectionId, itemId, question = null) => {
         form.setFieldsValue(
             question
                 ? { text: question.text, options: question.options, correct: question.correct }
-                : { text: "", options: ["", ""], correct: 0 },
+                : { text: "", options: [{ id: null, content: "" }, { id: null, content: "" }], correct: 0 },
         );
         setQuestionModal({ sectionId, itemId, question });
     };
 
-    const submitQuestion = async () => {
+    const handleCreateQuestion = async () => {
+        const values = await form.validateFields();
+        const { sectionId, itemId } = questionModal;
+
+        const body = {
+            content: values.text.trim(),
+            options: values.options.map((opt, i) => ({
+                id: null,
+                content: (typeof opt === "string" ? opt : opt.content).trim(),
+                isCorrect: i === values.correct,
+            })),
+        };
+
+        setSavingQuestion(true);
+        try {
+            const saved = await createQuestion(itemId, body);
+            const payload = toFormQuestion(saved.data ?? saved);
+
+            updateSection(sectionId, (s) => ({
+                ...s,
+                curriculumItems: s.curriculumItems.map((i) => {
+                    if (i.id !== itemId) return i;
+                    return { ...i, questions: [...(i.questions || []), payload] };
+                }),
+            }));
+
+            message.success("Thêm câu hỏi thành công");
+            setQuestionModal(null);
+        } catch (err) {
+            message.error(err?.response?.data?.message ?? "Không thể tạo câu hỏi");
+        } finally {
+            setSavingQuestion(false);
+        }
+    };
+
+    // Hàm 2: Xử lý CẬP NHẬT
+    const handleUpdateQuestion = async () => {
         const values = await form.validateFields();
         const { sectionId, itemId, question } = questionModal;
-        const options = values.options.map((o) => o.trim());
-        const payload = { id: question?.id ?? uid(), text: values.text.trim(), options, correct: values.correct };
 
-        updateSection(sectionId, (s) => ({
-            ...s,
-            curriculumItems: s.curriculumItems.map((i) => {
-                if (i.id !== itemId) return i;
-                const list = i.questions || [];
-                const questions = question ? list.map((q) => (q.id === question.id ? payload : q)) : [...list, payload];
-                return { ...i, questions };
-            }),
-        }));
-        setExpanded((prev) => ({ ...prev, [itemId]: true }));
-        setQuestionModal(null);
+        const body = {
+            content: values.text.trim(),
+            options: values.options.map((opt, i) => ({
+                id: opt?.id ?? null,
+                content: (typeof opt === "string" ? opt : opt.content).trim(),
+                isCorrect: i === values.correct,
+            })),
+        };
+
+        setSavingQuestion(true);
+        try {
+            const updated = await updateQuestion(itemId ,question.id, body);
+            const payload = toFormQuestion(updated.data ?? updated);
+
+            updateSection(sectionId, (s) => ({
+                ...s,
+                curriculumItems: s.curriculumItems.map((i) => {
+                    if (i.id !== itemId) return i;
+                    const questions = (i.questions || []).map((q) => (q.id === question.id ? payload : q));
+                    return { ...i, questions };
+                }),
+            }));
+
+            message.success("Cập nhật câu hỏi thành công");
+            setQuestionModal(null);
+        } catch (err) {
+            message.error(err?.response?.data?.message ?? "Không thể cập nhật câu hỏi");
+        } finally {
+            setSavingQuestion(false);
+        }
     };
+
+    const deleteQuestion = (sectionId, itemId, question) =>
+        Modal.confirm({
+            title: "Xóa câu hỏi này?",
+            content: `Câu hỏi "${question.text}" và các đáp án của nó sẽ bị xóa.`,
+            okText: "Xóa",
+            cancelText: "Hủy",
+            okButtonProps: { danger: true },
+            onOk: async () => {
+                try {
+                    await deleteQuestionApi(itemId, question.id);
+                    updateSection(sectionId, (s) => ({
+                        ...s,
+                        curriculumItems: s.curriculumItems.map((i) =>
+                            i.id !== itemId
+                                ? i
+                                : { ...i, questions: (i.questions || []).filter((q) => q.id !== question.id) },
+                        ),
+                    }));
+                    message.success("Đã xóa câu hỏi");
+                } catch (err) {
+                    message.error(err?.response?.data?.message ?? "Không thể xóa câu hỏi");
+                }
+            },
+        });
 
     /* ---------- drag & drop (HTML5 native) ---------- */
     const dropSection = async (targetId) => {
@@ -430,14 +615,23 @@ export default function CreateCourseCurriculum() {
                             <span className={styles.questionText}>
                                 Câu {idx + 1}. {q.text}
                             </span>
-                            <Button
-                                size="small"
-                                icon={<EditOutlined />}
-                                className={styles.questionEdit}
-                                onClick={() => openQuestionModal(section.id, item.id, q)}
-                            >
-                                Chỉnh sửa
-                            </Button>
+                            <div className={styles.questionEdit}>
+                                <Button
+                                    size="small"
+                                    icon={<EditOutlined />}
+                                    onClick={() => openQuestionModal(section.id, item.id, q)}
+                                >
+                                    Chỉnh sửa
+                                </Button>
+                                <Button
+                                    size="small"
+                                    danger
+                                    icon={<DeleteOutlined />}
+                                    onClick={() => deleteQuestion(section.id, item.id, q)}
+                                >
+                                    Xóa
+                                </Button>
+                            </div>
                         </div>
                     ))}
                     <Button
@@ -461,7 +655,11 @@ export default function CreateCourseCurriculum() {
                     <div className={styles.videoInfo}>
                         <div className={styles.fileName}>{item.fileName}</div>
                         <div className={styles.fileMeta}>{formatFileSize(item.fileSizeBytes)}</div>
-                        <Button size="small" onClick={() => pickFile(section.id, item.id, "DOCUMENT")}>
+                        <Button
+                            size="small"
+                            disabled={!!uploads[item.id]}
+                            onClick={() => pickFile(section.id, item.id, "DOCUMENT")}
+                        >
                             Thay đổi tệp
                         </Button>
                     </div>
@@ -484,7 +682,11 @@ export default function CreateCourseCurriculum() {
                 <div className={styles.videoInfo}>
                     <div className={styles.fileName}>{item.fileName}</div>
                     <div className={styles.fileMeta}>Thời lượng {formatDuration(item.videoDurationSeconds)}</div>
-                    <Button size="small" onClick={() => pickFile(section.id, item.id, "VIDEO")}>
+                    <Button
+                        size="small"
+                        disabled={!!uploads[item.id]}
+                        onClick={() => pickFile(section.id, item.id, "VIDEO")}
+                    >
                         Thay đổi video
                     </Button>
                 </div>
@@ -523,7 +725,10 @@ export default function CreateCourseCurriculum() {
                                 variant="borderless"
                                 value={item.title}
                                 className={styles.itemTitleInput}
+                                onFocus={() => (titleBackupRef.current = item.title)}
                                 onChange={(e) => updateItem(section.id, item.id, { title: e.target.value })}
+                                onBlur={() => saveItemTitle(section.id, item)}
+                                onPressEnter={(e) => e.currentTarget.blur()}
                             />
                             <span className={styles.itemSub}>{itemSubtitle(item)}</span>
                         </div>
@@ -535,65 +740,58 @@ export default function CreateCourseCurriculum() {
                                     <Switch
                                         size="small"
                                         checked={!!item.preview}
-                                        onChange={(checked) => updateItem(section.id, item.id, { preview: checked })}
+                                        onChange={(checked) => togglePreview(section.id, item.id, checked)}
                                     />
                                     <span>Xem trước</span>
                                 </span>
                             </Tooltip>
                         )}
-                        {!hasContent(item) &&
-                            (item.type === "QUIZ" ? (
+                        {item.type === "LECTURE" && !hasContent(item) && (
+                            <Dropdown
+                                trigger={["click"]}
+                                menu={{
+                                    items: [
+                                        { key: "VIDEO", icon: <PlayCircleOutlined />, label: "Video" },
+                                        { key: "DOCUMENT", icon: <FileTextOutlined />, label: "Bài đọc (tệp tài liệu)" },
+                                    ],
+                                    onClick: ({ key }) => pickFile(section.id, item.id, key),
+                                }}
+                            >
                                 <Button
                                     type="primary"
                                     size="small"
                                     icon={<PlusOutlined />}
                                     className={styles.addContentBtn}
-                                    onClick={() => openQuestionModal(section.id, item.id)}
                                 >
                                     Nội dung
                                 </Button>
-                            ) : (
-                                <Dropdown
-                                    trigger={["click"]}
-                                    menu={{
-                                        items: [
-                                            { key: "VIDEO", icon: <PlayCircleOutlined />, label: "Video" },
-                                            { key: "DOCUMENT", icon: <FileTextOutlined />, label: "Bài đọc (tệp tài liệu)" },
-                                        ],
-                                        onClick: ({ key }) => pickFile(section.id, item.id, key),
-                                    }}
-                                >
-                                    <Button
-                                        type="primary"
-                                        size="small"
-                                        icon={<PlusOutlined />}
-                                        className={styles.addContentBtn}
-                                    >
-                                        Nội dung
-                                    </Button>
-                                </Dropdown>
-                            ))}
+                            </Dropdown>
+                        )}
                         <Button
                             type="text"
                             size="small"
                             icon={<DeleteOutlined />}
                             className={styles.iconBtn}
-                            onClick={() => deleteItem(section.id, item.id)}
+                            onClick={() => deleteItem(section.id, item)}
+                            disabled={!!uploads[item.id]}
                             aria-label="Xóa bài học"
                         />
-                        {hasContent(item) && (
+                        {(hasContent(item) || item.type === "QUIZ") && (
                             <Button
                                 type="text"
                                 size="small"
                                 className={styles.iconBtn}
                                 icon={isOpen ? <CaretDownOutlined /> : <CaretRightOutlined />}
-                                onClick={() => toggleExpand(item.id)}
+                                onClick={() => toggleExpand(section.id, item)}
                                 aria-label={isOpen ? "Thu gọn" : "Mở rộng"}
                             />
                         )}
                     </div>
                 </div>
-                {hasContent(item) && isOpen && <div className={styles.itemExpanded}>{renderItemBody(section, item)}</div>}
+                {uploads[item.id] && (
+                    <Progress percent={uploads[item.id].percent} size="small" style={{ padding: "0 12px" }} />
+                )}
+                {(hasContent(item) || item.type === "QUIZ") && isOpen && <div className={styles.itemExpanded}>{renderItemBody(section, item)}</div>}
             </div>
         );
     };
@@ -653,11 +851,7 @@ export default function CreateCourseCurriculum() {
                                         autoFocus
                                         defaultValue={section.title}
                                         className={styles.sectionTitleInput}
-                                        onBlur={(e) => {
-                                            const title = e.target.value.trim();
-                                            if (title) updateSection(section.id, (s) => ({ ...s, title }));
-                                            setEditingSectionId(null);
-                                        }}
+                                        onBlur={(e) => saveSectionTitle(section, e.target.value)}
                                         onPressEnter={(e) => e.currentTarget.blur()}
                                     />
                                 ) : (
@@ -751,14 +945,51 @@ export default function CreateCourseCurriculum() {
             <input ref={fileInputRef} type="file" hidden onChange={handleVideoChosen} />
 
             <Modal
+                open={!!videoPreview}
+                title={videoPreview?.title}
+                footer={null}
+                width={800}
+                onCancel={() => setVideoPreview(null)}
+                destroyOnHidden
+            >
+                {videoPreview && <video src={videoPreview.url} controls autoPlay style={{ width: "100%" }} />}
+            </Modal>
+
+            <Modal
                 open={!!questionModal}
                 title={questionModal?.question ? "Chỉnh sửa câu hỏi" : "Thêm câu hỏi mới"}
-                okText="Lưu"
                 cancelText="Hủy"
-                onOk={submitQuestion}
+                confirmLoading={savingQuestion}
                 onCancel={() => setQuestionModal(null)}
                 destroyOnHidden
                 forceRender
+                footer={[
+                    <Button key="cancel" onClick={() => setQuestionModal(null)}>
+                        Hủy
+                    </Button>,
+
+                    // NÚT 1: Chỉ hiện khi ĐANG SỬA
+                    questionModal?.question ? (
+                        <Button
+                            key="update"
+                            type="primary"
+                            loading={savingQuestion}
+                            onClick={handleUpdateQuestion}
+                        >
+                            Cập nhật
+                        </Button>
+                    ) : (
+                        // NÚT 2: Chỉ hiện khi TẠO MỚI
+                        <Button
+                            key="create"
+                            type="primary"
+                            loading={savingQuestion}
+                            onClick={handleCreateQuestion}
+                        >
+                            Tạo mới
+                        </Button>
+                    ),
+                ]}
             >
                 <Form form={form} layout="vertical" requiredMark={false}>
                     <Form.Item
@@ -777,8 +1008,11 @@ export default function CreateCourseCurriculum() {
                                         {fields.map((field, idx) => (
                                             <div key={field.key} className={styles.optionRow}>
                                                 <Radio value={idx} />
+                                                <Form.Item name={[field.name, "id"]} hidden noStyle>
+                                                    <Input type="hidden" />
+                                                </Form.Item>
                                                 <Form.Item
-                                                    name={field.name}
+                                                    name={[field.name, "content"]}
                                                     noStyle
                                                     rules={[{ required: true, whitespace: true, message: "Nhập đáp án" }]}
                                                 >
@@ -799,7 +1033,7 @@ export default function CreateCourseCurriculum() {
                                             </div>
                                         ))}
                                         {fields.length < 6 && (
-                                            <Button type="dashed" icon={<PlusOutlined />} onClick={() => add("")}>
+                                            <Button type="dashed" icon={<PlusOutlined />} onClick={() => add({ id: null, content: "" })}>
                                                 Thêm đáp án
                                             </Button>
                                         )}

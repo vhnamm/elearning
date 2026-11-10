@@ -1,7 +1,7 @@
 package com.hnv.elearning.feature.course.mapper;
 
 import com.hnv.elearning.feature.category.mapper.TopicMapper;
-import com.hnv.elearning.feature.course.dto.instructor.*;
+import com.hnv.elearning.feature.course.dto.privates.*;
 import com.hnv.elearning.feature.course.dto.publics.*;
 import com.hnv.elearning.feature.course.entity.*;
 import org.mapstruct.BeanMapping;
@@ -86,8 +86,8 @@ public interface CourseMapper {
             }
         }
 
-        if (entity.getQuizz() != null) {
-            dto.setPassingScore(entity.getQuizz().getPassingScore());
+        if (entity.getQuiz() != null) {
+            dto.setPassingScore(entity.getQuiz().getPassingScore());
         }
 
         return dto;
@@ -127,10 +127,10 @@ public interface CourseMapper {
             }
         }
 
-        Quizz quizz = entity.getQuizz();
-        if (quizz != null) {
-            dto.setPassingScore(quizz.getPassingScore());
-            dto.setQuestionCount(questionCounts.getOrDefault(quizz.getId(), 0L));
+        Quiz quiz = entity.getQuiz();
+        if (quiz != null) {
+            dto.setPassingScore(quiz.getPassingScore());
+            dto.setQuestionCount(questionCounts.getOrDefault(quiz.getId(), 0L));
         }
 
         return dto;

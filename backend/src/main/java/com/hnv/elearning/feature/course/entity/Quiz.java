@@ -12,7 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-public class Quizz {
+public class Quiz {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

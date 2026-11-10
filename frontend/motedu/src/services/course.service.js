@@ -1,4 +1,5 @@
 import http from "~services/http.js";
+import axios from "axios";
 
 // Danh sách khóa học của giảng viên đang đăng nhập.
 export const getInstructorCourses = async ({
@@ -131,6 +132,23 @@ export const updateCourseBasicInfo = async (courseId, versionId, payload) => {
      return data;
  }
 
+ // PATCH: chỉ gửi trường cần sửa, ví dụ { preview: true } hoặc { title: "..." }
+ export const updateCurriculumItem = async (itemId, payload) => {
+     const {data} = await http.patch(`/curriculum-items/${itemId}`, payload)
+     return data;
+ }
+
+ // PATCH: chỉ gửi trường cần sửa, ví dụ { title: "..." }
+ export const updateSection = async (courseId, versionId, sectionId, payload) => {
+     const {data} = await http.patch(`/courses/${courseId}/versions/${versionId}/sections/${sectionId}`, payload)
+     return data;
+ }
+
+ export const deleteCurriculumItem = async (sectionId, itemId) => {
+     const {data} = await http.delete(`/sections/${sectionId}/items/${itemId}`)
+     return data;
+ }
+
  export const reorderSection = async (courseId, versionId, payload) => {
      const {data} = await http.patch(`courses/${courseId}/versions/${versionId}/sections/position`, payload)
      return data;
@@ -140,6 +158,33 @@ export const updateCourseBasicInfo = async (courseId, versionId, payload) => {
      const { data } = await http.post(`/curriculum-items/${itemId}/content/presigned-url`, payload);
      return data.data;
  }
+
+ export const putToStorage = async (presignedUrl, file, onProgressCallback) => {
+        const response = await axios.put(presignedUrl, file, {
+            headers: {
+                "Content-Type": file.type
+            },
+            onUploadProgress: (progressEvent) => {
+                if(progressEvent.total){
+                    const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+
+                    if(onProgressCallback){
+                        onProgressCallback(percent)
+                    }
+                }
+                
+            }
+        })
+
+        return response.data
+ }
+
+
+// Link tạm để xem video/tài liệu (bucket PRIVATE), mỗi lần bấm xem phải xin link mới.
+export const getContentAccess = async (itemId) => {
+    const { data } = await http.get(`/curriculum-items/${itemId}/content/access-url`);
+    return data.data; // { accessUrl, expiresAt, contentType, mimeType, fileName, durationSeconds }
+};
 
 export const completeContentUpload = async (itemId, payload) => {
     const { data } = await http.post(`/curriculum-items/${itemId}/content/complete`, payload);

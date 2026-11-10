@@ -49,7 +49,7 @@ public class CurriculumItem {
     private Lecture lecture;
 
     @OneToOne(mappedBy = "curriculumItem", cascade = CascadeType.ALL)
-    private Quizz quizz;
+    private Quiz quiz;
 
     @PrePersist
     void ensureStableKey() {

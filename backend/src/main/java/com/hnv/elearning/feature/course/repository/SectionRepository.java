@@ -15,7 +15,7 @@ public interface SectionRepository extends JpaRepository<Section, Long> {
             SELECT DISTINCT s FROM Section s
             LEFT JOIN FETCH s.curriculumItems i
             LEFT JOIN FETCH i.lecture
-            LEFT JOIN FETCH i.quizz
+            LEFT JOIN FETCH i.quiz
             WHERE s.courseVersion.id = :versionId
             ORDER BY s.position ASC, i.position ASC
             """)

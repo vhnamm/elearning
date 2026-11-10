@@ -1,6 +1,6 @@
 package com.hnv.elearning.feature.course.service;
 
-import com.hnv.elearning.feature.course.dto.instructor.*;
+import com.hnv.elearning.feature.course.dto.privates.*;
 import com.hnv.elearning.feature.course.dto.publics.CourseSearchRequest;
 import com.hnv.elearning.feature.user.entity.User;
 import com.hnv.elearning.infrastructure.storage.PresignedUploadResponse;

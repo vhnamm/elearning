@@ -68,3 +68,4 @@ r2:
     video-upload: 2h
     document-upload: 30m
     video-download: 2h
+    document-download: 30m

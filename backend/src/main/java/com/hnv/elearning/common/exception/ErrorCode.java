@@ -63,12 +63,13 @@ public enum ErrorCode {
     CURRICULUM_ITEM_NOT_EXIST(5010, "Bài giảng không tồn tại", HttpStatus.BAD_REQUEST),
     CURRICULUM_ITEM_NOT_LECTURE(5011, "Bài học này không phải bài giảng", HttpStatus.BAD_REQUEST),
     LECTURE_CONTENT_TYPE_INVALID(5012, "Loại nội dung bài giảng không hợp lệ", HttpStatus.BAD_REQUEST),
-
+    CURRICULUM_ITEM_NOT_QUIZ(5013, "Không thể tạo câu hỏi, kiểm tra lại dạng bài học", HttpStatus.BAD_REQUEST),
     // ==========================================
     // 60xx: ENROLLMENT
     // ==========================================
     COURSE_ALREADY_ENROLLED(6001, "Bạn đã sở hữu khoá học này rồi", HttpStatus.CONFLICT),
     COURSE_ID_REQUIRED(6002, "courseId không được để trống", HttpStatus.BAD_REQUEST),
+    QUESTION_NOT_FOUND(6003, "Không tìm thấy câu hỏi", HttpStatus.NOT_FOUND),
 
     // ==========================================
     // 70xx: MEDIA
@@ -80,7 +81,10 @@ public enum ErrorCode {
     FILE_SIZE_INVALID(7005, "Dung lượng tệp không hợp lệ hoặc vượt quá giới hạn", HttpStatus.BAD_REQUEST),
     UPLOAD_NOT_STARTED(7006, "Chưa bắt đầu tải nội dung lên cho bài giảng này", HttpStatus.BAD_REQUEST),
     CONTENT_NOT_UPLOADED(7007, "Tệp chưa được tải lên storage", HttpStatus.BAD_REQUEST),
-    VIDEO_DURATION_INVALID(7008, "Thời lượng video không hợp lệ", HttpStatus.BAD_REQUEST);
+    VIDEO_DURATION_INVALID(7008, "Thời lượng video không hợp lệ", HttpStatus.BAD_REQUEST),
+    VIDEO_NOT_READY(7009, "Video đang được xử lý, chưa thể phát", HttpStatus.BAD_REQUEST),
+
+    ;
 
     private final int code;
     private final String message;

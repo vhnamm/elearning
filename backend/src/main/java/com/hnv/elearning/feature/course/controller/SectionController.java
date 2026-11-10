@@ -1,13 +1,13 @@
 package com.hnv.elearning.feature.course.controller;
 
 import com.hnv.elearning.common.response.ApiResponse;
-import com.hnv.elearning.feature.course.dto.instructor.SectionCreateRequest;
-import com.hnv.elearning.feature.course.dto.instructor.SectionCreateResponse;
-import com.hnv.elearning.feature.course.dto.instructor.SectionReorderRequest;
+import com.hnv.elearning.feature.course.dto.privates.SectionCreateRequest;
+import com.hnv.elearning.feature.course.dto.privates.SectionCreateResponse;
+import com.hnv.elearning.feature.course.dto.privates.SectionReorderRequest;
+import com.hnv.elearning.feature.course.dto.privates.SectionUpdateRequest;
 import com.hnv.elearning.feature.course.service.SectionService;
 import com.hnv.elearning.feature.user.entity.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -47,6 +47,22 @@ public class SectionController {
                         .build()
         );
 
+    }
+
+    @PatchMapping("/api/v1/courses/{courseId}/versions/{versionId}/sections/{sectionId}")
+    public ResponseEntity<ApiResponse<Void>> updateSection(
+            @PathVariable("courseId") Long courseId,
+            @PathVariable("versionId") Long versionId,
+            @PathVariable("sectionId") Long sectionId,
+            @AuthenticationPrincipal User user,
+            @RequestBody SectionUpdateRequest request
+    ){
+        sectionService.updateSection(courseId, versionId, sectionId, user.getId(), request);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ApiResponse.<Void>builder()
+                        .code(HttpStatus.OK.value())
+                        .build()
+        );
     }
 
     @PatchMapping("/api/v1/courses/{courseId}/versions/{versionId}/sections/position")

@@ -1,11 +1,7 @@
 package com.hnv.elearning.feature.course.controller;
 
 import com.hnv.elearning.common.response.ApiResponse;
-import com.hnv.elearning.feature.course.dto.instructor.ContentCompleteRequest;
-import com.hnv.elearning.feature.course.dto.instructor.ContentPresignedUploadResponse;
-import com.hnv.elearning.feature.course.dto.instructor.ContentUploadRequest;
-import com.hnv.elearning.feature.course.dto.instructor.CurriculumItemCreateRequest;
-import com.hnv.elearning.feature.course.dto.instructor.CurriculumItemCreateResponse;
+import com.hnv.elearning.feature.course.dto.privates.*;
 import com.hnv.elearning.feature.course.service.CurriculumItemService;
 import com.hnv.elearning.feature.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-public class CurriculumItemController {
+public class ContentController {
     private final CurriculumItemService curriculumItemService;
 
     @PostMapping("/api/v1/sections/{sectionId}/items")
@@ -46,6 +42,20 @@ public class CurriculumItemController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
 
+    @PatchMapping("/api/v1/curriculum-items/{itemId}")
+    public ResponseEntity<ApiResponse<Void>> updateItem(
+            @PathVariable("itemId") Long itemId,
+            @AuthenticationPrincipal User user,
+            @RequestBody CurriculumItemUpdateRequest request
+    ){
+        curriculumItemService.updateItem(itemId, user.getId(), request);
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .code(HttpStatus.OK.value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
     @PostMapping("/api/v1/curriculum-items/{itemId}/content/presigned-url")
     public ResponseEntity<ApiResponse<ContentPresignedUploadResponse>> generatePresignedUrl(
             @AuthenticationPrincipal User user,
@@ -73,5 +83,19 @@ public class CurriculumItemController {
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/api/v1/curriculum-items/{itemId}/content/access-url")
+    public ResponseEntity<ApiResponse<ContentAccessResponse>> getAccessUrl(
+            @PathVariable("itemId") Long itemId,
+            @AuthenticationPrincipal User user
+    ){
+        ContentAccessResponse response = curriculumItemService.getContentAccess(itemId, user.getId());
+        ApiResponse apiResponse = ApiResponse.builder()
+                .data(response)
+                .code(HttpStatus.OK.value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
 }

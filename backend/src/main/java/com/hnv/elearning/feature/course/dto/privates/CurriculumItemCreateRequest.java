@@ -1,4 +1,4 @@
-package com.hnv.elearning.feature.course.dto.instructor;
+package com.hnv.elearning.feature.course.dto.privates;
 
 import com.hnv.elearning.feature.course.enums.CurriculumItemType;
 import lombok.Getter;

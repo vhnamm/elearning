@@ -2,9 +2,10 @@ package com.hnv.elearning.feature.course.service.impl;
 
 import com.hnv.elearning.common.exception.AppException;
 import com.hnv.elearning.common.exception.ErrorCode;
-import com.hnv.elearning.feature.course.dto.instructor.ContentCompleteRequest;
-import com.hnv.elearning.feature.course.dto.instructor.ContentPresignedUploadResponse;
-import com.hnv.elearning.feature.course.dto.instructor.ContentUploadRequest;
+import com.hnv.elearning.feature.course.dto.privates.ContentAccessResponse;
+import com.hnv.elearning.feature.course.dto.privates.ContentCompleteRequest;
+import com.hnv.elearning.feature.course.dto.privates.ContentPresignedUploadResponse;
+import com.hnv.elearning.feature.course.dto.privates.ContentUploadRequest;
 import com.hnv.elearning.feature.course.entity.CurriculumItem;
 import com.hnv.elearning.feature.course.entity.Lecture;
 import com.hnv.elearning.feature.course.enums.LectureType;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
 
 @Component
@@ -29,6 +31,8 @@ public class VideoContentHandler implements LectureContentHandler {
     private Duration UPLOAD_TTL;
     @Value("${r2.ttl.image-upload}")
     private Duration THUMBNAIL_UPLOAD_TTL;
+    @Value("${r2.ttl.video-download}")
+    private Duration VIDEO_DOWNLOAD_TTL;
 
     private final StorageService storageService;
     private final StorageKeyFactory storageKeyFactory;
@@ -75,6 +79,23 @@ public class VideoContentHandler implements LectureContentHandler {
             response.thumbnailUploadUrl(thumb.getUploadUrl()).thumbnailKey(thumb.getObjectKey());
         }
         return response.build();
+    }
+
+    @Override
+    public ContentAccessResponse createAccess(CurriculumItem item) {
+        if(item.getLecture().getVideoStatus() != LectureVideoStatus.READY){
+            throw new AppException(ErrorCode.VIDEO_NOT_READY);
+        }
+        String accessUrl = storageService.presignedDownload(BucketType.PRIVATE, item.getLecture().getVideoRawKey(), VIDEO_DOWNLOAD_TTL);
+        ContentAccessResponse response = ContentAccessResponse.builder()
+                .accessUrl(accessUrl)
+                .durationSeconds(item.getLecture().getVideoDurationSeconds())
+                .fileName(item.getLecture().getFileName())
+                .expiresAt(Instant.now().plus(VIDEO_DOWNLOAD_TTL))
+                .mimeType(item.getLecture().getFileMimeType())
+                .build();
+
+        return response;
     }
 
     @Override

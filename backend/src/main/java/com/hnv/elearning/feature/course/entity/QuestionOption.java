@@ -26,9 +26,9 @@ public class QuestionOption {
     @Column(length = 500)
     private String content;
 
-    @Column(name = "is_correct")
-    private boolean isCorrect;
+    @Column(name = "is_correct", nullable = false)
+    private Boolean isCorrect;
 
     // 0-3 tương ứng đáp án A-D. BE tự gán theo thứ tự mảng request, không nhận từ FE.
-    private int position;
+    private Integer position;
 }

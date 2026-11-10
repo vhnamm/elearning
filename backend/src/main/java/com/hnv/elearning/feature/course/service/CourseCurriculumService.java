@@ -1,6 +1,6 @@
 package com.hnv.elearning.feature.course.service;
 
-import com.hnv.elearning.feature.course.dto.instructor.CourseCurriculumInstructorResponse;
+import com.hnv.elearning.feature.course.dto.privates.CourseCurriculumInstructorResponse;
 import com.hnv.elearning.feature.course.dto.publics.CourseCurriculumResponse;
 
 public interface CourseCurriculumService {

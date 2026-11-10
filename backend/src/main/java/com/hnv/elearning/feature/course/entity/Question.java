@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,13 +24,25 @@ public class Question {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id")
-    private Quizz quiz;
+    private Quiz quiz;
 
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private int position;
+    private Integer position;
 
+    @Builder.Default
+    @OrderBy("position")
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "question")
-    private List<QuestionOption> options;
+    private List<QuestionOption> options = new ArrayList<>();
+
+    public void addOption(QuestionOption option){
+        option.setPosition(options.size());
+        options.add(option);
+        option.setQuestion(this);
+    }
+
+    public void clearOptions() {
+        options.clear();   // orphanRemoval sẽ xóa các dòng đáp án cũ khỏi DB
+    }
 }

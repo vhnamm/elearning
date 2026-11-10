@@ -1,7 +1,7 @@
 package com.hnv.elearning.feature.course.controller;
 
 import com.hnv.elearning.common.response.ApiResponse;
-import com.hnv.elearning.feature.course.dto.instructor.*;
+import com.hnv.elearning.feature.course.dto.privates.*;
 import com.hnv.elearning.feature.course.dto.publics.CourseSearchRequest;
 import com.hnv.elearning.feature.course.service.CourseManagementService;
 import com.hnv.elearning.feature.user.entity.User;

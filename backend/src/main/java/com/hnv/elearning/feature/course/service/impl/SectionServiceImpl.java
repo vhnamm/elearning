@@ -2,11 +2,12 @@ package com.hnv.elearning.feature.course.service.impl;
 
 import com.hnv.elearning.common.exception.AppException;
 import com.hnv.elearning.common.exception.ErrorCode;
-import com.hnv.elearning.feature.course.dto.instructor.SectionCreateRequest;
-import com.hnv.elearning.feature.course.dto.instructor.SectionReorderRequest;
+import com.hnv.elearning.feature.course.dto.privates.SectionCreateRequest;
+import com.hnv.elearning.feature.course.dto.privates.SectionReorderRequest;
+import com.hnv.elearning.feature.course.dto.privates.SectionUpdateRequest;
 import com.hnv.elearning.feature.course.entity.CourseVersion;
 import com.hnv.elearning.feature.course.enums.CourseVersionStatus;
-import com.hnv.elearning.feature.course.dto.instructor.SectionCreateResponse;
+import com.hnv.elearning.feature.course.dto.privates.SectionCreateResponse;
 import com.hnv.elearning.feature.course.entity.Section;
 import com.hnv.elearning.feature.course.repository.CourseRepository;
 import com.hnv.elearning.feature.course.repository.CourseVersionRepository;
@@ -57,6 +58,24 @@ public class SectionServiceImpl implements SectionService {
         int positionToShift = section.getPosition();
         sectionRepository.delete(section);
         sectionRepository.shiftPositionAfterDelete(versionId, positionToShift);
+    }
+
+    @PreAuthorize("hasRole('INSTRUCTOR')")
+    @Override
+    @Transactional
+    public void updateSection(Long courseId, Long versionId, Long sectionId, Long instructorId, SectionUpdateRequest request) {
+        assertOwnsVersion(courseId, versionId, instructorId);
+        Section section = sectionRepository.findByIdAndCourseVersionId(sectionId, versionId)
+                .orElseThrow(() -> new AppException(ErrorCode.SECTION_NOT_EXIST));
+
+        if (request.getTitle() != null) {
+            String title = request.getTitle().trim();
+            if (title.isEmpty()) {
+                throw new AppException(ErrorCode.BAD_REQUEST);
+            }
+            section.setTitle(title);
+        }
+        // Không cần save(): section đang được quản lý trong transaction, Hibernate tự ghi khi commit.
     }
 
     @PreAuthorize("hasRole('INSTRUCTOR')")

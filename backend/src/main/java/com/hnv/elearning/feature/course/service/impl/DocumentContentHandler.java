@@ -2,9 +2,10 @@ package com.hnv.elearning.feature.course.service.impl;
 
 import com.hnv.elearning.common.exception.AppException;
 import com.hnv.elearning.common.exception.ErrorCode;
-import com.hnv.elearning.feature.course.dto.instructor.ContentCompleteRequest;
-import com.hnv.elearning.feature.course.dto.instructor.ContentPresignedUploadResponse;
-import com.hnv.elearning.feature.course.dto.instructor.ContentUploadRequest;
+import com.hnv.elearning.feature.course.dto.privates.ContentAccessResponse;
+import com.hnv.elearning.feature.course.dto.privates.ContentCompleteRequest;
+import com.hnv.elearning.feature.course.dto.privates.ContentPresignedUploadResponse;
+import com.hnv.elearning.feature.course.dto.privates.ContentUploadRequest;
 import com.hnv.elearning.feature.course.entity.CurriculumItem;
 import com.hnv.elearning.feature.course.entity.Lecture;
 import com.hnv.elearning.feature.course.enums.LectureType;
@@ -18,15 +19,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class DocumentContentHandler implements LectureContentHandler {
+public
+class DocumentContentHandler implements LectureContentHandler {
     private static final long MAX_SIZE_BYTES = 100L * 1024 * 1024;
 
     @Value("${r2.ttl.document-upload}")
     private Duration UPLOAD_TTL;
+
+    @Value("${r2.ttl.document-download}")
+    private Duration DOWNLOAD_TTL;
 
     private final StorageService storageService;
     private final StorageKeyFactory storageKeyFactory;
@@ -63,6 +69,22 @@ public class DocumentContentHandler implements LectureContentHandler {
         return ContentPresignedUploadResponse.builder()
                 .uploadUrl(doc.getUploadUrl())
                 .objectKey(doc.getObjectKey())
+                .build();
+    }
+
+    @Override
+    public ContentAccessResponse createAccess(CurriculumItem item) {
+        if(item.getLecture().getFileKey() == null){
+            throw new AppException(ErrorCode.CONTENT_NOT_UPLOADED);
+        }
+
+        String accessUrl =storageService.presignedDownload(BucketType.PRIVATE, item.getLecture().getFileKey(), DOWNLOAD_TTL);
+
+        return ContentAccessResponse.builder()
+                .accessUrl(accessUrl)
+                .expiresAt(Instant.now().plus(DOWNLOAD_TTL))
+                .mimeType(item.getLecture().getFileMimeType())
+                .fileName(item.getLecture().getFileName())
                 .build();
     }
 

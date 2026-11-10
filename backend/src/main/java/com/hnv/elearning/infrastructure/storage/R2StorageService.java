@@ -5,9 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 
 import java.time.Duration;
@@ -37,6 +39,21 @@ public class R2StorageService implements StorageService {
         );
 
         return new PresignedUploadResponse(signed.url().toString(), key);
+    }
+
+    @Override
+    public String presignedDownload(BucketType bucketType, String key ,Duration ttl) {
+        GetObjectRequest get = GetObjectRequest.builder()
+                .bucket(getBucketName(bucketType))
+                .key(key)
+                .build();
+
+        PresignedGetObjectRequest signed = s3Presigner.presignGetObject(rq -> {
+            rq.getObjectRequest(get)
+                    .signatureDuration(ttl);
+
+        });
+        return signed.url().toString();
     }
 
 

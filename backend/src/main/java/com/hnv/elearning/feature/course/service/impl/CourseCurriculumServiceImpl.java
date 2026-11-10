@@ -1,15 +1,13 @@
 package com.hnv.elearning.feature.course.service.impl;
 
-import com.hnv.elearning.feature.course.dto.instructor.CourseCurriculumInstructorResponse;
-import com.hnv.elearning.feature.course.dto.instructor.CurriculumItemInstructorResponse;
-import com.hnv.elearning.feature.course.dto.instructor.SectionInstructorResponse;
+import com.hnv.elearning.feature.course.dto.privates.CourseCurriculumInstructorResponse;
+import com.hnv.elearning.feature.course.dto.privates.CurriculumItemInstructorResponse;
+import com.hnv.elearning.feature.course.dto.privates.SectionInstructorResponse;
 import com.hnv.elearning.feature.course.dto.publics.CourseCurriculumResponse;
 import com.hnv.elearning.feature.course.dto.publics.SectionDto;
 import com.hnv.elearning.feature.course.entity.CurriculumItem;
-import com.hnv.elearning.feature.course.entity.Quizz;
 import com.hnv.elearning.feature.course.entity.Section;
 import com.hnv.elearning.feature.course.enums.CurriculumItemType;
-import com.hnv.elearning.feature.course.enums.LectureType;
 import com.hnv.elearning.feature.course.mapper.CourseMapper;
 import com.hnv.elearning.feature.course.repository.QuestionRepository;
 import com.hnv.elearning.feature.course.repository.SectionRepository;
@@ -71,8 +69,8 @@ public class CourseCurriculumServiceImpl implements CourseCurriculumService {
         List<Long> quizIds = sections.stream()
                 .filter(section -> section.getCurriculumItems() != null)
                 .flatMap(section -> section.getCurriculumItems().stream())
-                .filter(curriculumItem -> curriculumItem.getType() == CurriculumItemType.QUIZ && curriculumItem.getQuizz() != null)
-                .map(curriculumItem -> curriculumItem.getQuizz().getId())
+                .filter(curriculumItem -> curriculumItem.getType() == CurriculumItemType.QUIZ && curriculumItem.getQuiz() != null)
+                .map(curriculumItem -> curriculumItem.getQuiz().getId())
                 .toList();
 
         Map<Long, Long> mapQuestionCount = quizIds.isEmpty() ? Map.of() : questionRepository.countByQuizIds(quizIds).stream()
