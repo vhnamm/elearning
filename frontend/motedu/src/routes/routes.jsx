@@ -18,6 +18,7 @@ import CreateCourseOverview from "~pages/CreateCourse/CreateCourseOverview.jsx";
 import CreateCourseCurriculum from "~pages/CreateCourse/CreateCourseCurriculum.jsx";
 import CourseDetail from "~pages/CourseDetail/CourseDetail.jsx";
 import NotFound from "~pages/NotFound/NotFound.jsx";
+import CreateCoursePricing from "~pages/CreateCourse/CreateCoursePricing.jsx";
 
 const AppRoutes = () => (
   <Routes>
@@ -61,6 +62,7 @@ const AppRoutes = () => (
               <Route index element={<Navigate to="overview" replace />}></Route>
               <Route path="overview" element={<CreateCourseOverview/>}></Route>
               <Route path="curriculum" element={<CreateCourseCurriculum/>}></Route>
+              <Route path="pricing" element={<CreateCoursePricing/>}></Route>
           </Route>
       </Route>
 

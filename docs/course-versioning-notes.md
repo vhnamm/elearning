@@ -453,7 +453,7 @@ export const deleteCourseDiscount = async (courseId) => {
 ### 5.2. Route (`routes.jsx`)
 
 ```jsx
-import CreateCoursePricing from "~pages/CreateCourse/CreateCoursePricing.jsx";
+import CreateCoursePricing from "~pages/CreateCourse/CreateCoursePricing.jsx.jsx";
 ...
 <Route path="/instructor/course/:courseId/version/:versionId/manage" element={<CreateCourseLayout/>}>
     <Route index element={<Navigate to="overview" replace />}></Route>
@@ -507,7 +507,7 @@ import { formatPrice } from "~/utils/course.util.js";
 import {
     getCoursePricing, updateCoursePrice, saveCourseDiscount, deleteCourseDiscount,
 } from "~services/course.service.js";
-import styles from "./CreateCoursePricing.module.scss";
+import styles from "./CreateCoursePricing.jsx.module.scss";
 
 const DATE_FORMAT = "YYYY-MM-DDTHH:mm:ss"; // LocalDateTime phía BE, không kèm múi giờ
 

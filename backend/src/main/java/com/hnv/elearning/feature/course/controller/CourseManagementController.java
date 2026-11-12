@@ -111,4 +111,12 @@ public class CourseManagementController {
                 .build();
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/api/v1/courses/{courseId}/pricing")
+    public ResponseEntity<ApiResponse<CoursePricingResponse>> getCourseVersionPricing(
+            @AuthenticationPrincipal User user,
+            @PathVariable("courseId") Long courseId
+    ){
+        return null;
+    }
 }
